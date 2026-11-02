@@ -3,6 +3,12 @@
 Only recorded native items enter the timeline. Outer response_item tool calls,
 configuration injections and encrypted reasoning never enter it. Callers choose
 sources and persist JSONable snapshots; this module never discovers home files.
+
+Retrieval preserves captured normalized JSON values, not original JSONL bytes:
+known item/field names normalize; unsupported types, encrypted fields and raw
+reasoning are excluded. Source SHA-256 and record references identify the read
+source, whose upstream payloads may themselves be truncated. Rendered detail is
+an evidence projection; immutable field reads return retained normalized values.
 """
 from __future__ import annotations
 
@@ -29,7 +35,7 @@ _TOP_KEYS = {'aggregatedOutput': 'aggregated_output', 'exitCode': 'exit_code',
              'processId': 'process_id', 'parsedCmd': 'parsed_cmd',
              'summaryText': 'summary_text', 'agentThreadId': 'agent_thread_id',
              'agentPath': 'agent_path', 'reasoningEffort': 'reasoning_effort',
-             'rawContent': 'raw_content', 'summary': 'summary_text'}
+             'rawContent': 'raw_content', 'summary': 'summary_text', 'durationMs': 'duration_ms'}
 
 
 def _json(value) -> str:
@@ -64,9 +70,24 @@ def _text(value) -> str:
     return ''
 
 
+def _type_token(value) -> str:
+    return str(value).replace('_', '').casefold()
+
+
+def _message_text(item: dict) -> str:
+    # App Server's published agentMessage uses text; rollout items can use
+    # content blocks. An explicitly recorded empty text remains authoritative.
+    return item['text'] if isinstance(item.get('text'), str) else _text(item.get('content'))
+
+
 def _normalize(item: dict) -> dict | None:
-    item = {_TOP_KEYS.get(k, k): v for k, v in _sanitize(item).items()}
-    wire_type = str(item.get('type', '')).casefold()
+    item = _sanitize(item)
+    for alias, canonical in _TOP_KEYS.items():
+        if alias in item and canonical not in item:
+            item[canonical] = item.pop(alias)
+    # When both spellings are recorded, retain both values without overwriting;
+    # the canonical spelling drives projections and both stay field-readable.
+    wire_type = _type_token(item.get('type', ''))
     if wire_type == 'websearch':
         item['kind'] = 'web.search'
         wire_type = 'extension'
@@ -80,7 +101,7 @@ def _normalize(item: dict) -> dict | None:
             return None
         # Only the explicitly recorded visible summary is eligible.
         item = {'id': item['id'], 'type': kind, 'summary_text': item['summary_text']}
-    if kind == 'Extension' and item.get('kind') not in ('webSearch', 'web_search', 'web.search'):
+    if kind == 'Extension' and _type_token(item.get('kind')) not in ('websearch', 'web.search'):
         return None
     return item
 
@@ -112,7 +133,7 @@ def _add_item(snapshot: dict, by_id: dict, item: dict, *, turn_id, record: int, 
     normalized = _normalize(item)
     if normalized is None:
         snapshot['diagnostics']['ignored_native_items'] += 1
-        if str(item.get('type', '')).casefold() == 'reasoning' and isinstance(item.get('id'), str):
+        if _type_token(item.get('type', '')) == 'reasoning' and isinstance(item.get('id'), str):
             by_id.pop(item.get('id'), None)
         return
     item_id = normalized['id']
@@ -283,7 +304,8 @@ def _descriptor(entry: dict) -> dict:
     item = entry['item']
     preview = item.get('command') if entry['kind'] == 'CommandExecution' else (
         item.get('tool') if entry['kind'] == 'McpToolCall' else
-        item.get('summary_text') if entry['kind'] == 'Reasoning' else item.get('content', item.get('kind', '')))
+        item.get('summary_text') if entry['kind'] == 'Reasoning' else
+        _message_text(item) if entry['kind'] in ('AgentMessage', 'UserMessage') else item.get('content', item.get('kind', '')))
     if not isinstance(preview, str):
         preview = _text(preview) or _json(preview)
     return {k: entry.get(k) for k in ('session_id', 'item_id', 'kind', 'turn_id', 'status', 'sha256', 'first_record')} | {
@@ -291,15 +313,54 @@ def _descriptor(entry: dict) -> dict:
         'source_ref_count': len(entry['source_refs'])}
 
 
-def _contains(value, needle: str) -> bool:
-    # JSON escaping must not prevent exact multiline/quoted output searches.
+def _match_excerpt(text: str, needle: str, field: str, encoding: str) -> dict | None:
+    folded = text.casefold()
+    start = folded.find(needle)
+    if start < 0:
+        return None
+    end = start + len(needle)
+    if len(folded) != len(text):
+        # Case folding can expand a character (e.g. Straße -> strasse). Keep
+        # offsets in original Unicode characters, rather than folded positions.
+        original_start = original_end = None
+        cursor = 0
+        for index, char in enumerate(text):
+            cursor_end = cursor + len(char.casefold())
+            if original_start is None and cursor_end > start:
+                original_start = index
+            if cursor_end >= end:
+                original_end = index + 1
+                break
+            cursor = cursor_end
+        start = original_start if original_start is not None else start
+        end = original_end if original_end is not None else end
+    excerpt_start = max(0, start - 120)
+    excerpt_end = min(len(text), max(end, start + 280), excerpt_start + 400)
+    return {'field': field, 'encoding': encoding, 'value_offset': start, 'value_end': end,
+            'excerpt_offset': excerpt_start, 'offset_unit': 'unicode_characters',
+            'excerpt': text[excerpt_start:excerpt_end]}
+
+
+def _find_match(value, needle: str, pointer: str = '') -> dict | None:
     if isinstance(value, str):
-        return needle in value.casefold()
+        return _match_excerpt(value, needle, pointer, 'decoded_text')
     if isinstance(value, dict):
-        return any(needle in key.casefold() or _contains(child, needle) for key, child in value.items())
-    if isinstance(value, list):
-        return any(_contains(child, needle) for child in value)
-    return False
+        for key, child in value.items():
+            field = pointer + '/' + _pointer_part(key)
+            match = _find_match(child, needle, field)
+            if match:
+                return match
+            match = _match_excerpt(key, needle, field, 'field_name')
+            if match:
+                return match
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            match = _find_match(child, needle, pointer + '/' + str(index))
+            if match:
+                return match
+    else:
+        return _match_excerpt(_json(value), needle, pointer, 'canonical_json')
+    return None
 
 
 def search(snapshot: dict, query: str = '', kinds: list[str] | None = None,
@@ -319,18 +380,37 @@ def search(snapshot: dict, query: str = '', kinds: list[str] | None = None,
     if type(failures_only) is not bool:
         raise ValueError('failures_only must be a boolean.')
     needle = query.casefold()
-    matches = [entry for entry in snapshot['items']
-               if (kinds is None or entry['kind'] in kinds) and (not failures_only or _failed(entry))
-               and (not needle or _contains(entry['item'], needle) or needle in _json(entry['item']).casefold())]
+    matches = []
+    for entry in snapshot['items']:
+        if (kinds is not None and entry['kind'] not in kinds) or (failures_only and not _failed(entry)):
+            continue
+        match = None
+        if needle:
+            match = _find_match(entry['item'], needle)
+            if match is None:
+                # Preserve literal structured-JSON queries as an explicit
+                # representation match; ordinary output hits point at the leaf.
+                match = _match_excerpt(_json(entry['item']), needle, '', 'canonical_json')
+            if match is None:
+                continue
+        matches.append((entry, match))
     end = min(len(matches), offset + limit)
-    return {'sha256': snapshot['sha256'], 'items': [_descriptor(e) for e in matches[offset:end]],
-            'total_matches': len(matches), 'offset': offset, 'next_offset': end if end < len(matches) else None}
+    descriptors = []
+    for entry, match in matches[offset:end]:
+        descriptor = _descriptor(entry)
+        if match:
+            descriptor['excerpt'] = match.pop('excerpt')
+            descriptor['match'] = match
+        descriptors.append(descriptor)
+    return {'sha256': snapshot['sha256'], 'items': descriptors,
+            'total_matches': len(matches), 'offset': offset, 'next_offset': end if end < len(matches) else None,
+            'offset_unit': 'matching_items'}
 
 
 def read_item(snapshot: dict, item_id: str, offset: int = 0, limit: int = 24000, field: str = '') -> dict:
-    """Page an exact item or JSON Pointer field relative to its native item.
+    """Page captured normalized JSON, or one field relative to its native item.
 
-    Empty field returns the original whole entry. A field returns only that
+    Empty field returns the captured whole entry. A field returns only that
     value. Partial pages concatenate to canonical JSON, including JSON string
     quotes/escapes. String evidence SHA values hash the original UTF-8 text.
     """
@@ -363,7 +443,9 @@ def read_item(snapshot: dict, item_id: str, offset: int = 0, limit: int = 24000,
         raise ValueError('offset is beyond the native item.')
     end = min(len(body), offset + limit)
     result = {'sha256': snapshot['sha256'], 'item_id': item_id,
-              'offset': offset, 'next_offset': end if end < len(body) else None, 'total_chars': len(body), 'field': field}
+              'offset': offset, 'next_offset': end if end < len(body) else None, 'total_chars': len(body), 'field': field,
+              'representation': 'captured_normalized_value', 'page_encoding': 'canonical_json',
+              'offset_unit': 'unicode_characters'}
     if offset == 0 and end == len(body):
         result['payload'] = value
     else:
@@ -387,7 +469,7 @@ def _compact_item(entry: dict) -> dict:
     item = entry['item']
     kind = entry['kind']
     if kind == 'CommandExecution':
-        result = {k: item[k] for k in ('cwd', 'status', 'exit_code') if k in item}
+        result = {k: item[k] for k in ('cwd', 'status', 'exit_code', 'duration_ms') if k in item}
         command = item.get('command', [])
         encoded = _json(command)
         if len(encoded) <= 240:
@@ -419,9 +501,10 @@ def _compact_item(entry: dict) -> dict:
     if kind == 'McpToolCall':
         args = _json(item.get('arguments', {}))
         return {'server': item.get('server'), 'tool': item.get('tool'), 'status': item.get('status'),
-                'arguments': item.get('arguments', {}) if len(args) <= 800 else {'preview': args[:700], 'chars': len(args)}}
+                'arguments': item.get('arguments', {}) if len(args) <= 800 else {'preview': args[:700], 'chars': len(args)},
+                **({'duration_ms': item['duration_ms']} if 'duration_ms' in item else {})}
     if kind in ('UserMessage', 'AgentMessage'):
-        return {'text': _text(item.get('content')), **({'phase': item['phase']} if 'phase' in item else {})}
+        return {'text': _message_text(item), **({'phase': item['phase']} if 'phase' in item else {})}
     if kind == 'Reasoning':
         return {'visible_summary': _text(item.get('summary_text'))}
     if kind == 'Extension':

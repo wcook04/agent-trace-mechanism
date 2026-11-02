@@ -1,33 +1,68 @@
-# Reading Codex history
+# Reading and retrieving Codex records
 
-The reader converts local Codex records into messages, commands, tool calls and file changes. The app displays or copies these records; agents can search and read them through MCP.
+Agent Trace has two processing paths. The native reader consumes recorded item events and powers item search, field retrieval and change queries. The legacy parser reads older transcript records. The JavaScript builder indexes supplied rendered text; it is a separate export tool, not a second database behind the native MCP calls.
 
-## Record identity
+## Inputs and coverage
 
-The [record reader](../src/trace_mechanism/codex_native.py) supports Codex's JSONL session files and the `thread_items` table in its local SQLite database, which it opens read-only. These sources use different field names; the reader converts them to one representation while keeping the session, turn and item IDs. Each item also retains a reference to its source location.
+The public server accepts explicitly registered JSONL files. Its native reader processes `event_msg` records containing supported `item_started`, `item_updated` and `item_completed` items. It retains the session, turn and item IDs and the source record positions. Later events replace the state of an existing item ID while preserving its source references.
 
-An operation can appear more than once as its state changes. The reader updates the existing item by ID rather than appending another copy. It also omits an outer `functions.exec` wrapper when the operations inside it have their own native records.
+Supported items cover user and assistant messages, visible reasoning summaries, commands, file changes, MCP calls, child-agent activity and recorded web searches. Field names and item types are normalized across the supported wire shapes. Command status and exit code come from recorded fields; words inside output do not determine success. `aggregated_output` contains the recorded combined stdout and stderr.
 
-Supported types include `CommandExecution`, `FileChange`, `McpToolCall`, `SubAgentActivity`, `UserMessage`, `AgentMessage`, `Reasoning` and `Extension`. Command outcomes come from the exit-code and status fields. The reader does not infer success from words in the output. Reasoning records contribute their visible summaries.
+The native path excludes outer `response_item` records. This is an admission rule, not a test proving each excluded wrapper has a complete native equivalent. Unsupported native items and malformed records appear in diagnostics. Encrypted fields are excluded, and reasoning contributes only its recorded visible summary. Nothing in a detailed view can recover content absent from the retained source.
 
-## Views and exact access
+When a selected session has no supported native items, conversation views use the legacy transcript parser. Native item search does not turn legacy wrapper text into native items.
 
-Compact retains messages, visible summaries, command previews, outcomes, changed paths and recorded settings. It omits outputs and patch bodies. Detailed includes inputs, outputs and patches, storing repeated text blocks once. Oversized fields have a beginning-and-end preview and a reference containing the session ID, snapshot hash, item ID and field path. The full values remain in the saved records and are included in searches.
+The library also has `load_history`, a read-only reader for rows in SQLite's `thread_items` table. It is **not a public MCP manifest option**. It reads rows for one physical thread ID; it does not implement Codex's fork-lineage and segment traversal. Codex's [logical history reader](https://github.com/openai/codex/blob/dd2df0aa9d7ae3667236d6f9feeea03c8e544d7a/codex-rs/thread-store/src/local/thread_history/segment_paging.rs) applies those additional rules. The library function therefore does not claim equivalence to the history returned by App Server.
 
-`search_trace_items` returns matching records with previews and their session and item IDs. `read_trace_item` reads one item or a selected field, such as `/aggregated_output`. Large values can be read in pages from the same saved version. `read_trace_changes` compares two saved versions and reports added, updated or removed items. Identical repeated records do not appear as changes.
+## Normalized records and views
 
-The [index builder](../src/trace_mechanism/structurer.mjs) reads this structured view and produces a JSON index of actions, retaining references into the supplied trace text.
+The saved native representation is decoded JSON with normalized field names, supported content and source references. A read returns that retained representation or a field within it. It does not return the original JSONL bytes. For example, `aggregatedOutput` is read through `/aggregated_output`.
 
-## App and plugin
+Compact keeps messages, visible summaries, command previews and outcomes, changed paths and settings. Detailed adds retained inputs, outputs and patches. Long values use previews and references; equal text blocks share one copy across a rendered parent/child selection. Full retained values remain available to item search and field reads.
 
-The desktop app discovers local sessions, watches their files and lets you select which turns to copy. Before reusing a cached view, it checks the renderer version and every selected source file. A change in a subagent's file therefore causes the next read to rebuild the combined view. Recorded parent/child IDs determine which sessions belong together; each session is included once. A missing child's ID is retained even when its records cannot be read.
+These are separate operations:
 
-The installed MCP plugin lets an agent search and read these records without opening the panel. The accompanying [skill](skill-source-excerpt.txt) explains how to find a chat, read a compact view, retrieve individual records and request subsequent changes. Full-thread, latest-response and last-N-turn selections use the same record reader.
+| Operation | What it removes or combines |
+|---|---|
+| Update an item by ID | Earlier states of that same recorded operation in the current view |
+| Visit a session once | Duplicate traversal of the same registered chat |
+| Share equal text blocks | Byte-identical text repeated in the rendered selection |
+| Exclude outer wrappers | All outer `response_item` records from the native path |
 
-The MCP server in this repository reads sessions listed in a manifest. Child entries must match the parent recorded in their session metadata. It rereads selected files on request and keeps saved versions in memory for the life of the server process. The desktop app adds automatic discovery, file watching and storage that persists between runs. Older records without native items use the earlier text parser.
+None of these establishes that inherited history appearing in different forked sessions has been included only once.
 
-## Codex history API
+## Captures, references and freshness
 
-The inspected desktop runtime, Codex 0.166.0-alpha.5.1, also includes `thread/items/list`, `thread/items/read`, `thread/turns/list` and update notifications through its app-server protocol. Agent Trace currently reads local files. Using a supported history API could replace that file-reading layer while keeping the same views and agent tools.
+A capture holds the selected root and readable children. The files are read sequentially and the assembled result is then fixed. It is immutable for later reads, but is not a simultaneous transaction across those files.
 
-[Core provenance](provenance.json) · [Builder provenance](structurer-provenance.json) · [MCP configuration](mcp.md)
+`read_chat_context`, `search_trace_items` and `read_trace_changes` return a `snapshot_sha256` for that capture. It can be reused for searches, item reads and change comparisons. Rendered text has a separate `text_sha256`; use that with `read_trace_page`. Core hashes inside large-field references identify the retained session snapshot. The [MCP guide](mcp.md) defines each parameter and paging unit.
+
+Fresh context and item-search calls reread the selected files. Change queries also compare retained item identities and normalized item values against an earlier capture. Source-reference or lifecycle-timestamp changes alone do not count as an item update. These are on-demand reads, not a notification subscription or incremental file parser. Fixed pages do not reread their sources. Saved versions last for the server process; restarting the public server invalidates its stored references.
+
+## Parent and child sessions
+
+The public server follows `parent_session_id` relationships among explicit manifest entries, checked against the child's recorded parent ID. It does not infer relationships from titles or nearby timestamps. Search, context and change queries can include registered descendants, up to 64 selected sessions.
+
+A missing child is reported as unavailable while available sessions remain readable. A missing root is an error. Unavailability is distinct from proof that its items were deleted. Fresh public-server requests reload the manifest and can include newly registered children. They do not discover unregistered files on the computer.
+
+The desktop app adds automatic local-session discovery, file watchers and persistent storage. Before reusing a prepared view, it checks the selected source files, including children, and its renderer version. Its latest-response and last-N-turn copy scopes are additional app functions; this public server supplies compact and detailed full-thread views.
+
+The full app's plugin also includes a skill. This package supplies its own [six-tool usage instructions](mcp.md); it does not install that desktop plugin. Retained production excerpts describe their captured source versions, not the public server's current callable interface.
+
+## Codex history interface
+
+The question is how a separate reader should receive updates for a chat executing in the desktop app. There is no demonstrated requirement here to bypass supported history reads.
+
+On 2 November 2026, a new App Server process from the installed Codex `0.166.0-alpha.5.1` runtime successfully read this running desktop chat with `experimentalApi: false`:
+
+| Call | Observed result |
+|---|---|
+| `thread/read` | Stored metadata; runtime status `notLoaded` in the new process |
+| `thread/turns/list`, `limit: 1`, `itemsView: "full"` | One persisted turn and history cursors |
+| `thread/items/list`, `limit: 1`, descending | One persisted item and history cursors |
+
+The probe did not start or resume a turn, subscribe to events, or change the desktop chat. These results establish stored-history access from a second process; they do not establish delivery of future notifications from the process running the chat.
+
+The [official App Server guide](https://developers.openai.com/codex/app-server/) describes stored-history paging without resuming. In the inspected [protocol declaration](https://github.com/openai/codex/blob/dd2df0aa9d7ae3667236d6f9feeea03c8e544d7a/codex-rs/app-server-protocol/src/protocol/common.rs), `thread/items/read` is experimental, whereas `thread/items/list` and `thread/turns/list` have no experimental annotation. They should not be presented as one stability contract.
+
+A useful answer would identify the intended passive observation route: should a separate local client poll persisted history, or can it subscribe to updates from the desktop-owned thread without resuming it? That is the requested integration guidance, not a request to review the application or approve its release. The current file reader can be replaced while retaining Agent Trace's selection, views and saved-reference layer.

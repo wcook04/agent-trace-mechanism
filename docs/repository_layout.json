@@ -15,10 +15,10 @@
       "purpose": "Regression and provenance tests"
     },
     "examples": {
-      "purpose": "Synthetic regressions, selected Codex retrieval recording, generated outputs and historical controlled recording"
+      "purpose": "Selected native command and current MCP responses, plus retained legacy parser regressions"
     },
     "tools": {
-      "purpose": "MCP replay, example reproduction, selected-source export and repository layout checks"
+      "purpose": "Native MCP contract capture, compatibility replay, example regeneration and layout checks"
     },
     "docs": {
       "purpose": "Mechanism, production excerpts, provenance, layout policy and supplied app screenshots"
@@ -40,7 +40,10 @@
     "tools/regenerate_examples.py",
     "docs/codex-retrieval.md",
     "src/trace_mechanism/codex_native.py",
-    "docs/mcp.md"
+    "docs/mcp.md",
+    "examples/native-command.jsonl",
+    "examples/native-command-response.json",
+    "tools/record_native_contract.py"
   ],
   "content_routes": {
     "README.md": [

@@ -30,9 +30,9 @@
   "source_commit": "dd8e4e0797dbd6a526d08f2b82229bfe391d92d4",
   "native_core": {
     "source": "tools/agent_trace_structurer/codex_native.py",
-    "source_commit": "0d5041d2ed7427c9515f07968eb432c9aacf27fa",
+    "source_commit": "d3ecfeaf669ab08662c94522ef3f62acc1afab9e",
     "copy": "src/trace_mechanism/codex_native.py",
-    "sha256": "51bfbc6c47ce57b784eb9c9349a11b39bc6c0914932f140a6f2e35ce4032d6a9",
+    "sha256": "47fa7c3add1516e09bf222f559385198dc74d1cd35c916bf84e69ab82927ae36",
     "method": "Byte-identical portable production module. Test copy changes only the import path."
   },
   "production_prepare_commit": "e43a644d4509ffeef5482377288b2fa3d7b5980b"

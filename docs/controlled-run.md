@@ -1,6 +1,6 @@
 # Historical controlled Codex run
 
-The primary example is now [Codex retrieving a fictional repair-café task](codex-retrieval.md). This larger recording is retained as historical evidence. Its native rendered text is frozen; its structured index is rebuilt with the corrected, bundled builder.
+This earlier recording is retained for parser and index-builder regressions. Its rendered text is frozen; its structured index is rebuilt with the bundled builder. It is separate from the current [native-item MCP interface](mcp.md).
 
 This sample is a real, bounded Codex run over this repository's synthetic fixtures. A `gpt-6.1-terra` parent launched two `gpt-6-luna` children: `call_pairing` checked the pending-to-complete tool-call replay; `scope_snapshot` checked compact/detailed selection and snapshot paging. The parent independently checked the same detailed scope before and after an append, addressing a limitation in the child's first comparison. The checks passed in the run. They establish behavior on the invented fixtures, not compatibility with all provider formats or the full app's live refresh.
 

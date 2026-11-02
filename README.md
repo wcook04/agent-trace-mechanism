@@ -1,62 +1,71 @@
 # Agent Trace
 
-[![Agent Trace showing live Codex activity, linked workers and copy scopes](docs/images/agent-trace.png)](docs/images/agent-trace.png)
+Agent Trace lets an agent search recorded Codex activity in other chats, retrieve a particular command output or patch, and read what changed while those chats continue running. It also provides compact and detailed views for people to browse or copy.
 
-Agent Trace reads the conversation history that Codex stores on your computer, including the commands, tool calls and file changes recorded during each chat. You can browse that history in a desktop app, copy a selected part of it, or let an agent retrieve it through an MCP server.
+**This repository contains the record reader and a runnable MCP server.** The desktop app uses the same reader and adds session discovery, file watching, copy controls and persistent snapshots. The public server reads JSONL files you explicitly register; it keeps snapshots for the life of its process.
 
-An agent can search another chat, read a command's output, inspect a patch or check a subagent's progress without someone copying the conversation into its context. It can also retrieve new records while the other chat is still running.
+**The integration question:** what is the recommended way for a separate client to observe new persisted items in a chat that the Codex desktop app is running, without resuming it? Read-only history calls already work in our local check. The remaining question is how that client should receive updates. [Methods checked and exact scope](docs/mechanism.md#codex-history-interface).
 
-## What you can read
+<details>
+<summary>Desktop app screenshot</summary>
 
-| Records | Contents |
+[![Agent Trace desktop app: running chats, linked workers and selectable copy scopes](docs/images/agent-trace.png)](docs/images/agent-trace.png)
+
+The supplied screenshot shows the full desktop app at an earlier revision. Its copy sizes describe whole exports, not what an MCP call puts in an agent's context. The server below returns bounded search results, text pages or selected fields.
+
+</details>
+
+## What Agent Trace adds
+
+Codex already records messages, visible thinking summaries, commands, tool calls, file changes and child-thread activity. Agent Trace makes those records available through the following operations:
+
+| Operation | Returned information |
 |---|---|
-| Conversation | User messages, assistant updates, final answers and visible thinking summaries |
-| Commands | Command arguments, working directory, recorded status, exit code, duration and output |
-| File changes | File paths and the recorded patch for each change |
-| Tool calls | MCP tool names, arguments and results, plus recorded web operations |
-| Subagents | Parent and child chat IDs, activity records and each available child's conversation and tool history |
-| Settings | Recorded model, reasoning-effort and working-directory changes |
+| Search within a chat and its registered children | Matching item IDs, recorded status, and a short passage identifying the matching field |
+| Read a command, patch or tool result | One captured item or a field selected by JSON Pointer, with paging for large values |
+| Read another chat's context | A compact or detailed view, optionally including registered children |
+| Check for changes | Paged added, updated and removed item references between two fixed captures |
+| Continue an earlier read | The same saved content, even after the source file changes |
+| Follow recorded parent/child links | Each selected session once, with explicit availability information when a child cannot be read |
 
-You can select the full thread, the latest response or a number of recent turns. Including subagents follows the parent/child relationships recorded by Codex, so each chat is included once.
+These operations use Codex's session, turn and item IDs. An agent can request an output directly without receiving the rest of the conversation. [A complete request and response from an actual recorded test command](examples/native-command-response.json) shows the returned contract; [the MCP guide](docs/mcp.md) explains how to use it.
 
-## Compact and detailed views
+## Compact and detailed
 
-**Compact** keeps messages, visible thinking summaries, command previews, command status and changed file paths. It leaves out command output and patch bodies.
+**Compact** keeps messages, visible thinking summaries, command previews and status, changed file paths and recorded settings. It omits command output and patch bodies.
 
-**Detailed** adds inputs, output and patches. Repeated text blocks share one copy. Large fields have a beginning-and-end preview, their full length, and a reference that an agent can use to retrieve the complete field. This keeps long source-file reads, browser results and tool output from filling the copied thread.
+**Detailed** adds inputs, outputs and patches. Identical text blocks share one copy. Fields over the inline limit have a beginning-and-end preview, their length and an item/field reference. The full retained value remains searchable and retrievable from that snapshot. Detailed text is therefore a view of the records, not a self-contained copy of every field.
 
-The full captured fields remain available for search and retrieval. A reference identifies the chat, the saved version of its records, the item and the field, so it still retrieves the same content after the live chat changes.
-
-## Access from an agent
-
-The plugin includes an MCP server and a skill describing how to use its tools. An agent can:
-
-- Find a chat by title or ID with `search_trace_threads`.
-- Search commands, output text, patches and visible summaries with `search_trace_items`, filtering by record type or failed status and optionally including subagents.
-- Read one item, or one field such as command output, with `read_trace_item`. Large values can be read in pages.
-- Request only added, updated or removed items since an earlier read with `read_trace_changes`.
-- Read a compact or detailed conversation with `read_chat_context`, continuing through `read_trace_page` when needed.
+Text and field reads default to 24,000 characters and accept up to 48,000 per page. Item search and change results default to 20 items and accept up to 100. Callers choose the next page rather than receiving the entire history at once. [Paging units and snapshot lifetime](docs/mcp.md#paging-and-saved-versions).
 
 ## How it works
 
-1. **Read Codex's records.** The reader supports local JSONL session files and the SQLite history format. The app currently reads session files and watches for changes.
-2. **Identify each recorded operation.** The reader keeps Codex's thread, turn and item IDs. A later update to an item replaces its earlier state. Command outcomes come from the recorded exit code and status; file changes come from the recorded patches.
-3. **Build the requested view.** Compact and detailed views use those items in recorded order. When a tool-call wrapper contains operations that Codex also records individually, the reader avoids including both copies. Repeated text is stored once across the selected parent and child chats.
-4. **Keep reads consistent.** The app stores fixed copies of the records used for a view. Later pages and field requests refer to that saved copy. A fresh read can then report what changed. The app also checks linked child sources before reusing a cached view.
+1. **Read recorded items.** The JSONL reader processes supported item-start, update and completion events. It normalizes field names and retains their session, turn and item IDs. Later events for the same item update its state.
+2. **Select the history.** The adapter follows verified parent/child IDs among registered files. It reads each source, then freezes the assembled result. Sources are read sequentially; the capture does not claim that all workers were observed at the same instant.
+3. **Search or render.** Searches inspect retained fields, including long outputs. Compact and detailed views use the same normalized records. Outer `response_item` wrappers are excluded from this path; older transcripts without supported native items use the legacy parser.
+4. **Read by reference.** A snapshot hash selects a saved capture; a session ID, item ID and optional field path select the value. Later pages use that capture. A fresh read rereads the files and can report changes against it.
 
-## Code in this repository
+The Python reader powers these MCP calls. The JavaScript index builder is a separate consumer of rendered trace text; it is not required to search native items. [Record coverage, deduplication and consistency](docs/mechanism.md).
 
-This repository contains the app's native record reader and structured-index builder, plus a smaller MCP server that reads files listed in a manifest. The desktop app adds session discovery, file watchers, copy controls and persistent storage.
+## Run or inspect
 
-| Code | Responsibility |
+Python 3.10+:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install '.[mcp]'
+.venv/bin/python tools/record_native_contract.py --check
+```
+
+The check sends requests through the actual stdio MCP server using the selected recorded command. It compares the responses with the linked capture; it does not rerun the command in the recording. To read your own chats, follow [manifest setup](docs/mcp.md).
+
+| Source | Responsibility |
 |---|---|
-| [Record reader](src/trace_mechanism/codex_native.py) | Parse native items, build views, retrieve fields and compare saved records |
-| [Agent tools](src/trace_mechanism/agent_tools.py) | Select chats and children, search records and serve saved versions |
-| [MCP server](src/trace_mechanism/mcp_server.py) | Make those operations callable by agents |
-| [Index builder](src/trace_mechanism/structurer.mjs) | Produce a JSON index of actions with references into the supplied trace text |
+| [Record reader](src/trace_mechanism/codex_native.py) | Normalize recorded items, render views, search fields and compare item states |
+| [Agent tools](src/trace_mechanism/agent_tools.py) | Select registered sessions, assemble captures and serve bounded reads |
+| [MCP server](src/trace_mechanism/mcp_server.py) | Tool schemas and stdio transport |
+| [Index builder](src/trace_mechanism/structurer.mjs) | Index actions and source ranges in supplied trace text |
 
-[How the records are processed](docs/mechanism.md) · [MCP setup](docs/mcp.md) · [Development](docs/development.md) · [Source provenance](docs/provenance.json) · [Layout check](tools/check_layout.py)
-
-Feedback on which Codex history interface to build against would be useful before I release the full app.
+[Development and tests](docs/development.md) · [Source provenance](docs/provenance.json) · [Layout check](tools/check_layout.py)
 
 [Apache-2.0](LICENSE) · Will Cook · [Security](SECURITY.md)

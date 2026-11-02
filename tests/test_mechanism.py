@@ -51,6 +51,10 @@ class MechanismTests(unittest.TestCase):
             for provider in ('codex', 'claude'):
                 path = Path(directory) / provider
                 initial, later, _ = records(provider)
+                if provider == 'codex':
+                    initial[0]['payload']['id'] = 'test'
+                else:
+                    initial[0]['sessionId'] = 'test'
                 path.write_text(''.join(json.dumps(row) + '\n' for row in initial))
                 tools = AgentTools([{'provider': provider, 'session_id': 'test', 'title': 'Example', 'path': path}])
                 self.assertEqual(tools.search_trace_threads('example')[0]['provider'], provider)

@@ -355,3 +355,105 @@ def test_field_reads_page_only_requested_original_value(tmp_path):
         offset=page['next_offset']
     assert json.loads(''.join(chunks))==output
     assert native.read_item(snap,'exec-native-uuid',field='/command/0')['payload']=='sh'
+
+
+def test_published_sqlite_shapes_render_message_text_and_duration_ms(tmp_path):
+    """ThreadItem.ts 5cb7a35: agentMessage.text and commandExecution.durationMs.
+
+    These are schema-shaped regression values, not a constructed product demo.
+    """
+    path=tmp_path/'published-history.sqlite'
+    message={'type':'agentMessage','id':'published-message','text':'Recorded assistant message',
+             'phase':'final','memoryCitation':None,'delivery':None}
+    cmd={'type':'commandExecution','id':'published-command','pluginId':None,'scriptPath':None,
+         'command':'python -m pytest','cwd':'/workspace','processId':None,'source':'agent',
+         'status':'completed','commandActions':[],'aggregatedOutput':'stdout line\nstderr line',
+         'exitCode':0,'durationMs':27}
+    with sqlite3.connect(path) as connection:
+        connection.execute('CREATE TABLE thread_items(thread_id,turn_id,item_id,rollout_ordinal,item_json)')
+        for number,item in enumerate((message,cmd)):
+            connection.execute('INSERT INTO thread_items VALUES(?,?,?,?,?)',
+                               ('session-a','turn-a',item['id'],number,json.dumps(item)))
+    snap=native.load_history(path,'session-a')
+    for detail in (False,True):
+        rows=rendered_rows(native.render(snap,detail),snap)
+        assert rows[0]['text']=='Recorded assistant message'
+        assert rows[1]['command']=='python -m pytest'
+        assert rows[1]['duration_ms']==27
+    assert native.read_item(snap,'published-message',field='/text')['payload']==message['text']
+    assert native.read_item(snap,'published-command',field='/duration_ms')['payload']==27
+    assert native.read_item(snap,'published-message',field='/memoryCitation')['payload'] is None
+    assert native.search(snap,'Recorded assistant')['items'][0]['excerpt']=='Recorded assistant message'
+    detailed=rendered_rows(native.render(snap,True),snap)
+    assert detailed[1]['aggregated_output']=='stdout line\nstderr line'
+
+
+@pytest.mark.parametrize('wire_type,expected',[
+    ('AgentMessage','AgentMessage'),('agentMessage','AgentMessage'),('agent_message','AgentMessage'),
+    ('CommandExecution','CommandExecution'),('commandExecution','CommandExecution'),('command_execution','CommandExecution'),
+    ('mcp_tool_call','McpToolCall'),('file_change','FileChange'),('sub_agent_activity','SubAgentActivity'),
+    ('context_compaction','ContextCompaction'),('user_message','UserMessage'),('reasoning','Reasoning'),
+    ('webSearch','Extension'),('web_search','Extension'),('WebSearch','Extension')])
+def test_supported_native_types_normalize_camel_pascal_and_snake(tmp_path,wire_type,expected):
+    item={'type':wire_type,'id':'variant','text':'visible','content':[{'text':'content'}],
+          'summary_text':['Visible summary'],'changes':{},'kind':'spawned'}
+    snap=native.load_rollout(write(tmp_path/'rollout',[event(item)]))
+    assert snap['items'][0]['kind']==expected
+    assert native.read_item(snap,'variant')['payload']['item']['type']==expected
+
+
+def test_alias_collisions_preserve_both_recorded_values(tmp_path):
+    cmd=command(durationMs=12,duration_ms=99,aggregatedOutput='camel spelling',aggregated_output='snake spelling')
+    snap=native.load_rollout(write(tmp_path/'rollout',[event(cmd)]))
+    item=native.read_item(snap,'exec-native-uuid')['payload']['item']
+    assert item['durationMs']==12 and item['duration_ms']==99
+    assert item['aggregatedOutput']=='camel spelling' and item['aggregated_output']=='snake spelling'
+    assert rendered_rows(native.render(snap,True),snap)[0]['duration_ms']==99
+
+
+def test_explicit_empty_published_text_is_not_inferred_from_other_content(tmp_path):
+    snap=native.load_rollout(write(tmp_path/'rollout',[event({'type':'agentMessage','id':'empty','text':'',
+        'content':[{'text':'another retained field'}]})]))
+    assert rendered_rows(native.render(snap),snap)[0]['text']==''
+    assert native.read_item(snap,'empty',field='/content/0/text')['payload']=='another retained field'
+
+
+def test_search_returns_actual_output_match_field_and_context(tmp_path):
+    output='unrelated prefix '*100+'ACTUAL SEARCH EVIDENCE'+' unrelated suffix'*100
+    snap=native.load_rollout(write(tmp_path/'rollout',[event(command(aggregated_output=output))]))
+    hit=native.search(snap,'actual search evidence')['items'][0]
+    assert 'ACTUAL SEARCH EVIDENCE' in hit['excerpt'] and len(hit['excerpt'])<=400
+    assert hit['match']['field']=='/aggregated_output'
+    assert hit['match']['encoding']=='decoded_text'
+    assert output[hit['match']['value_offset']:hit['match']['value_end']]=='ACTUAL SEARCH EVIDENCE'
+    assert native.read_item(snap,hit['item_id'],field=hit['match']['field'])['payload']==output
+    assert 'pytest' not in hit['excerpt']
+
+
+def test_search_unicode_offsets_escaped_field_and_json_representation(tmp_path):
+    item={'type':'McpToolCall','id':'search-fields','tool':'fetch','arguments':{'a/b~c':'before Straße after'},
+          'result':{'content':[{'text':'first line\n"quoted" second line'}]}}
+    snap=native.load_rollout(write(tmp_path/'rollout',[event(item)]))
+    hit=native.search(snap,'STRASSE')['items'][0]
+    assert hit['match']['field']=='/arguments/a~1b~0c' and 'Straße' in hit['excerpt']
+    assert hit['match']['value_offset']==7 and hit['match']['value_end']==13
+    multiline=native.search(snap,'line\n"quoted"')['items'][0]
+    assert multiline['match']['field']=='/result/content/0/text'
+    assert multiline['excerpt']=='first line\n"quoted" second line'
+    structured=native.search(snap,'"tool":"fetch"')['items'][0]
+    assert structured['match']['encoding']=='canonical_json' and structured['match']['field']==''
+    assert '"tool":"fetch"' in structured['excerpt']
+
+
+def test_read_metadata_distinguishes_retained_value_from_source_bytes(tmp_path):
+    path=tmp_path/'rollout'
+    # Deliberately noncanonical whitespace and an alias: field retrieval is not
+    # a claim that these original JSONL bytes can be reconstructed from an item.
+    row=event(command(aggregatedOutput='alias retained',aggregated_output='native retained'))
+    path.write_text(json.dumps(row,indent=2).replace('\n',' ')+'\n')
+    snap=native.load_rollout(path)
+    result=native.read_item(snap,'exec-native-uuid',field='/aggregated_output')
+    assert result['representation']=='captured_normalized_value'
+    assert result['page_encoding']=='canonical_json' and result['offset_unit']=='unicode_characters'
+    assert snap['source']['sha256']==hashlib.sha256(path.read_bytes()).hexdigest()
+    assert result['payload']=='native retained'

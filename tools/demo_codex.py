@@ -30,7 +30,10 @@ async def demo():
                     result = await client.call_tool(name, arguments)
                     if result.isError:
                         raise RuntimeError(result.content)
-                    return result.structuredContent
+                    data = dict(result.structuredContent or {})
+                    if name in ('read_chat_context', 'read_trace_page'):
+                        data['text'] = ''.join(block.text for block in result.content if block.type == 'text')
+                    return data
 
                 found = await call('search_trace_threads', query='repair cafe')
                 selection = {key: found['items'][0][key] for key in ('provider', 'session_id')}
