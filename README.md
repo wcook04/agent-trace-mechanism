@@ -1,5 +1,9 @@
 # Agent Trace: context across Codex and Claude Code
 
+[![Agent Trace showing Codex and Claude Code threads, live parent and subagent activity, and compact and detailed copy scopes](docs/images/agent-trace.png)](docs/images/agent-trace.png)
+
+*The full Agent Trace app. Click the screenshot to inspect it at full resolution.*
+
 **With Agent Trace configured in both hosts, Codex can read a running Claude Code thread, and Claude Code can read a running Codex thread. Either can retrieve a compact earlier thread, then request a detailed view.**
 
 That is what my Agent Trace app and local MCP plugin do. This repository makes the mechanism inspectable: it reuses the app's actual provider parsers, demonstrates search and refresh with synthetic conversations, and includes a selected, sanitized recording of a real Terra parent and two Luna agents checking this repository. It is a runnable extraction and explanation, not the full app.
@@ -84,7 +88,7 @@ I built Agent Trace to recover context across my work. My release question is ab
 | Contents | Only records present in the file and supported by the parser. Missing events and unrecorded model reasoning are not reconstructed. |
 | Sensitive material | File contents or secrets can be present in tool results. This extraction does **not** redact them. The small fixtures are synthetic; the controlled real run was separately selected and sanitized before inclusion. |
 | Agent access | In the full plugin, returned text becomes available to the calling agent. Reading across providers can put the source thread's contents into the other provider's model context. |
-| Publication | Publishing this code is different from publishing conversation data. Only the deliberately controlled run is included, with its selection receipt. No unrelated conversations, private app state or credentials are included. |
+| Publication | The supplied app screenshot and deliberately controlled run are included. The run has a selection receipt; unrelated conversation bodies and credentials are excluded. |
 
 Codex documents stored-thread reading through its [app-server API](https://learn.chatgpt.com/docs/app-server). Agent Trace currently parses local files instead. The [source comparison](docs/mechanism.md#codex-source-and-supported-api) explains the distinction and format limitations.
 

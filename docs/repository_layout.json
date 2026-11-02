@@ -21,7 +21,7 @@
       "purpose": "Repository maintenance checks"
     },
     "docs": {
-      "purpose": "Mechanism, production excerpts, provenance and layout policy"
+      "purpose": "Mechanism, production excerpts, provenance, layout policy and supplied app screenshots"
     },
     ".github": {
       "purpose": "Public CI verification"
