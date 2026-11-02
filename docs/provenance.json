@@ -1,10 +1,10 @@
 {
   "source": "Agent Trace cli_prompt_trace.py",
-  "source_sha256": "8f466ca0cfd499af735b2b8ffb735d16088d3b28c5f91987bc7e7ed49553b0cc",
+  "source_sha256": "04b7903da897a7c7e6be85bd3a5be410e3ef696bc269119924c24846f3de657d",
   "symbol_sha256": {
-    "ToolEvent": "a805483ae99736f2ea830f0e4434e60e109ea92cc8221f352982fc22c745bb8c",
+    "ToolEvent": "00cb3ce20d9a76340ffc34268fbc3f8538939a07ad4f5e079eecfff8587762e7",
     "AssistantEvent": "4811b110676ac326bdc003fd25d7c5724b3e0fcf288e7f9a38171a0f70e128f6",
-    "Turn": "f95e6b847b7d828d0fbc2de62b8da65fd6555d4aa191c1f9234ca551e751e1db",
+    "Turn": "49df7a3610a97c6e8beeff86bbe994babe1f7d9949395a6fd84313889977700a",
     "_sha16": "620cf1a32af10ef9c460f3c369e48f2e5d9767949a03732bedfcd2fec03feb06",
     "_iso_diff_ms": "fb7c74c48c25e41a7afd6e684dddf50719c185f8e0217f2c56c3a839cf0ec171",
     "_flatten_claude_content": "1bf53341d928979c5da662fd24a10007dc359f2409ae4df1ff72779334a8f23c",
@@ -12,8 +12,8 @@
     "_parse_codex_exit_code": "aa654518c93fbefcf2d26c97a29e5ed74a2cb9b87b5292f1601f6a544fd2f43e",
     "_codex_nested_command_receipts": "0adbe50e26e10b8208becce3eb559fadd146389c6db1e2e30278222f442909b3",
     "_codex_tool_outcome": "86f124ba9e239d186d71ca890377d218af100f90f93c6d994d4999d4df6df192",
-    "parse_claude_session": "5837f9d0ff24578144b93d8411bf608ea24bed36cfaf0e38d88ad3d624389760",
-    "parse_codex_session": "fa978af7e3486cbc3d954d2bda490dc5de1071994526b49597429d186b5a103f"
+    "parse_claude_session": "0243b4c19dcaa20322f21c2a181fd997222c57c13f580905c9577ebec132bc36",
+    "parse_codex_session": "ef74e4021a00d88481e7bd84552f10a07e618ab66b0d380d011412d44ca8bc39"
   },
   "method": "Exact parser source blocks, including decorators, in dependency order. Imports and two constants are included separately.",
   "adapted_files": [
@@ -21,9 +21,11 @@
     "src/trace_mechanism/views.py",
     "src/trace_mechanism/replay.py",
     "src/trace_mechanism/agent_tools.py",
-    "src/trace_mechanism/agent_demo.py"
+    "src/trace_mechanism/agent_demo.py",
+    "src/trace_mechanism/mcp_server.py"
   ],
   "production_prepare_sha256": "5ddf078ad35eec6805a4d0e9c5992494e87565c8c9df7e88b223f5a674166930",
   "production_prepare_source": "Agent Trace mcp_server.py::prepare",
-  "boundary": "The parser blocks are exact; renderers, registry, snapshots and demos are inspection adaptations. Source excerpts are not runnable integration code."
+  "boundary": "The parser blocks are exact; renderers, registry, snapshots and demos are inspection adaptations. Source excerpts are not runnable integration code.",
+  "source_commit": "dd8e4e0797dbd6a526d08f2b82229bfe391d92d4"
 }

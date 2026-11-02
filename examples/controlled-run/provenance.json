@@ -68,8 +68,14 @@
       "sha256": "e45b6f73f1bda86eb79c96160e364d95f6c0ce30f342d258636d09b7cf59d496"
     },
     "structured-attachment.json": {
-      "bytes": 227198,
-      "sha256": "48fe93c67ab2c17ad7970d908294cce1079c87c063c1a56dd11eb0c73e4b00a4"
+      "bytes": 166518,
+      "sha256": "94ea72f96e216b8581c9c18cdaa0f0f381cef616421cbacbac694ed5826fdf34"
     }
+  },
+  "structured_index_rebuilt": {
+    "builder": "src/trace_mechanism/structurer.mjs",
+    "source_sha256": "4230e7d58e7e7f87762f609a3901b83c1ea1d116bd6c85a069f75bfcce112755",
+    "command": "node tools/build_index.mjs examples/controlled-run/assembled.detailed.txt examples/controlled-run/structured-attachment.json",
+    "boundary": "Historical native rendered text is frozen. Only the interpretation index is rebuilt."
   }
 }

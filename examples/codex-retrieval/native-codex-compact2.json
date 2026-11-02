@@ -1,0 +1,31 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "# Agent Trace example: repair cafe source\n\nUser:\n\n[Injected repository instructions and environment omitted]\n\n?\n\nAssistant:\n\nI’ll calculate the fuse total with one Python command.\n\n`exec_command({cmd:\"python3 -c 'print(3 * 7)'\",workdir:\"<example-workspace>\",max_output_tokens:100})`\n\nThe repair cafe opens Saturday at 10:00. Each fuse costs £3. We need 7 fuses, for a total budget of **£21**.\n\n?\n\nThe repair cafe now opens Saturday at 10:30, and the total fuse budget remains £21.\n\n[Incomplete: 1 tool result(s) without calls]\n"
+    }
+  ],
+  "structuredContent": {
+    "ok": true,
+    "provider": "codex",
+    "session_id": "01a19dee-f8b7-7b02-9f5c-ac8a2431350d",
+    "scope": "full_thread_concise",
+    "title": "Agent Trace example: repair cafe source",
+    "bytes": 10375,
+    "sha256": "2bdb7bbc0cce2ff3b995c97e5357fd5873c56267c12e50756e9252e4e3fecd26",
+    "resource": {
+      "type": "resource_link",
+      "uri": "agent-trace://artifact/2bdb7bbc0cce2ff3b995c97e5357fd5873c56267c12e50756e9252e4e3fecd26",
+      "name": "Agent Trace example: repair cafe source — full thread compact",
+      "mimeType": "text/markdown",
+      "size": 10375,
+      "description": "codex · 01a19dee-f8b7-7b02-9f5c-ac8a2431350d · full thread compact"
+    },
+    "turn_index": 2,
+    "offset": 0,
+    "next_offset": null,
+    "total_chars": 10362
+  },
+  "isError": false,
+  "export_note": "Actual MCP response with injected repository instructions/environment omitted for publication; snapshot hash identifies unmodified private snapshot, not this redacted export. Workspace paths and coordinator ID also replaced. Recorded offsets and byte counts describe the original response, not this edited excerpt."
+}

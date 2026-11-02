@@ -1,0 +1,6 @@
+USER: "This is a deliberately public-shareable fictional example for Agent Trace. The repair cafe opens on Saturday at 10:00. Each replacement fuse costs £3, and we need 7 fuses. Calculate the total fuse budget with one small Python command, then state the start time, unit cost, quantity and total plainly. Run only that arithmetic in your projectless working directory. Do not read any files, other chats, credentials or network, and do not modify anything or contact anyone. All facts here are invented demonstration data. Stop after your short answer; a separate agent will later recover these facts through Agent Trace."
+STATUS: complete
+TOOL_RESULTS: [omitted in compact view]
+ASSISTANT: "I’ll calculate the fuse total with one Python command."
+TOOL exec (call_f168b64414044f11aa858184c2ecb8ac): {}
+ASSISTANT: "The repair cafe opens Saturday at 10:00. Each fuse costs £3. We need 7 fuses, for a total budget of **£21**."

@@ -9,16 +9,16 @@
   ],
   "directories": {
     "src": {
-      "purpose": "Standalone parsing package"
+      "purpose": "Provider parsers, portable views, MCP adapter and copied production index builder"
     },
     "tests": {
       "purpose": "Regression and provenance tests"
     },
     "examples": {
-      "purpose": "Synthetic fixtures and a selected controlled agent run with rendered outputs"
+      "purpose": "Synthetic regressions, selected Codex retrieval recording, generated outputs and historical controlled recording"
     },
     "tools": {
-      "purpose": "Repository maintenance checks"
+      "purpose": "MCP replay, example reproduction, selected-source export and repository layout checks"
     },
     "docs": {
       "purpose": "Mechanism, production excerpts, provenance, layout policy and supplied app screenshots"
@@ -34,7 +34,11 @@
     "docs/provenance.json",
     "docs/repository_layout.json",
     "src/trace_mechanism/parser.py",
-    "tools/check_layout.py"
+    "tools/check_layout.py",
+    "src/trace_mechanism/mcp_server.py",
+    "src/trace_mechanism/structurer.mjs",
+    "tools/regenerate_examples.py",
+    "docs/codex-retrieval.md"
   ],
   "content_routes": {
     "README.md": [

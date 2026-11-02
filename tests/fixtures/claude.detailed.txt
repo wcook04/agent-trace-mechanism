@@ -1,8 +1,7 @@
-USER: Read and update example.txt.
+USER: "Read and update example.txt."
 STATUS: complete
 TOOL Read (read): {"file_path": "example.txt"}
-RESULT: old line
-
+RESULT Read (read): "old line\n"
 TOOL Edit (edit): {"file_path": "example.txt", "new_string": "new line", "old_string": "old line"}
-RESULT: Updated example.txt.
-ASSISTANT: Update complete.
+RESULT Edit (edit): "Updated example.txt."
+ASSISTANT: "Update complete."

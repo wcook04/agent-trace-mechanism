@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-02",
+  "source_host": "Codex desktop",
+  "source_model": "gpt-6.1-sol",
+  "reader_host": "Codex subagent",
+  "reader_model": "gpt-6.1-sol",
+  "reader_session_id": "01a19df1-19d3-7543-917f-3f1c9753f89b",
+  "reader_source_sha256": "2dfb8e85eeee8901116123e964f267c192b62e3b03db4a965c21dba2effc5513",
+  "reader_received": "Source provider/session ID and a question about opening time and fuse budget; no source facts. Root then signalled that the source had changed without supplying changed facts.",
+  "answers": [
+    {
+      "source_line_1_based": 46,
+      "text": "The fictional repair cafe starts **Saturday at 10:00**, with **£21 for 7 fuses at £3 each**."
+    },
+    {
+      "source_line_1_based": 85,
+      "text": "Current retrieved answer: **Saturday at 10:30; fuse budget £21**. The second detailed view includes the correction input (`O003`) and corrected answer (`N003`); cost and quantity remain unchanged."
+    }
+  ],
+  "calls": [
+    {
+      "source_line_1_based": 19,
+      "code": "const r = await tools.mcp__agent_trace__read_chat_context({provider:\"codex\",session_id:\"01a19dee-f8b7-7b02-9f5c-ac8a2431350d\",scope:\"full_thread_concise\"}); store(\"compact\",r);text(r);\n"
+    },
+    {
+      "source_line_1_based": 40,
+      "code": "const r = await tools.mcp__agent_trace__read_chat_context({provider:\"codex\",session_id:\"01a19dee-f8b7-7b02-9f5c-ac8a2431350d\",scope:\"full_thread\"}); store(\"detailed\",r);text(r);\n"
+    },
+    {
+      "source_line_1_based": 54,
+      "code": "text(ALL_TOOLS.filter(x=>/read_trace_page/.test(x.name)));\nconst r=await tools.mcp__agent_trace__read_chat_context({provider:\"codex\",session_id:\"01a19dee-f8b7-7b02-9f5c-ac8a2431350d\",scope:\"full_thread_concise\"});store(\"compact2\",r);text(r);\n"
+    },
+    {
+      "source_line_1_based": 59,
+      "code": "const results=await Promise.all([tools.mcp__agent_trace__read_chat_context({provider:\"codex\",session_id:\"01a19dee-f8b7-7b02-9f5c-ac8a2431350d\",scope:\"full_thread\"}),tools.mcp__agent_trace__read_trace_page({sha256:\"0e64b55b397165df4f0b87d7f3f4269ed00b202606f5492b50f972220858d607\",offset:0})]);store(\"detailed2\",results[0]);store(\"oldreread\",results[1]);text(results);\n"
+    }
+  ],
+  "old_snapshot_check": {
+    "source_call_line_1_based": 67,
+    "comparison": "oldreread.content[0].text === compact.content[0].text",
+    "reported_result": true,
+    "source_result_line_1_based": 74,
+    "recorded_result_excerpt": {
+      "oldUnchanged": true
+    }
+  },
+  "limits": "Selected record excerpts; original hashes identify unpublished complete responses. The reader used the installed native plugin, whose formatting differs from the public portable views. Replay uses the same selected source facts through the public MCP implementation; it does not replay model inference. Native receipts were captured before the delegation-input parser repair and retain the historical missing-call warning."
+}

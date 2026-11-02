@@ -1,0 +1,26 @@
+{
+  "source_session_id": "01a19dee-f8b7-7b02-9f5c-ac8a2431350d",
+  "original_sha256": "9261e3d8e03caf84906783e35bcb98b4f57403f4a199d2b6d5acd4847bd16fbe",
+  "original_records": 36,
+  "retained_original_lines_1_based": [
+    2,
+    13,
+    16,
+    17,
+    20,
+    23,
+    26,
+    28,
+    30,
+    33,
+    36
+  ],
+  "selection": "Lifecycle, visible assistant messages, tool calls and results only. Actual delivered requests remain inside their recorded codex_delegation input elements.",
+  "omitted": "Injected instructions/environment, reasoning, telemetry and all unselected record types. No session metadata or synthetic user-message events added.",
+  "replacements": {
+    "workspace_prefix": "<example-workspace>",
+    "coordinator_thread_id": "controlled-coordinator"
+  },
+  "before_rule": "Selected prefix through the first task_complete record.",
+  "original_session_complete": false
+}

@@ -3,6 +3,8 @@
     "prompt": "Read and update example.txt.",
     "assistant": "Update prepared.",
     "complete": false,
+    "turn_ended": true,
+    "tool_evidence_complete": false,
     "partial_reason": "1 function_call(s) without function_call_output",
     "tools": [
       {
@@ -13,6 +15,9 @@
         },
         "output": "old line\n",
         "error": false,
+        "call_observed": true,
+        "result_observed": true,
+        "missing_call": false,
         "missing_result": false
       },
       {
@@ -23,6 +28,9 @@
         },
         "output": "Applied patch.",
         "error": false,
+        "call_observed": true,
+        "result_observed": true,
+        "missing_call": false,
         "missing_result": false
       },
       {
@@ -33,6 +41,9 @@
         },
         "output": "[no output recorded]",
         "error": false,
+        "call_observed": true,
+        "result_observed": false,
+        "missing_call": false,
         "missing_result": true
       }
     ]

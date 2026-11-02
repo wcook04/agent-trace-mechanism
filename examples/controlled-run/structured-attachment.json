@@ -4,7 +4,7 @@
   "manifest_role": "lossless_raw_sidecar_with_bounded_navigation_index",
   "clip_contract": {
     "schema_version": "agent_trace_clip_contract_v1",
-    "standard_ref": "codex/standards/std_agent_trace_lossless_clip.json",
+    "standard_ref": "agent_trace_clip_contract_v1",
     "artifact_class": "lossless_agent_trace_clip",
     "source_authority_field": "raw_sidecar.filename",
     "parse_order": [
@@ -89,13 +89,13 @@
       }
     }
   },
-  "generated_at": "2026-11-02T19:46:52Z",
+  "generated_at": "2026-11-02T00:00:00Z",
   "source_integrity": {
     "source_text_hash": "a052dea4",
     "source_text_bytes": 149482,
     "source_text_chars": 149442,
     "source_line_count": 2755,
-    "exact_source_text_in_attachment": true,
+    "exact_source_text_in_attachment": false,
     "exact_source_text_stored_locally": true,
     "source_text_attachment_field": "raw_sidecar",
     "source_lines_reconstructable_from_source_text": true,
@@ -2901,11 +2901,11 @@
       },
       {
         "id": "evidence_0012",
-        "kind": "command",
-        "title": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"pwd && rg --files -g 'AGENTS.md' - [truncated]",
+        "kind": "section",
+        "title": "parent",
         "line_range": {
-          "start": 724,
-          "end": 725
+          "start": 2,
+          "end": 3
         }
       }
     ],
@@ -3083,16 +3083,64 @@
     "schema_version": "agent_trace_coverage_scope_v1",
     "source_window": "full_thread",
     "copy_scope": "full_thread",
-    "thread_totality": "full_thread_detailed",
-    "full_thread_coverage": true,
+    "thread_totality": "source_claimed_full_thread_detailed",
+    "full_thread_coverage": false,
+    "supplied_source_claims_full_thread": true,
+    "supplied_source_coverage": "all_supplied_text_preserved",
     "full_thread_concise": false,
     "selected_window_only": false,
-    "coverage_class": "full_thread_exact_source",
-    "zero_edit_totality": "requires_explicit_no_edit_evidence"
+    "coverage_class": "full_thread_claimed_by_supplied_source",
+    "original_session_coverage": "unknown_from_supplied_text",
+    "scope_evidence": "source_claimed_not_independently_verified",
+    "zero_edit_totality": "unknown_from_supplied_text"
   },
   "agent_episode_graph": {
     "schema_version": "agent_episode_graph_v1",
     "projection_authority": "derived_from_copied_source_window",
+    "graph_semantics": "workflow phase presence; edge order is categorical, not chronology or parent-child identity",
+    "agent_relationships": "deployments listed where source metadata exists; no inferred identity links",
+    "observed_delegations": [
+      {
+        "id": "S001",
+        "status": "source_claimed_deployment",
+        "source_line_range": {
+          "start": 687,
+          "end": 687
+        },
+        "parent_turn": "1",
+        "provider": "codex",
+        "model": "gpt-6-luna"
+      },
+      {
+        "id": "S002",
+        "status": "source_claimed_deployment",
+        "source_line_range": {
+          "start": 689,
+          "end": 689
+        },
+        "parent_turn": "1",
+        "provider": "codex",
+        "model": "gpt-6-luna"
+      }
+    ],
+    "observed_scope_labels": [
+      {
+        "label": "parent",
+        "line": 1,
+        "status": "source_claimed"
+      },
+      {
+        "label": "call-pairing",
+        "line": 696,
+        "status": "source_claimed"
+      },
+      {
+        "label": "scope-snapshot",
+        "line": 1818,
+        "status": "source_claimed"
+      }
+    ],
+    "observed_scope_label_rule": "Assembly labels show included scopes; they do not independently establish parent-child relationships.",
     "nodes": [
       {
         "node_id": "episode_1",
@@ -3102,9 +3150,9 @@
     ],
     "edges": [],
     "copy_scope": "full_thread",
-    "thread_totality": "full_thread_detailed",
+    "thread_totality": "source_claimed_full_thread_detailed",
     "selected_window_only": false,
-    "warning": ""
+    "warning": "This graph covers supplied source evidence only; original-session completeness and uncaptured relationships are unknown."
   },
   "edit_claim": {
     "schema_version": "agent_trace_edit_claim_v1",
@@ -3112,15 +3160,21 @@
       "schema_version": "agent_trace_coverage_scope_v1",
       "source_window": "full_thread",
       "copy_scope": "full_thread",
-      "thread_totality": "full_thread_detailed",
-      "full_thread_coverage": true,
+      "thread_totality": "source_claimed_full_thread_detailed",
+      "full_thread_coverage": false,
+      "supplied_source_claims_full_thread": true,
+      "supplied_source_coverage": "all_supplied_text_preserved",
       "full_thread_concise": false,
       "selected_window_only": false,
-      "coverage_class": "full_thread_exact_source",
-      "zero_edit_totality": "requires_explicit_no_edit_evidence"
+      "coverage_class": "full_thread_claimed_by_supplied_source",
+      "original_session_coverage": "unknown_from_supplied_text",
+      "scope_evidence": "source_claimed_not_independently_verified",
+      "zero_edit_totality": "unknown_from_supplied_text"
     },
     "captured_window_edits": 0,
     "captured_file_artifact_edits": 0,
+    "source_claimed_tool_edit_count": 0,
+    "source_claimed_tool_edits": [],
     "visible_ui_diff_count": 0,
     "visible_ui_diff_summary": [],
     "substrate_diff_contract": {
@@ -3133,10 +3187,10 @@
     },
     "diff_state": {
       "schema_version": "agent_trace_diff_state_v1",
-      "state": "no_diff_evidence_in_full_thread_window",
+      "state": "no_diff_evidence_in_selected_window",
       "exact_plus_minus_required": true,
       "exact_plus_minus_available": false,
-      "reason": "no edit or commit evidence was captured in the full-thread source window"
+      "reason": "no edit evidence was captured in this selected/partial source window"
     },
     "mutation_event_count": 0,
     "positive_landing_receipts": {
@@ -3147,12 +3201,7 @@
       "status": "not_detected",
       "commit_diff_missing": false
     },
-    "explicit_no_edit_rows": [
-      {
-        "line": 709,
-        "text": "changed: no edits were made in the covered full thread"
-      }
-    ],
+    "explicit_no_edit_rows": [],
     "explicit_no_edit_claim_allowed_marker": null,
     "mode_boundaries": {
       "schema_version": "agent_trace_mode_boundary_signals_v1",
@@ -3180,15 +3229,15 @@
       "implementation_marker_confidence": "none",
       "plan_to_implementation_bound": false,
       "edits_in_plan_marked_region": false,
-      "coverage_scope": "full_thread_exact_source",
+      "coverage_scope": "full_thread_claimed_by_supplied_source",
       "conflicts": []
     },
     "operator_interventions": {
       "schema_version": "agent_trace_operator_intervention_ledger_v2",
       "count": 0,
       "selected_window_count": 0,
-      "full_thread_count": 0,
-      "outside_selected_window_count": 0,
+      "full_thread_count": null,
+      "outside_selected_window_count": null,
       "full_thread_available": true,
       "status": "not_detected",
       "rows": [],
@@ -3209,28 +3258,24 @@
         "status": "source_claimed",
         "line_range": {
           "start": 618,
-          "end": 641
+          "end": 618
         },
         "rows": [
           {
             "line": 618,
             "text": "| I’ll use the requested read-only checks in the standalone review repository and launch the two specified Luna subagents. I’ll independently review their e [truncated]"
-          },
-          {
-            "line": 641,
-            "text": "| This is a deliberately controlled, public-shareable sample run for Agent Trace. Work ONLY in <review-repository>, the standalone review repository. Set th [truncated]"
           }
         ]
       },
-      "subagent_read_only_claim_count": 2,
+      "subagent_read_only_claim_count": 1,
       "controller_edit_evidence_count": 0,
       "controller_edit_evidence_classes": [],
       "rule": "Read-only subagent claims are advisory for those subagents only and must not erase controller/thread edit evidence."
     },
-    "thread_total_edits": "not_proven_absent",
+    "thread_total_edits": "unknown_not_full_thread",
     "type_b_consumer_rule": {
       "unqualified_no_edits_allowed": false,
-      "safe_zero_edit_phrase": "no edits captured in full_thread window; thread_total_edits=not_proven_absent",
+      "safe_zero_edit_phrase": "no edits captured in full_thread window; thread_total_edits=unknown",
       "forbidden_phrase": "no edits were made",
       "claim_basis": "not_enough_totality_or_diff_commit_evidence_for_unqualified_no_edit_claim",
       "required_before_unqualified_no_edits": [
@@ -3243,32 +3288,104 @@
         "explicit terminal no-edit evidence"
       ]
     },
-    "integrity_issues": []
+    "integrity_issues": [
+      {
+        "code": "selected_or_partial_window_edits_zero_not_thread_total",
+        "severity": "blocking_for_unqualified_no_edit_claim",
+        "message": "Zero captured edits only describes this source window."
+      }
+    ]
   },
   "diff_state": {
     "schema_version": "agent_trace_diff_state_v1",
-    "state": "no_diff_evidence_in_full_thread_window",
+    "state": "no_diff_evidence_in_selected_window",
     "exact_plus_minus_required": true,
     "exact_plus_minus_available": false,
-    "reason": "no edit or commit evidence was captured in the full-thread source window"
+    "reason": "no edit evidence was captured in this selected/partial source window"
   },
   "terminal_state_index": {
     "schema_version": "agent_trace_terminal_state_index_v1",
     "purpose": "Pointers to terminal state evidence without deciding live truth beyond captured source text.",
     "final_assistant_message": {
-      "status": "not_detected"
-    },
-    "final_closeout_prose": {
+      "schema_version": "agent_trace_final_assistant_message_v1",
       "status": "source_claimed",
       "line_range": {
-        "start": 1793,
-        "end": 2754
+        "start": 628,
+        "end": 636
       },
-      "summary": "N001 validation_intent note_ref=N001 section=VISIBLE_PROGRESS C001 pass srch input_ref=I001 command_ref=O001 output_ref=O001 section=COMMAND_RETURNS C002 pass srch input_r [excerpt omitted: 54686 chars] the artifact receipt. not_captured_outputs: 1 promp [truncated]",
-      "source": "tail_marker"
+      "line_count": 9,
+      "char_count": 1308,
+      "byte_count": 1316,
+      "body_char_limit": 8000,
+      "body_is_complete": true,
+      "omitted_char_count": 0,
+      "summary": "| The bounded checks passed for both synthetic Codex and Claude records. I reviewed the subagents’ evidence and independently checked paging after an append. | | - **`/root/call_pairing`** ran the repository’s replay test: a call without a result was incomplete; after a matching result was appended, call `c1` had output `ok` and the turn was complete. | - **`/root/scope_snapshot`** checked the supplied fixtures: compact views omit [excerpt omitted: 678 chars] ndalone extraction and its invented fixtures. They do not establish compatibility with every real provider format or verify the full app’s live refresh behavior. No genuine issue was demonstrated.",
+      "body": "| The bounded checks passed for both synthetic Codex and Claude records. I reviewed the subagents’ evidence and independently checked paging after an append.\n|\n| - **`/root/call_pairing`** ran the repository’s replay test: a call without a result was incomplete; after a matching result was appended, call `c1` had output `ok` and the turn was complete.\n| - **`/root/scope_snapshot`** checked the supplied fixtures: compact views omitted the recorded `old line` and `new line` bodies, while detailed views retained them. It also verified that an older second page remained unchanged after a fresh read.\n| - I ran `PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v`: all six tests passed. I also checked both providers with the same detailed scope before and after an append: the fresh snapshot hash changed, and the old second page stayed unchanged.\n|\n| The scope subagent’s fresh-read comparison used different scopes, so that comparison alone could not attribute the changed hash to the append. My same-scope check addresses that limitation.\n|\n| These are executable checks of the standalone extraction and its invented fixtures. They do not establish compatibility with every real provider format or verify the full app’s live refresh behavior. No genuine issue was demonstrated.",
+      "excerpt": "| The bounded checks passed for both synthetic Codex and Claude records. I reviewed the subagents’ evidence and independently checked paging after an append.\n|\n| - **`/root/call_pairing`** ran the repository’s replay test: a call without a result was incomplete; after a matching result was appended, call `c1` had output `ok` and the turn was complete.\n| - **`/root/scope_snapshot`** checked the supplied fixtures: compact views omitted the recorded `old line` and `new line` bodies, while detailed views retained them. It also verified that an older second page remained unchanged after a fresh read.\n| - I ran `PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v`: all six tests passed. I also checked both providers with the same detailed scope before and after an append: the fresh snapshot hash changed, and the old second page stayed unchanged.\n|\n| The scope subagent’s fresh-read comparison used different scopes, so that comparison alone could not attribute the changed hash to the append. My same-scope check addresses that limitation.\n|\n| These are executable checks of the standalone extraction and its invented fixtures. They do not establish compatibility with every real provider format or verify the full app’s live refresh behavior. No genuine issue was demonstrated.",
+      "recovery": {
+        "source_authority": "source_text/source_lines",
+        "line_range": {
+          "start": 628,
+          "end": 636
+        },
+        "rule": "If body_is_complete is false, recover the exact message from the captured source by this line_range; for lossless clips, use source_segments or raw_sidecar per clip_contract."
+      },
+      "source": "capsule_closeout_note"
+    },
+    "final_closeout_prose": {
+      "schema_version": "agent_trace_final_closeout_pointer_v1",
+      "status": "source_claimed",
+      "line_range": {
+        "start": 628,
+        "end": 636
+      },
+      "line_count": 9,
+      "char_count": 1308,
+      "byte_count": 1316,
+      "summary": "| The bounded checks passed for both synthetic Codex and Claude records. I reviewed the subagents’ evidence and independently checked paging after an append. | | - **`/root/call_pairing`** ran the repository’s replay test: a call without a result was incomplete; after a matching result was appended, call `c1` had output `ok` and the turn was complete. | - **`/root/scope_snapshot`** checked the supplied fixtures: compact views omit [excerpt omitted: 678 chars] ndalone extraction and its invented fixtures. They do not establish compatibility with every real provider format or verify the full app’s live refresh behavior. No genuine issue was demonstrated.",
+      "body_ref": "terminal_state_index.final_assistant_message",
+      "body_is_complete": true,
+      "omitted_char_count": 0,
+      "recovery": {
+        "source_authority": "source_text/source_lines",
+        "line_range": {
+          "start": 628,
+          "end": 636
+        },
+        "rule": "If body_is_complete is false, recover the exact message from the captured source by this line_range; for lossless clips, use source_segments or raw_sidecar per clip_contract."
+      },
+      "source": "capsule_closeout_note:final_closeout_preferred"
     },
     "latest_commit": {
       "status": "not_detected"
+    },
+    "source_scope": {
+      "schema_version": "agent_trace_controller_source_scope_v1",
+      "semantic_scope": "controller_excluding_embedded_worker_bodies",
+      "child_trace_count": 0,
+      "unclosed_child_trace_count": 0,
+      "child_trace_ranges": [],
+      "assembled_non_parent_scope_count": 2,
+      "assembled_non_parent_scopes": [
+        {
+          "label": "call-pairing",
+          "status": "source_claimed",
+          "line_range": {
+            "start": 696,
+            "end": 1817
+          }
+        },
+        {
+          "label": "scope-snapshot",
+          "status": "source_claimed",
+          "line_range": {
+            "start": 1818,
+            "end": 2755
+          }
+        }
+      ],
+      "source_preserved": true,
+      "rule": "Worker bodies remain in the exact source carrier at these ranges; their terminal state, validation and assurance claims do not establish parent state."
     },
     "landed_commit_sequence": {
       "status": "not_detected"
@@ -3281,26 +3398,25 @@
       "reason": "no_commit_claim_detected"
     },
     "validation_summary": {
-      "status": "not_applicable",
-      "reason": "no_validation_rows_detected"
+      "status": "tool_output",
+      "validation_count": 1,
+      "result_counts": {
+        "pass": 1
+      },
+      "line_range": {
+        "start": 406,
+        "end": 406
+      }
     },
     "receipt_status": {
       "status": "source_claimed",
       "line_range": {
         "start": 693,
-        "end": 2752
+        "end": 693
       },
       "rows": [
         {
           "line": 693,
-          "text": "Captured visible content is retained after secret redaction. Hidden reasoning and uncaptured provider data are unavailable. Generated audit tables are kept in the artifact receipt."
-        },
-        {
-          "line": 1815,
-          "text": "Captured visible content is retained after secret redaction. Hidden reasoning and uncaptured provider data are unavailable. Generated audit tables are kept in the artifact receipt."
-        },
-        {
-          "line": 2752,
           "text": "Captured visible content is retained after secret redaction. Hidden reasoning and uncaptured provider data are unavailable. Generated audit tables are kept in the artifact receipt."
         }
       ]
@@ -3313,12 +3429,16 @@
   "command_ledger": {
     "schema_version": "agent_trace_command_ledger_v1",
     "purpose": "All detected shell/tool commands as bounded pointers; output is excerpted and hashed, source text remains authoritative in source_segments or raw sidecar.",
-    "command_count": 27,
+    "command_count": 11,
     "role_counts": {
-      "discovery": 27
+      "diagnostic": 1,
+      "discovery": 5,
+      "search": 4,
+      "validation": 1
     },
     "status_counts": {
-      "not_detected": 27
+      "not_detected": 10,
+      "pass": 1
     },
     "records": [
       {
@@ -3397,8 +3517,8 @@
       },
       {
         "id": "cmd_0003",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat README.md\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"max_output_tokens\\\":5000}); text(r.output);\\n\"}",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat README.md\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"max_output_tokens\\\":5000}); text(r.output);\\n\"}",
+        "command": "cat README.md",
+        "normalized_command": "cat README.md",
         "source_line_range": {
           "start": 43,
           "end": 43
@@ -3411,6 +3531,11 @@
           "start": 45,
           "end": 164
         },
+        "input_id": "I003",
+        "input_line_range": {
+          "start": 517,
+          "end": 518
+        },
         "output_id": "O003",
         "output_ref": null,
         "canonical_output": {
@@ -3422,7 +3547,7 @@
             "end": 164
           }
         },
-        "role": "discovery",
+        "role": "search",
         "status": "not_detected",
         "exit_code": null,
         "source": "tool_output",
@@ -3434,8 +3559,8 @@
       },
       {
         "id": "cmd_0004",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/replay.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/replay.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"",
+        "command": "cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/replay.py",
+        "normalized_command": "cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/replay.py",
         "source_line_range": {
           "start": 167,
           "end": 167
@@ -3448,6 +3573,11 @@
           "start": 169,
           "end": 296
         },
+        "input_id": "I004",
+        "input_line_range": {
+          "start": 522,
+          "end": 523
+        },
         "output_id": "O004",
         "output_ref": null,
         "canonical_output": {
@@ -3459,7 +3589,7 @@
             "end": 296
           }
         },
-        "role": "discovery",
+        "role": "search",
         "status": "not_detected",
         "exit_code": null,
         "source": "tool_output",
@@ -3471,8 +3601,8 @@
       },
       {
         "id": "cmd_0005",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat tests/test_mechanism.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"max_output_tokens\\\":13000}); text(r.output);\\n\"}",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat tests/test_mechanism.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"max_output_tokens\\\":13000}); text(r.output);\\n\"}",
+        "command": "cat tests/test_mechanism.py",
+        "normalized_command": "cat tests/test_mechanism.py",
         "source_line_range": {
           "start": 299,
           "end": 299
@@ -3485,6 +3615,11 @@
           "start": 301,
           "end": 403
         },
+        "input_id": "I005",
+        "input_line_range": {
+          "start": 527,
+          "end": 528
+        },
         "output_id": "O005",
         "output_ref": null,
         "canonical_output": {
@@ -3496,7 +3631,7 @@
             "end": 403
           }
         },
-        "role": "discovery",
+        "role": "search",
         "status": "not_detected",
         "exit_code": null,
         "source": "tool_output",
@@ -3508,8 +3643,8 @@
       },
       {
         "id": "cmd_0006",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"yield_time_ms\\\":10000,",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"yield_time_ms\\\":10000,",
+        "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v",
+        "normalized_command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v",
         "source_line_range": {
           "start": 406,
           "end": 406
@@ -3522,6 +3657,11 @@
           "start": 408,
           "end": 424
         },
+        "input_id": "I006",
+        "input_line_range": {
+          "start": 532,
+          "end": 533
+        },
         "output_id": "O006",
         "output_ref": null,
         "canonical_output": {
@@ -3533,8 +3673,8 @@
             "end": 424
           }
         },
-        "role": "discovery",
-        "status": "not_detected",
+        "role": "validation",
+        "status": "pass",
         "exit_code": null,
         "source": "tool_output",
         "output_excerpt": "output:\n| Script completed\n| Wall time 0.8 seconds\n| Output:\n|\n| test_actual_missing_result_and_view_selection (test_mechanism.MechanismTests.test_actual_missing_result_and_view_selection) ... ok\n| test_agent_search_scopes_and_stable_snapshot (test_mechanism.MechanismTests.test_agent_search_scopes_and_stable_snapshot) ... ok\n| test_explicit_replay_matches_call_and_result (test_mechanism.MechanismTests.test_explicit_replay_matches_call_and_result) ... ok\n| test_extracted_symbols_match_recorded_original_hashes (test_mechanism.MechanismTests.test_extracted_symbols_match_recorded_original_hashes) ... ok\n| test_production_clip_preserves_synthetic_source (test_mechanism.MechanismTests.test_production_clip_preserves_synthetic_source) ... ok\n| test_synthetic_examples_match_expected_output (test_mechanism.MechanismTests.test_synthetic_examples_match_expected_output) ... ok\n|\n| ----------------------------------------------------------------------\n| Ran 6 tests in 0.300s\n|\n| OK\n|",
@@ -3545,8 +3685,8 @@
       },
       {
         "id": "cmd_0007",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg -n 'def parse_(codex|claude)_session|tool_call_id|source_record_indices|is_complete|partial_reason' src/trace_mechanism/parser.py\\\",\\\"w",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg -n 'def parse_(codex|claude)_session|tool_call_id|source_record_indices|is_complete|partial_reason' src/trace_mechanism/parser.py\\\",\\\"w",
+        "command": "rg -n 'def parse_(codex|claude)_session|tool_call_id|source_record_indices|is_complete|partial_reason' src/trace_mechanism/parser.py",
+        "normalized_command": "rg -n 'def parse_(codex|claude)_session|tool_call_id|source_record_indices|is_complete|partial_reason' src/trace_mechanism/parser.py",
         "source_line_range": {
           "start": 427,
           "end": 427
@@ -3559,6 +3699,11 @@
           "start": 429,
           "end": 478
         },
+        "input_id": "I007",
+        "input_line_range": {
+          "start": 537,
+          "end": 538
+        },
         "output_id": "O007",
         "output_ref": null,
         "canonical_output": {
@@ -3570,7 +3715,7 @@
             "end": 478
           }
         },
-        "role": "discovery",
+        "role": "search",
         "status": "not_detected",
         "exit_code": null,
         "source": "tool_output",
@@ -3647,8 +3792,8 @@
       },
       {
         "id": "cmd_0010",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'\\\\nimport json\\\\nfrom pathlib import Path\\\\nfrom tempfile import TemporaryDirectory\\\\nf",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'\\\\nimport json\\\\nfrom pathlib import Path\\\\nfrom tempfile import TemporaryDirectory\\\\nf",
+        "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY' import json from pathlib import Path from tempfile import TemporaryDirectory from trace_mechanism.agent_tools import AgentTools from trace_mechanism.replay import records with Temporar [truncated]",
+        "normalized_command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY' import json from pathlib import Path from tempfile import TemporaryDirectory from trace_mechanism.agent_tools import AgentTools from trace_mechanism.replay import records with TemporaryDirectory() as d: for p",
         "source_line_range": {
           "start": 490,
           "end": 490
@@ -3661,6 +3806,11 @@
           "start": 492,
           "end": 499
         },
+        "input_id": "I010",
+        "input_line_range": {
+          "start": 552,
+          "end": 553
+        },
         "output_id": "O010",
         "output_ref": null,
         "canonical_output": {
@@ -3672,7 +3822,7 @@
             "end": 499
           }
         },
-        "role": "discovery",
+        "role": "diagnostic",
         "status": "not_detected",
         "exit_code": null,
         "source": "tool_output",
@@ -3715,589 +3865,6 @@
         "output_line_count": 0,
         "output_char_count": 0,
         "output_excerpt_truncated": false
-      },
-      {
-        "id": "cmd_0012",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"pwd && rg --files -g 'AGENTS.md' -g '*fixture*' -g '*test*' -g '*.py' | head -100\\\",workdir:\\\"<review-repository>\\\",yield_time_ms:10000,ma",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"pwd && rg --files -g 'AGENTS.md' -g '*fixture*' -g '*test*' -g '*.py' | head -100\\\",workdir:\\\"<review-repository>\\\",yield_time_ms:10000,ma",
-        "source_line_range": {
-          "start": 724,
-          "end": 724
-        },
-        "command_line_range": {
-          "start": 724,
-          "end": 724
-        },
-        "output_line_range": {
-          "start": 726,
-          "end": 741
-        },
-        "output_id": "O001",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O001",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 726,
-            "end": 741
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| <review-repository>\n| src/trace_mechanism/views.py\n| src/trace_mechanism/agent_tools.py\n| src/trace_mechanism/__main__.py\n| src/trace_mechanism/replay.py\n| src/trace_mechanism/parser.py\n| src/trace_mechanism/__init__.py\n| src/trace_mechanism/agent_demo.py\n| tests/test_mechanism.py\n| tools/check_layout.py\n|",
-        "output_hash": "7790fb1f",
-        "output_line_count": 16,
-        "output_char_count": 372,
-        "output_excerpt_truncated": false
-      },
-      {
-        "id": "cmd_0013",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg --files\\\",workdir:\\\"<review-repository>\\\",yield_time_ms:10000,max_output_tokens:4000});\\ntext(r.output);\\n\"}",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg --files\\\",workdir:\\\"<review-repository>\\\",yield_time_ms:10000,max_output_tokens:4000});\\ntext(r.output);\\n\"}",
-        "source_line_range": {
-          "start": 744,
-          "end": 744
-        },
-        "command_line_range": {
-          "start": 744,
-          "end": 744
-        },
-        "output_line_range": {
-          "start": 746,
-          "end": 781
-        },
-        "output_id": "O002",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O002",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 746,
-            "end": 781
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| src/trace_mechanism/views.py\n| src/trace_mechanism/agent_tools.py\n| src/trace_mechanism/__main__.py\n| src/trace_mechanism/replay.py\n| src/trace_mechanism/parser.py\n| src/trace_mechanism/__init__.py\n| src/trace_mechanism/agent_demo.py\n| SECURITY.md\n| examples/claude.compact.txt\n| examples/codex.expected.json\n| examples/claude.expected.json\n| examples/claude.detailed.txt\n| examples/codex.jsonl\n| examples/claude.jsonl\n| examples/codex.detailed.txt\n| examples/production-structured-clip.json\n| examples/codex.compact.txt\n| README.md\n| docs/structured-clip-provenance.json\n| docs/structured-clip-source-excerpt.txt\n| docs/skill-source-excerpt.txt\n| docs/repository_layout.json\n| docs/provenance.json\n| docs/mcp-source-excerpt.txt\n| docs/mechanism.md\n| tests/test_mechanism.py\n| pyproject.toml\n| LICENSE\n| tools/NOTICE.md\n| tools/check_layout.py\n|",
-        "output_hash": "918feb05",
-        "output_line_count": 36,
-        "output_char_count": 910,
-        "output_excerpt_truncated": false
-      },
-      {
-        "id": "cmd_0014",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,260p' src/trace_mechanism/parser.py && sed -n '1,300p' tests/test_mechanism.py && sed -n '1,260p' examples/codex.jsonl && sed -n",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,260p' src/trace_mechanism/parser.py && sed -n '1,300p' tests/test_mechanism.py && sed -n '1,260p' examples/codex.jsonl && sed -n",
-        "source_line_range": {
-          "start": 784,
-          "end": 784
-        },
-        "command_line_range": {
-          "start": 784,
-          "end": 784
-        },
-        "output_line_range": {
-          "start": 786,
-          "end": 1163
-        },
-        "output_id": "O003",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O003",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 786,
-            "end": 1163
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| \"\"\"Provider JSONL parsing functions extracted unchanged from Agent Trace.\"\"\"\n| from __future__ import annotations\n| import datetime as _dt\n| import hashlib\n| import json\n| import re\n| from dataclasses import dataclass, field\n| from pathlib import Path\n| from typing import Any\n|\n| CLAUDE_COMPLETE_STOP_REASONS = {\"end_turn\", \"max_tokens\", \"stop_sequence\", \"refusal\"}\n| CODEX_EXIT_CODE_RE = re.compile(r\"Process exited with code\\s+(-?\\d+)\")\n|\n| @dataclass\n| class ToolEvent:\n|     index: int\n|     name: str\n|     input: dict\n|     tool_call_id: str | None\n|     started_at: str | None\n|     completed_at: str | None\n|     duration_ms: int | None\n|     is_error: bool\n|     output\n[excerpt omitted: 16684 chars]\n\"old_string\": \"old line\", \"new_string\": \"new line\"}}], \"stop_reason\": \"tool_use\"}}\n| {\"type\": \"user\", \"message\": {\"content\": [{\"type\": \"tool_result\", \"tool_use_id\": \"edit\", \"content\": \"Updated example.txt.\"}]}}\n| {\"type\": \"assistant\", \"message\": {\"content\": [{\"type\": \"text\", \"text\": \"Update complete.\"}], \"stop_reason\": \"end_turn\"}}\n|",
-        "output_hash": "e7395d3b",
-        "output_line_count": 378,
-        "output_char_count": 17763,
-        "output_excerpt_truncated": true
-      },
-      {
-        "id": "cmd_0015",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '260,620p' src/trace_mechanism/parser.py && sed -n '1,280p' src/trace_mechanism/replay.py && cat examples/codex.expected.json | hea",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '260,620p' src/trace_mechanism/parser.py && sed -n '1,280p' src/trace_mechanism/replay.py && cat examples/codex.expected.json | hea",
-        "source_line_range": {
-          "start": 1166,
-          "end": 1166
-        },
-        "command_line_range": {
-          "start": 1166,
-          "end": 1166
-        },
-        "output_line_range": {
-          "start": 1168,
-          "end": 1661
-        },
-        "output_id": "O004",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O004",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 1168,
-            "end": 1661
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n|\n|         for idx, r in recs:\n|             source_indices.append(idx)\n|             rtype = r.get(\"type\")\n|             ts = r.get(\"timestamp\")\n|             if rtype == \"user\":\n|                 msg = r.get(\"message\") or {}\n|                 content = msg.get(\"content\")\n|                 if not prompt_text and _is_real_claude_prompt(r):\n|                     prompt_text = _flatten_claude_content(content)\n|                     prompt_ts = ts\n|                     prompt_record_idx = idx\n|                 if isinstance(content, list):\n|                     for c in content:\n|                         if not isinstance(c, dict) or c.get(\"type\") != \"tool_result\":\n|\n[excerpt omitted: 18856 chars]\n\"name\": \"Edit\",\n|         \"call_id\": \"edit\",\n|         \"input\": {\n|           \"file_path\": \"example.txt\",\n|           \"old_string\": \"old line\",\n|           \"new_string\": \"new line\"\n|         },\n|         \"output\": \"Updated example.txt.\",\n|         \"error\": false,\n|         \"missing_result\": false\n|       }\n|     ]\n|   }\n| ]\n|",
-        "output_hash": "318b4bff",
-        "output_line_count": 494,
-        "output_char_count": 19918,
-        "output_excerpt_truncated": true
-      },
-      {
-        "id": "cmd_0016",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' examples/codex.detailed.txt && sed -n '1,220p' examples/claude.detailed.txt && sed -n '1,180p' examples/codex.compact.txt",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' examples/codex.detailed.txt && sed -n '1,220p' examples/claude.detailed.txt && sed -n '1,180p' examples/codex.compact.txt",
-        "source_line_range": {
-          "start": 1664,
-          "end": 1664
-        },
-        "command_line_range": {
-          "start": 1664,
-          "end": 1664
-        },
-        "output_line_range": {
-          "start": 1666,
-          "end": 1713
-        },
-        "output_id": "O005",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O005",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 1666,
-            "end": 1713
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.2 seconds\n| Output:\n|\n| USER: Read and update example.txt.\n| STATUS: incomplete\n| TOOL read_file (read): {\"path\": \"example.txt\"}\n| RESULT: old line\n|\n| TOOL apply_patch (edit): {\"patch\": \"--- example.txt\\n+++ example.txt\\n-old line\\n+new line\"}\n| RESULT: Applied patch.\n| TOOL shell (pending): {\"cmd\": \"check\"}\n| RESULT: [no output recorded]\n| ASSISTANT: Update prepared.\n| PARTIAL: 1 function_call(s) without function_call_output\n| USER: Read and update example.txt.\n| STATUS: complete\n| TOOL Read (read): {\"file_path\": \"example.txt\"}\n| RESULT: old line\n|\n| TOOL Edit (edit): {\"file_path\": \"example.txt\", \"new_string\": \"new line\", \"old_string\": \"old line\"}\n| RESULT: Updated example.txt.\n| ASSISTANT: U\n[excerpt omitted: 554 chars]\nfile_path\": \"example.txt\"}\n| RESULT: [omitted in compact view]\n| ASSISTANT: Update complete.\n| test_explicit_replay_matches_call_and_result (tests.test_mechanism.MechanismTests.test_explicit_replay_matches_call_and_result) ... ok\n|\n| ----------------------------------------------------------------------\n| Ran 1 test in 0.003s\n|\n| OK\n|",
-        "output_hash": "66916f2a",
-        "output_line_count": 48,
-        "output_char_count": 1634,
-        "output_excerpt_truncated": true
-      },
-      {
-        "id": "cmd_0017",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,240p' src/trace_mechanism/agent_tools.py && sed -n '1,260p' src/trace_mechanism/views.py && rg --files | rg 'fixture|invented'\\\"",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,240p' src/trace_mechanism/agent_tools.py && sed -n '1,260p' src/trace_mechanism/views.py && rg --files | rg 'fixture|invented'\\\"",
-        "source_line_range": {
-          "start": 1846,
-          "end": 1846
-        },
-        "command_line_range": {
-          "start": 1846,
-          "end": 1846
-        },
-        "output_line_range": {
-          "start": 1848,
-          "end": 1920
-        },
-        "output_id": "O001",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O001",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 1848,
-            "end": 1920
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| \"\"\"Adapted in-memory tool boundary: explicit registry, no MCP transport or home scan.\"\"\"\n| import hashlib\n| from .parser import parse_claude_session, parse_codex_session\n| from .views import render\n|\n|\n| class AgentTools:\n|     def __init__(self, entries):\n|         # Caller supplies provider, session_id, title and path; no discovery.\n|         self.entries = list(entries)\n|         self.snapshots = {}\n|\n|     def search_trace_threads(self, query):\n|         terms = query.casefold().split()\n|         return [{key: row[key] for key in ('provider', 'session_id', 'title')}\n|                 for row in self.entries if all(term in\n|                 f\"{row['provider']} {row['s\n[excerpt omitted: 2680 chars]\n|             lines.append(f'RESULT: {event.output_text}' if detail else 'RESULT: [omitted in compact view]')\n|         if turn.assistant_text:\n|             lines.append(f'ASSISTANT: {turn.assistant_text}')\n|         if turn.partial_reason:\n|             lines.append(f'PARTIAL: {turn.partial_reason}')\n|     return '\\n'.join(lines)\n|",
-        "output_hash": "14685937",
-        "output_line_count": 73,
-        "output_char_count": 3759,
-        "output_excerpt_truncated": true
-      },
-      {
-        "id": "cmd_0018",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg --files\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"yield_time_ms\\\":10000,\\\"max_output_tokens\\\":3000}); text(r.output);\\n\"}",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg --files\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"yield_time_ms\\\":10000,\\\"max_output_tokens\\\":3000}); text(r.output);\\n\"}",
-        "source_line_range": {
-          "start": 1923,
-          "end": 1923
-        },
-        "command_line_range": {
-          "start": 1923,
-          "end": 1923
-        },
-        "output_line_range": {
-          "start": 1925,
-          "end": 1960
-        },
-        "output_id": "O002",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O002",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 1925,
-            "end": 1960
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| src/trace_mechanism/views.py\n| src/trace_mechanism/agent_tools.py\n| src/trace_mechanism/__main__.py\n| src/trace_mechanism/replay.py\n| src/trace_mechanism/parser.py\n| src/trace_mechanism/__init__.py\n| src/trace_mechanism/agent_demo.py\n| SECURITY.md\n| examples/claude.compact.txt\n| examples/codex.expected.json\n| examples/claude.expected.json\n| examples/claude.detailed.txt\n| examples/codex.jsonl\n| examples/claude.jsonl\n| examples/codex.detailed.txt\n| examples/production-structured-clip.json\n| examples/codex.compact.txt\n| README.md\n| docs/structured-clip-provenance.json\n| docs/structured-clip-source-excerpt.txt\n| docs/skill-source-excerpt.txt\n| docs/repository_layout.json\n| docs/provenance.json\n| docs/mcp-source-excerpt.txt\n| docs/mechanism.md\n| tests/test_mechanism.py\n| pyproject.toml\n| LICENSE\n| tools/NOTICE.md\n| tools/check_layout.py\n|",
-        "output_hash": "918feb05",
-        "output_line_count": 36,
-        "output_char_count": 910,
-        "output_excerpt_truncated": false
-      },
-      {
-        "id": "cmd_0019",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,260p' tests/test_mechanism.py && sed -n '1,240p' src/trace_mechanism/parser.py && sed -n '1,180p' examples/codex.jsonl && sed -n",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,260p' tests/test_mechanism.py && sed -n '1,240p' src/trace_mechanism/parser.py && sed -n '1,180p' examples/codex.jsonl && sed -n",
-        "source_line_range": {
-          "start": 1963,
-          "end": 1963
-        },
-        "command_line_range": {
-          "start": 1963,
-          "end": 1963
-        },
-        "output_line_range": {
-          "start": 1965,
-          "end": 2322
-        },
-        "output_id": "O003",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O003",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 1965,
-            "end": 2322
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| import ast\n| import hashlib\n| import json\n| from pathlib import Path\n| import subprocess\n| import sys\n| import tempfile\n| import unittest\n| from trace_mechanism.parser import parse_codex_session, parse_claude_session\n| from trace_mechanism.replay import replay, records\n| from trace_mechanism.agent_tools import AgentTools\n| from trace_mechanism.views import render, structured\n|\n| ROOT = Path(__file__).resolve().parents[1]\n|\n|\n| class MechanismTests(unittest.TestCase):\n|     def test_extracted_symbols_match_recorded_original_hashes(self):\n|         source = (ROOT / 'src/trace_mechanism/parser.py').read_text()\n|         lines = source.splitlines(keepends=True)\n|         nod\n[excerpt omitted: 15863 chars]\n\"old_string\": \"old line\", \"new_string\": \"new line\"}}], \"stop_reason\": \"tool_use\"}}\n| {\"type\": \"user\", \"message\": {\"content\": [{\"type\": \"tool_result\", \"tool_use_id\": \"edit\", \"content\": \"Updated example.txt.\"}]}}\n| {\"type\": \"assistant\", \"message\": {\"content\": [{\"type\": \"text\", \"text\": \"Update complete.\"}], \"stop_reason\": \"end_turn\"}}\n|",
-        "output_hash": "7aa62d5e",
-        "output_line_count": 358,
-        "output_char_count": 16942,
-        "output_excerpt_truncated": true
-      },
-      {
-        "id": "cmd_0020",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python -c 'import json,tempfile; from pathlib import Path; from trace_mechanism.agent_tools import AgentTools; from trace_mechan",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python -c 'import json,tempfile; from pathlib import Path; from trace_mechanism.agent_tools import AgentTools; from trace_mechan",
-        "source_line_range": {
-          "start": 2325,
-          "end": 2325
-        },
-        "command_line_range": {
-          "start": 2325,
-          "end": 2325
-        },
-        "output_line_range": {
-          "start": 2327,
-          "end": 2335
-        },
-        "output_id": "O004",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O004",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 2327,
-            "end": 2335
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.4 seconds\n| Output:\n|\n| Traceback (most recent call last):\n|   File \"<string>\", line 8, in <module>\n| AssertionError\n|",
-        "output_hash": "7ddeb2fa",
-        "output_line_count": 9,
-        "output_char_count": 159,
-        "output_excerpt_truncated": false
-      },
-      {
-        "id": "cmd_0021",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "source_line_range": {
-          "start": 2338,
-          "end": 2338
-        },
-        "command_line_range": {
-          "start": 2338,
-          "end": 2338
-        },
-        "output_line_range": {
-          "start": 2340,
-          "end": 2348
-        },
-        "output_id": "O005",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O005",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 2340,
-            "end": 2348
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.4 seconds\n| Output:\n|\n| Traceback (most recent call last):\n|   File \"<stdin>\", line 21, in <module>\n| AssertionError\n|",
-        "output_hash": "1c5a8d8c",
-        "output_line_count": 9,
-        "output_char_count": 159,
-        "output_excerpt_truncated": false
-      },
-      {
-        "id": "cmd_0022",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "source_line_range": {
-          "start": 2351,
-          "end": 2351
-        },
-        "command_line_range": {
-          "start": 2351,
-          "end": 2351
-        },
-        "output_line_range": {
-          "start": 2353,
-          "end": 2364
-        },
-        "output_id": "O006",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O006",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 2353,
-            "end": 2364
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.2 seconds\n| Output:\n|\n| codex 'USER: Run the check.\\nSTATUS: incomplete\\nTOOL shell (c1): {\"cmd\": \"check\"}\\nRESULT: [omitted in compact view]\\nPARTIAL: no task_complete; 1 function_call(s) without output'\n| detailed contains False False\n| stable True\n| claude 'USER: Run the check.\\nSTATUS: incomplete\\nTOOL Bash (c1): {\"command\": \"check\"}\\nRESULT: [omitted in compact view]\\nPARTIAL: 1 tool call(s) without results'\n| detailed contains False False\n| stable True\n|",
-        "output_hash": "b300a328",
-        "output_line_count": 12,
-        "output_char_count": 505,
-        "output_excerpt_truncated": false
-      },
-      {
-        "id": "cmd_0023",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/replay.py && cat examples/codex.detailed.txt && cat examples/claude.detailed.txt\\\",\\\"workdir\\\":\\\"<revi",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/replay.py && cat examples/codex.detailed.txt && cat examples/claude.detailed.txt\\\",\\\"workdir\\\":\\\"<revi",
-        "source_line_range": {
-          "start": 2367,
-          "end": 2367
-        },
-        "command_line_range": {
-          "start": 2367,
-          "end": 2367
-        },
-        "output_line_range": {
-          "start": 2369,
-          "end": 2448
-        },
-        "output_id": "O007",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O007",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 2369,
-            "end": 2448
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| \"\"\"Append synthetic records to temporary files and explicitly refresh both parsers.\"\"\"\n| import json\n| from pathlib import Path\n| from tempfile import TemporaryDirectory\n| from .parser import parse_codex_session, parse_claude_session\n| from .views import structured\n|\n|\n| def records(provider):\n|     if provider == 'codex':\n|         initial = [\n|             {'type': 'session_meta', 'payload': {'id': 'synthetic-live'}},\n|             {'type': 'event_msg', 'payload': {'type': 'task_started', 'turn_id': 't1'}},\n|             {'type': 'event_msg', 'payload': {'type': 'user_message', 'message': 'Run the check.'}},\n|             {'type': 'response_item', 'payload': {'type': '\n[excerpt omitted: 2227 chars]\nfunction_call(s) without function_call_output\n| USER: Read and update example.txt.\n| STATUS: complete\n| TOOL Read (read): {\"file_path\": \"example.txt\"}\n| RESULT: old line\n|\n| TOOL Edit (edit): {\"file_path\": \"example.txt\", \"new_string\": \"new line\", \"old_string\": \"old line\"}\n| RESULT: Updated example.txt.\n| ASSISTANT: Update complete.\n|",
-        "output_hash": "eece6780",
-        "output_line_count": 80,
-        "output_char_count": 3306,
-        "output_excerpt_truncated": true
-      },
-      {
-        "id": "cmd_0024",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "source_line_range": {
-          "start": 2451,
-          "end": 2451
-        },
-        "command_line_range": {
-          "start": 2451,
-          "end": 2451
-        },
-        "output_line_range": {
-          "start": 2453,
-          "end": 2460
-        },
-        "output_id": "O008",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O008",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 2453,
-            "end": 2460
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.2 seconds\n| Output:\n|\n| codex compact omits old/new bodies; detailed retains them; old snapshot page unchanged\n| claude compact omits old/new bodies; detailed retains them; old snapshot page unchanged\n|",
-        "output_hash": "1339736a",
-        "output_line_count": 8,
-        "output_char_count": 243,
-        "output_excerpt_truncated": false
-      },
-      {
-        "id": "cmd_0025",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/agent_tools.py && sed -n '1,100p' src/trace_mechanism/replay.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/agent_tools.py && sed -n '1,100p' src/trace_mechanism/replay.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",",
-        "source_line_range": {
-          "start": 2463,
-          "end": 2463
-        },
-        "command_line_range": {
-          "start": 2463,
-          "end": 2463
-        },
-        "output_line_range": {
-          "start": 2465,
-          "end": 2565
-        },
-        "output_id": "O009",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O009",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 2465,
-            "end": 2565
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| \"\"\"Adapted in-memory tool boundary: explicit registry, no MCP transport or home scan.\"\"\"\n| import hashlib\n| from .parser import parse_claude_session, parse_codex_session\n| from .views import render\n|\n|\n| class AgentTools:\n|     def __init__(self, entries):\n|         # Caller supplies provider, session_id, title and path; no discovery.\n|         self.entries = list(entries)\n|         self.snapshots = {}\n|\n|     def search_trace_threads(self, query):\n|         terms = query.casefold().split()\n|         return [{key: row[key] for key in ('provider', 'session_id', 'title')}\n|                 for row in self.entries if all(term in\n|                 f\"{row['provider']} {row['s\n[excerpt omitted: 3745 chars]\npath))\n|     return {'provider': provider, 'before': before, 'after': after}\n|\n|\n| def main():\n|     with TemporaryDirectory() as directory:\n|         for provider in ('codex', 'claude'):\n|             print(json.dumps(replay(provider, Path(directory) / (provider + '.jsonl')), indent=2))\n|\n|\n| if __name__ == '__main__':\n|     main()\n|",
-        "output_hash": "17b8714e",
-        "output_line_count": 101,
-        "output_char_count": 4825,
-        "output_excerpt_truncated": true
-      },
-      {
-        "id": "cmd_0026",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "normalized_command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "source_line_range": {
-          "start": 2568,
-          "end": 2568
-        },
-        "command_line_range": {
-          "start": 2568,
-          "end": 2568
-        },
-        "output_line_range": {
-          "start": 2570,
-          "end": 2577
-        },
-        "output_id": "O010",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "resolved",
-          "id": "O010",
-          "scope_path": "parent",
-          "line_range": {
-            "start": 2570,
-            "end": 2577
-          }
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| codex digest differs: True chars: 354 -> 376 old second page stable\n| claude digest differs: True chars: 241 -> 305 old second page stable\n|",
-        "output_hash": "7c623d56",
-        "output_line_count": 8,
-        "output_char_count": 205,
-        "output_excerpt_truncated": false
-      },
-      {
-        "id": "cmd_0027",
-        "command": "{\"target\": \"/root\", \"message\": \"[encrypted payload omitted]\"}",
-        "normalized_command": "{\"target\": \"/root\", \"message\": \"[encrypted payload omitted]\"}",
-        "source_line_range": {
-          "start": 2580,
-          "end": 2580
-        },
-        "command_line_range": {
-          "start": 2580,
-          "end": 2580
-        },
-        "output_line_range": null,
-        "output_id": "O011",
-        "output_ref": null,
-        "canonical_output": {
-          "status": "not_captured"
-        },
-        "role": "discovery",
-        "status": "not_detected",
-        "exit_code": null,
-        "source": "tool_output",
-        "output_excerpt": null,
-        "output_hash": null,
-        "output_line_count": 0,
-        "output_char_count": 0,
-        "output_excerpt_truncated": false
       }
     ],
     "policy": "Every command detected by the parser is represented once. Read source_line_range/output_line_range for exact wording and output."
@@ -4311,13 +3878,15 @@
       "unavailable": "Signal requires an omitted/lossless source variant or live re-verification.",
       "missing_required": "Signal is required for promotion but absent from the captured evidence."
     },
-    "validation_count": 0,
-    "command_validation_count": 0,
+    "validation_count": 1,
+    "command_validation_count": 1,
     "source_claimed_validation_count": 0,
     "governance_receipt_count": 0,
-    "diagnostic_count": 27,
-    "evidence_count": 27,
-    "result_counts": {},
+    "diagnostic_count": 10,
+    "evidence_count": 11,
+    "result_counts": {
+      "pass": 1
+    },
     "rows": [
       {
         "id": "evidence_0001",
@@ -4367,7 +3936,7 @@
         "bucket": "diagnostics",
         "evidence_bucket": "diagnostics",
         "command_id": "cmd_0003",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat README.md\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"max_output_tokens\\\":5000}); text(r.output);\\n\"}",
+        "command": "cat README.md",
         "source_line_range": {
           "start": 43,
           "end": 43
@@ -4388,7 +3957,7 @@
         "bucket": "diagnostics",
         "evidence_bucket": "diagnostics",
         "command_id": "cmd_0004",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/replay.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"",
+        "command": "cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/replay.py",
         "source_line_range": {
           "start": 167,
           "end": 167
@@ -4409,7 +3978,7 @@
         "bucket": "diagnostics",
         "evidence_bucket": "diagnostics",
         "command_id": "cmd_0005",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat tests/test_mechanism.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"max_output_tokens\\\":13000}); text(r.output);\\n\"}",
+        "command": "cat tests/test_mechanism.py",
         "source_line_range": {
           "start": 299,
           "end": 299
@@ -4426,11 +3995,11 @@
       },
       {
         "id": "evidence_0006",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
+        "kind": "check_command",
+        "bucket": "checks",
+        "evidence_bucket": "checks",
         "command_id": "cmd_0006",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"yield_time_ms\\\":10000,",
+        "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v",
         "source_line_range": {
           "start": 406,
           "end": 406
@@ -4439,7 +4008,7 @@
           "start": 408,
           "end": 424
         },
-        "result": "other",
+        "result": "pass",
         "result_source": "tool_output",
         "exit_code": null,
         "output_excerpt": "output:\n| Script completed\n| Wall time 0.8 seconds\n| Output:\n|\n| test_actual_missing_result_and_view_selection (test_mechanism.MechanismTests.test_actual_missing_result_and_view_selection) ... ok\n| test_agent_search_scopes_and_stable_snapshot (test_mechanism.MechanismTests.test_agent_search_scopes_and_stable_snapshot) ... ok\n| test_explicit_replay_matches_call_and_result (test_mechanism.MechanismTests.test_explicit_replay_matches_call_and_result) ... ok\n| test_extracted_symbols_match_recorded_original_hashes (test_mechanism.MechanismTests.test_extracted_symbols_match_recorded_original_hashes) ... ok\n| test_production_clip_preserves_synthetic_source (test_mechanism.MechanismTests.test_production_clip_preserves_synthetic_source) ... ok\n| test_synthetic_examples_match_expected_output (test_mechanism.MechanismTests.test_synthetic_examples_match_expected_output) ... ok\n|\n| ----------------------------------------------------------------------\n| Ran 6 tests in 0.300s\n|\n| OK\n|",
@@ -4451,7 +4020,7 @@
         "bucket": "diagnostics",
         "evidence_bucket": "diagnostics",
         "command_id": "cmd_0007",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg -n 'def parse_(codex|claude)_session|tool_call_id|source_record_indices|is_complete|partial_reason' src/trace_mechanism/parser.py\\\",\\\"w",
+        "command": "rg -n 'def parse_(codex|claude)_session|tool_call_id|source_record_indices|is_complete|partial_reason' src/trace_mechanism/parser.py",
         "source_line_range": {
           "start": 427,
           "end": 427
@@ -4511,7 +4080,7 @@
         "bucket": "diagnostics",
         "evidence_bucket": "diagnostics",
         "command_id": "cmd_0010",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'\\\\nimport json\\\\nfrom pathlib import Path\\\\nfrom tempfile import TemporaryDirectory\\\\nf",
+        "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY' import json from pathlib import Path from tempfile import TemporaryDirectory from trace_mechanism.agent_tools import AgentTools from trace_mechanism.replay import records with Temporar [truncated]",
         "source_line_range": {
           "start": 490,
           "end": 490
@@ -4536,339 +4105,6 @@
         "source_line_range": {
           "start": 502,
           "end": 502
-        },
-        "output_line_range": null,
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": null,
-        "output_hash": null
-      },
-      {
-        "id": "evidence_0012",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0012",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"pwd && rg --files -g 'AGENTS.md' -g '*fixture*' -g '*test*' -g '*.py' | head -100\\\",workdir:\\\"<review-repository>\\\",yield_time_ms:10000,ma",
-        "source_line_range": {
-          "start": 724,
-          "end": 724
-        },
-        "output_line_range": {
-          "start": 726,
-          "end": 741
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| <review-repository>\n| src/trace_mechanism/views.py\n| src/trace_mechanism/agent_tools.py\n| src/trace_mechanism/__main__.py\n| src/trace_mechanism/replay.py\n| src/trace_mechanism/parser.py\n| src/trace_mechanism/__init__.py\n| src/trace_mechanism/agent_demo.py\n| tests/test_mechanism.py\n| tools/check_layout.py\n|",
-        "output_hash": "7790fb1f"
-      },
-      {
-        "id": "evidence_0013",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0013",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg --files\\\",workdir:\\\"<review-repository>\\\",yield_time_ms:10000,max_output_tokens:4000});\\ntext(r.output);\\n\"}",
-        "source_line_range": {
-          "start": 744,
-          "end": 744
-        },
-        "output_line_range": {
-          "start": 746,
-          "end": 781
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| src/trace_mechanism/views.py\n| src/trace_mechanism/agent_tools.py\n| src/trace_mechanism/__main__.py\n| src/trace_mechanism/replay.py\n| src/trace_mechanism/parser.py\n| src/trace_mechanism/__init__.py\n| src/trace_mechanism/agent_demo.py\n| SECURITY.md\n| examples/claude.compact.txt\n| examples/codex.expected.json\n| examples/claude.expected.json\n| examples/claude.detailed.txt\n| examples/codex.jsonl\n| examples/claude.jsonl\n| examples/codex.detailed.txt\n| examples/production-structured-clip.json\n| examples/codex.compact.txt\n| README.md\n| docs/structured-clip-provenance.json\n| docs/structured-clip-source-excerpt.txt\n| docs/skill-source-excerpt.txt\n| docs/repository_layout.json\n| docs/provenance.json\n| docs/mcp-source-excerpt.txt\n| docs/mechanism.md\n| tests/test_mechanism.py\n| pyproject.toml\n| LICENSE\n| tools/NOTICE.md\n| tools/check_layout.py\n|",
-        "output_hash": "918feb05"
-      },
-      {
-        "id": "evidence_0014",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0014",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,260p' src/trace_mechanism/parser.py && sed -n '1,300p' tests/test_mechanism.py && sed -n '1,260p' examples/codex.jsonl && sed -n",
-        "source_line_range": {
-          "start": 784,
-          "end": 784
-        },
-        "output_line_range": {
-          "start": 786,
-          "end": 1163
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| \"\"\"Provider JSONL parsing functions extracted unchanged from Agent Trace.\"\"\"\n| from __future__ import annotations\n| import datetime as _dt\n| import hashlib\n| import json\n| import re\n| from dataclasses import dataclass, field\n| from pathlib import Path\n| from typing import Any\n|\n| CLAUDE_COMPLETE_STOP_REASONS = {\"end_turn\", \"max_tokens\", \"stop_sequence\", \"refusal\"}\n| CODEX_EXIT_CODE_RE = re.compile(r\"Process exited with code\\s+(-?\\d+)\")\n|\n| @dataclass\n| class ToolEvent:\n|     index: int\n|     name: str\n|     input: dict\n|     tool_call_id: str | None\n|     started_at: str | None\n|     completed_at: str | None\n|     duration_ms: int | None\n|     is_error: bool\n|     output\n[excerpt omitted: 16684 chars]\n\"old_string\": \"old line\", \"new_string\": \"new line\"}}], \"stop_reason\": \"tool_use\"}}\n| {\"type\": \"user\", \"message\": {\"content\": [{\"type\": \"tool_result\", \"tool_use_id\": \"edit\", \"content\": \"Updated example.txt.\"}]}}\n| {\"type\": \"assistant\", \"message\": {\"content\": [{\"type\": \"text\", \"text\": \"Update complete.\"}], \"stop_reason\": \"end_turn\"}}\n|",
-        "output_hash": "e7395d3b"
-      },
-      {
-        "id": "evidence_0015",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0015",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '260,620p' src/trace_mechanism/parser.py && sed -n '1,280p' src/trace_mechanism/replay.py && cat examples/codex.expected.json | hea",
-        "source_line_range": {
-          "start": 1166,
-          "end": 1166
-        },
-        "output_line_range": {
-          "start": 1168,
-          "end": 1661
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n|\n|         for idx, r in recs:\n|             source_indices.append(idx)\n|             rtype = r.get(\"type\")\n|             ts = r.get(\"timestamp\")\n|             if rtype == \"user\":\n|                 msg = r.get(\"message\") or {}\n|                 content = msg.get(\"content\")\n|                 if not prompt_text and _is_real_claude_prompt(r):\n|                     prompt_text = _flatten_claude_content(content)\n|                     prompt_ts = ts\n|                     prompt_record_idx = idx\n|                 if isinstance(content, list):\n|                     for c in content:\n|                         if not isinstance(c, dict) or c.get(\"type\") != \"tool_result\":\n|\n[excerpt omitted: 18856 chars]\n\"name\": \"Edit\",\n|         \"call_id\": \"edit\",\n|         \"input\": {\n|           \"file_path\": \"example.txt\",\n|           \"old_string\": \"old line\",\n|           \"new_string\": \"new line\"\n|         },\n|         \"output\": \"Updated example.txt.\",\n|         \"error\": false,\n|         \"missing_result\": false\n|       }\n|     ]\n|   }\n| ]\n|",
-        "output_hash": "318b4bff"
-      },
-      {
-        "id": "evidence_0016",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0016",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' examples/codex.detailed.txt && sed -n '1,220p' examples/claude.detailed.txt && sed -n '1,180p' examples/codex.compact.txt",
-        "source_line_range": {
-          "start": 1664,
-          "end": 1664
-        },
-        "output_line_range": {
-          "start": 1666,
-          "end": 1713
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.2 seconds\n| Output:\n|\n| USER: Read and update example.txt.\n| STATUS: incomplete\n| TOOL read_file (read): {\"path\": \"example.txt\"}\n| RESULT: old line\n|\n| TOOL apply_patch (edit): {\"patch\": \"--- example.txt\\n+++ example.txt\\n-old line\\n+new line\"}\n| RESULT: Applied patch.\n| TOOL shell (pending): {\"cmd\": \"check\"}\n| RESULT: [no output recorded]\n| ASSISTANT: Update prepared.\n| PARTIAL: 1 function_call(s) without function_call_output\n| USER: Read and update example.txt.\n| STATUS: complete\n| TOOL Read (read): {\"file_path\": \"example.txt\"}\n| RESULT: old line\n|\n| TOOL Edit (edit): {\"file_path\": \"example.txt\", \"new_string\": \"new line\", \"old_string\": \"old line\"}\n| RESULT: Updated example.txt.\n| ASSISTANT: U\n[excerpt omitted: 554 chars]\nfile_path\": \"example.txt\"}\n| RESULT: [omitted in compact view]\n| ASSISTANT: Update complete.\n| test_explicit_replay_matches_call_and_result (tests.test_mechanism.MechanismTests.test_explicit_replay_matches_call_and_result) ... ok\n|\n| ----------------------------------------------------------------------\n| Ran 1 test in 0.003s\n|\n| OK\n|",
-        "output_hash": "66916f2a"
-      },
-      {
-        "id": "evidence_0017",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0017",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,240p' src/trace_mechanism/agent_tools.py && sed -n '1,260p' src/trace_mechanism/views.py && rg --files | rg 'fixture|invented'\\\"",
-        "source_line_range": {
-          "start": 1846,
-          "end": 1846
-        },
-        "output_line_range": {
-          "start": 1848,
-          "end": 1920
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| \"\"\"Adapted in-memory tool boundary: explicit registry, no MCP transport or home scan.\"\"\"\n| import hashlib\n| from .parser import parse_claude_session, parse_codex_session\n| from .views import render\n|\n|\n| class AgentTools:\n|     def __init__(self, entries):\n|         # Caller supplies provider, session_id, title and path; no discovery.\n|         self.entries = list(entries)\n|         self.snapshots = {}\n|\n|     def search_trace_threads(self, query):\n|         terms = query.casefold().split()\n|         return [{key: row[key] for key in ('provider', 'session_id', 'title')}\n|                 for row in self.entries if all(term in\n|                 f\"{row['provider']} {row['s\n[excerpt omitted: 2680 chars]\n|             lines.append(f'RESULT: {event.output_text}' if detail else 'RESULT: [omitted in compact view]')\n|         if turn.assistant_text:\n|             lines.append(f'ASSISTANT: {turn.assistant_text}')\n|         if turn.partial_reason:\n|             lines.append(f'PARTIAL: {turn.partial_reason}')\n|     return '\\n'.join(lines)\n|",
-        "output_hash": "14685937"
-      },
-      {
-        "id": "evidence_0018",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0018",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg --files\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"yield_time_ms\\\":10000,\\\"max_output_tokens\\\":3000}); text(r.output);\\n\"}",
-        "source_line_range": {
-          "start": 1923,
-          "end": 1923
-        },
-        "output_line_range": {
-          "start": 1925,
-          "end": 1960
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| src/trace_mechanism/views.py\n| src/trace_mechanism/agent_tools.py\n| src/trace_mechanism/__main__.py\n| src/trace_mechanism/replay.py\n| src/trace_mechanism/parser.py\n| src/trace_mechanism/__init__.py\n| src/trace_mechanism/agent_demo.py\n| SECURITY.md\n| examples/claude.compact.txt\n| examples/codex.expected.json\n| examples/claude.expected.json\n| examples/claude.detailed.txt\n| examples/codex.jsonl\n| examples/claude.jsonl\n| examples/codex.detailed.txt\n| examples/production-structured-clip.json\n| examples/codex.compact.txt\n| README.md\n| docs/structured-clip-provenance.json\n| docs/structured-clip-source-excerpt.txt\n| docs/skill-source-excerpt.txt\n| docs/repository_layout.json\n| docs/provenance.json\n| docs/mcp-source-excerpt.txt\n| docs/mechanism.md\n| tests/test_mechanism.py\n| pyproject.toml\n| LICENSE\n| tools/NOTICE.md\n| tools/check_layout.py\n|",
-        "output_hash": "918feb05"
-      },
-      {
-        "id": "evidence_0019",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0019",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,260p' tests/test_mechanism.py && sed -n '1,240p' src/trace_mechanism/parser.py && sed -n '1,180p' examples/codex.jsonl && sed -n",
-        "source_line_range": {
-          "start": 1963,
-          "end": 1963
-        },
-        "output_line_range": {
-          "start": 1965,
-          "end": 2322
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| import ast\n| import hashlib\n| import json\n| from pathlib import Path\n| import subprocess\n| import sys\n| import tempfile\n| import unittest\n| from trace_mechanism.parser import parse_codex_session, parse_claude_session\n| from trace_mechanism.replay import replay, records\n| from trace_mechanism.agent_tools import AgentTools\n| from trace_mechanism.views import render, structured\n|\n| ROOT = Path(__file__).resolve().parents[1]\n|\n|\n| class MechanismTests(unittest.TestCase):\n|     def test_extracted_symbols_match_recorded_original_hashes(self):\n|         source = (ROOT / 'src/trace_mechanism/parser.py').read_text()\n|         lines = source.splitlines(keepends=True)\n|         nod\n[excerpt omitted: 15863 chars]\n\"old_string\": \"old line\", \"new_string\": \"new line\"}}], \"stop_reason\": \"tool_use\"}}\n| {\"type\": \"user\", \"message\": {\"content\": [{\"type\": \"tool_result\", \"tool_use_id\": \"edit\", \"content\": \"Updated example.txt.\"}]}}\n| {\"type\": \"assistant\", \"message\": {\"content\": [{\"type\": \"text\", \"text\": \"Update complete.\"}], \"stop_reason\": \"end_turn\"}}\n|",
-        "output_hash": "7aa62d5e"
-      },
-      {
-        "id": "evidence_0020",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0020",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python -c 'import json,tempfile; from pathlib import Path; from trace_mechanism.agent_tools import AgentTools; from trace_mechan",
-        "source_line_range": {
-          "start": 2325,
-          "end": 2325
-        },
-        "output_line_range": {
-          "start": 2327,
-          "end": 2335
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.4 seconds\n| Output:\n|\n| Traceback (most recent call last):\n|   File \"<string>\", line 8, in <module>\n| AssertionError\n|",
-        "output_hash": "7ddeb2fa"
-      },
-      {
-        "id": "evidence_0021",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0021",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "source_line_range": {
-          "start": 2338,
-          "end": 2338
-        },
-        "output_line_range": {
-          "start": 2340,
-          "end": 2348
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.4 seconds\n| Output:\n|\n| Traceback (most recent call last):\n|   File \"<stdin>\", line 21, in <module>\n| AssertionError\n|",
-        "output_hash": "1c5a8d8c"
-      },
-      {
-        "id": "evidence_0022",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0022",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "source_line_range": {
-          "start": 2351,
-          "end": 2351
-        },
-        "output_line_range": {
-          "start": 2353,
-          "end": 2364
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.2 seconds\n| Output:\n|\n| codex 'USER: Run the check.\\nSTATUS: incomplete\\nTOOL shell (c1): {\"cmd\": \"check\"}\\nRESULT: [omitted in compact view]\\nPARTIAL: no task_complete; 1 function_call(s) without output'\n| detailed contains False False\n| stable True\n| claude 'USER: Run the check.\\nSTATUS: incomplete\\nTOOL Bash (c1): {\"command\": \"check\"}\\nRESULT: [omitted in compact view]\\nPARTIAL: 1 tool call(s) without results'\n| detailed contains False False\n| stable True\n|",
-        "output_hash": "b300a328"
-      },
-      {
-        "id": "evidence_0023",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0023",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/replay.py && cat examples/codex.detailed.txt && cat examples/claude.detailed.txt\\\",\\\"workdir\\\":\\\"<revi",
-        "source_line_range": {
-          "start": 2367,
-          "end": 2367
-        },
-        "output_line_range": {
-          "start": 2369,
-          "end": 2448
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| \"\"\"Append synthetic records to temporary files and explicitly refresh both parsers.\"\"\"\n| import json\n| from pathlib import Path\n| from tempfile import TemporaryDirectory\n| from .parser import parse_codex_session, parse_claude_session\n| from .views import structured\n|\n|\n| def records(provider):\n|     if provider == 'codex':\n|         initial = [\n|             {'type': 'session_meta', 'payload': {'id': 'synthetic-live'}},\n|             {'type': 'event_msg', 'payload': {'type': 'task_started', 'turn_id': 't1'}},\n|             {'type': 'event_msg', 'payload': {'type': 'user_message', 'message': 'Run the check.'}},\n|             {'type': 'response_item', 'payload': {'type': '\n[excerpt omitted: 2227 chars]\nfunction_call(s) without function_call_output\n| USER: Read and update example.txt.\n| STATUS: complete\n| TOOL Read (read): {\"file_path\": \"example.txt\"}\n| RESULT: old line\n|\n| TOOL Edit (edit): {\"file_path\": \"example.txt\", \"new_string\": \"new line\", \"old_string\": \"old line\"}\n| RESULT: Updated example.txt.\n| ASSISTANT: Update complete.\n|",
-        "output_hash": "eece6780"
-      },
-      {
-        "id": "evidence_0024",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0024",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "source_line_range": {
-          "start": 2451,
-          "end": 2451
-        },
-        "output_line_range": {
-          "start": 2453,
-          "end": 2460
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.2 seconds\n| Output:\n|\n| codex compact omits old/new bodies; detailed retains them; old snapshot page unchanged\n| claude compact omits old/new bodies; detailed retains them; old snapshot page unchanged\n|",
-        "output_hash": "1339736a"
-      },
-      {
-        "id": "evidence_0025",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0025",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/agent_tools.py && sed -n '1,100p' src/trace_mechanism/replay.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",",
-        "source_line_range": {
-          "start": 2463,
-          "end": 2463
-        },
-        "output_line_range": {
-          "start": 2465,
-          "end": 2565
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| \"\"\"Adapted in-memory tool boundary: explicit registry, no MCP transport or home scan.\"\"\"\n| import hashlib\n| from .parser import parse_claude_session, parse_codex_session\n| from .views import render\n|\n|\n| class AgentTools:\n|     def __init__(self, entries):\n|         # Caller supplies provider, session_id, title and path; no discovery.\n|         self.entries = list(entries)\n|         self.snapshots = {}\n|\n|     def search_trace_threads(self, query):\n|         terms = query.casefold().split()\n|         return [{key: row[key] for key in ('provider', 'session_id', 'title')}\n|                 for row in self.entries if all(term in\n|                 f\"{row['provider']} {row['s\n[excerpt omitted: 3745 chars]\npath))\n|     return {'provider': provider, 'before': before, 'after': after}\n|\n|\n| def main():\n|     with TemporaryDirectory() as directory:\n|         for provider in ('codex', 'claude'):\n|             print(json.dumps(replay(provider, Path(directory) / (provider + '.jsonl')), indent=2))\n|\n|\n| if __name__ == '__main__':\n|     main()\n|",
-        "output_hash": "17b8714e"
-      },
-      {
-        "id": "evidence_0026",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0026",
-        "command": "{\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\".venv/bin/python - <<'PY'\\\\nimport json, tempfile\\\\nfrom pathlib import Path\\\\nfrom trace_mechanism.agent_tools import AgentTools\\\\nfrom t",
-        "source_line_range": {
-          "start": 2568,
-          "end": 2568
-        },
-        "output_line_range": {
-          "start": 2570,
-          "end": 2577
-        },
-        "result": "other",
-        "result_source": "tool_output",
-        "exit_code": null,
-        "output_excerpt": "output:\n| Script completed\n| Wall time 0.1 seconds\n| Output:\n|\n| codex digest differs: True chars: 354 -> 376 old second page stable\n| claude digest differs: True chars: 241 -> 305 old second page stable\n|",
-        "output_hash": "7c623d56"
-      },
-      {
-        "id": "evidence_0027",
-        "kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "evidence_bucket": "diagnostics",
-        "command_id": "cmd_0027",
-        "command": "{\"target\": \"/root\", \"message\": \"[encrypted payload omitted]\"}",
-        "source_line_range": {
-          "start": 2580,
-          "end": 2580
         },
         "output_line_range": null,
         "result": "other",
@@ -4956,8 +4192,8 @@
       },
       {
         "id": "evidence_0006",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
+        "proof_kind": "check_command",
+        "bucket": "checks",
         "source_line_range": {
           "start": 406,
           "end": 406
@@ -4966,7 +4202,7 @@
           "start": 408,
           "end": 424
         },
-        "result": "other",
+        "result": "pass",
         "establishes": "source-stated validation/proof only; does not prove live current state"
       },
       {
@@ -5037,252 +4273,15 @@
         "output_line_range": null,
         "result": "other",
         "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0012",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 724,
-          "end": 724
-        },
-        "output_line_range": {
-          "start": 726,
-          "end": 741
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0013",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 744,
-          "end": 744
-        },
-        "output_line_range": {
-          "start": 746,
-          "end": 781
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0014",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 784,
-          "end": 784
-        },
-        "output_line_range": {
-          "start": 786,
-          "end": 1163
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0015",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 1166,
-          "end": 1166
-        },
-        "output_line_range": {
-          "start": 1168,
-          "end": 1661
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0016",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 1664,
-          "end": 1664
-        },
-        "output_line_range": {
-          "start": 1666,
-          "end": 1713
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0017",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 1846,
-          "end": 1846
-        },
-        "output_line_range": {
-          "start": 1848,
-          "end": 1920
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0018",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 1923,
-          "end": 1923
-        },
-        "output_line_range": {
-          "start": 1925,
-          "end": 1960
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0019",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 1963,
-          "end": 1963
-        },
-        "output_line_range": {
-          "start": 1965,
-          "end": 2322
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0020",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 2325,
-          "end": 2325
-        },
-        "output_line_range": {
-          "start": 2327,
-          "end": 2335
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0021",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 2338,
-          "end": 2338
-        },
-        "output_line_range": {
-          "start": 2340,
-          "end": 2348
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0022",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 2351,
-          "end": 2351
-        },
-        "output_line_range": {
-          "start": 2353,
-          "end": 2364
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0023",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 2367,
-          "end": 2367
-        },
-        "output_line_range": {
-          "start": 2369,
-          "end": 2448
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0024",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 2451,
-          "end": 2451
-        },
-        "output_line_range": {
-          "start": 2453,
-          "end": 2460
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0025",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 2463,
-          "end": 2463
-        },
-        "output_line_range": {
-          "start": 2465,
-          "end": 2565
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0026",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 2568,
-          "end": 2568
-        },
-        "output_line_range": {
-          "start": 2570,
-          "end": 2577
-        },
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
-      },
-      {
-        "id": "evidence_0027",
-        "proof_kind": "diagnostic_command",
-        "bucket": "diagnostics",
-        "source_line_range": {
-          "start": 2580,
-          "end": 2580
-        },
-        "output_line_range": null,
-        "result": "other",
-        "establishes": "source-stated validation/proof only; does not prove live current state"
       }
     ],
     "policy": "Preserve command/result boundaries without mirroring full outputs.",
     "bucket_counts": {
       "checks": {
-        "pass": 0,
+        "pass": 1,
         "fail": 0,
         "other": 0,
-        "total": 0
+        "total": 1
       },
       "governance_receipts": {
         "pass": 0,
@@ -5293,8 +4292,8 @@
       "diagnostics": {
         "pass": 0,
         "fail": 0,
-        "other": 27,
-        "total": 27
+        "other": 10,
+        "total": 10
       }
     }
   },
@@ -5302,14 +4301,10 @@
     "schema_version": "agent_trace_artifact_delta_index_v1",
     "purpose": "Artifact and path deltas as source pointers; exact file content remains only in source text or local full packet.",
     "artifact_row_count": 0,
-    "path_row_count": 29,
+    "path_row_count": 25,
     "visible_ui_diff_summary_count": 0,
     "state_counts": {
-      "committed": 1,
-      "discovered": 22,
-      "edited": 2,
-      "generated": 3,
-      "proposed": 1
+      "discovered": 25
     },
     "rows": [
       {
@@ -5317,17 +4312,17 @@
         "source": "path_entity_context",
         "delta_state": "discovered",
         "path": ".venv/bin/python",
-        "count": 26,
+        "count": 9,
         "first_line": 105,
-        "last_line": 2701,
+        "last_line": 632,
         "evidence_lines": [
           {
             "line": 105,
             "text": "| .venv/bin/python -m pip install ."
           },
           {
-            "line": 2701,
-            "text": "| Verified with `.venv/bin/python` using the invented Codex and Claude fixtures copied to temporary files. For both providers, compact view omitted the reco [truncated]"
+            "line": 632,
+            "text": "| - I ran `PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v`: all six tests passed. I also checked both providers with the same d [truncated]"
           }
         ]
       },
@@ -5335,56 +4330,56 @@
         "id": "path_delta_0002",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "src/trace_mechanism/parser.py",
-        "count": 15,
-        "first_line": 148,
-        "last_line": 2597,
+        "path": "src/trace_mechanism/agent_tools.py",
+        "count": 3,
+        "first_line": 60,
+        "last_line": 167,
         "evidence_lines": [
           {
-            "line": 148,
-            "text": "| | [parser.py](src/trace_mechanism/parser.py) | Actual provider parsers, data classes and required helpers copied from Agent Trace. |"
+            "line": 60,
+            "text": "| 3. Read the [agent-facing search/read boundary](src/trace_mechanism/agent_tools.py): select a provider, session and scope; read again after more records arrive."
           },
           {
-            "line": 2597,
-            "text": "| {\"_raw_arguments\":\"const r = await tools.exec_command({cmd:\\\"sed -n '1,260p' tests/test_mechanism.py && sed -n '1,240p' src/trace_mechanism/parser.py && s [truncated]"
+            "line": 167,
+            "text": "$ {\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/repl [truncated]"
           }
         ]
       },
       {
         "id": "path_delta_0003",
         "source": "path_entity_context",
-        "delta_state": "edited",
-        "path": "examples/codex.jsonl",
-        "count": 12,
-        "first_line": 107,
-        "last_line": 2703,
+        "delta_state": "discovered",
+        "path": "examples/production-structured-clip.json",
+        "count": 3,
+        "first_line": 61,
+        "last_line": 378,
         "evidence_lines": [
           {
-            "line": 107,
-            "text": "| .venv/bin/python -m trace_mechanism codex examples/codex.jsonl --view compact"
+            "line": 61,
+            "text": "| 4. Inspect the [actual structured attachment exhibit](examples/production-structured-clip.json) and its [builder logic](docs/structured-clip-source-excerp [truncated]"
           },
           {
-            "line": 2703,
-            "text": "| The first check used the replay fixture, whose tool output is only `ok`; it did not exercise edit bodies. The successful check used `examples/codex.jsonl` [truncated]"
+            "line": 378,
+            "text": "| clip = json.loads((ROOT / 'examples/production-structured-clip.json').read_text())"
           }
         ]
       },
       {
         "id": "path_delta_0004",
         "source": "path_entity_context",
-        "delta_state": "proposed",
-        "path": "src/trace_mechanism/replay.py",
-        "count": 12,
-        "first_line": 152,
-        "last_line": 2627,
+        "delta_state": "discovered",
+        "path": "docs/mechanism.md",
+        "count": 3,
+        "first_line": 72,
+        "last_line": 134,
         "evidence_lines": [
           {
-            "line": 152,
-            "text": "| | [replay.py](src/trace_mechanism/replay.py) | Synthetic pending-to-completed record sequences. |"
+            "line": 72,
+            "text": "| These small renderers illustrate the distinction. The full app also retains chronological progress, richer provenance, linked-agent records and navigation [truncated]"
           },
           {
-            "line": 2627,
-            "text": "| {\"_raw_arguments\":\"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/agent_tools.py && sed -n '1,100p' src/trace_mechanism/rep [truncated]"
+            "line": 134,
+            "text": "| Codex documents stored-thread reading through its [app-server API](https://learn.chatgpt.com/docs/app-server). Agent Trace currently parses local files in [truncated]"
           }
         ]
       },
@@ -5392,18 +4387,18 @@
         "id": "path_delta_0005",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "src/trace_mechanism/agent_tools.py",
-        "count": 11,
-        "first_line": 60,
-        "last_line": 2627,
+        "path": "examples/codex.jsonl",
+        "count": 3,
+        "first_line": 107,
+        "last_line": 349,
         "evidence_lines": [
           {
-            "line": 60,
-            "text": "| 3. Read the [agent-facing search/read boundary](src/trace_mechanism/agent_tools.py): select a provider, session and scope; read again after more records arrive."
+            "line": 107,
+            "text": "| .venv/bin/python -m trace_mechanism codex examples/codex.jsonl --view compact"
           },
           {
-            "line": 2627,
-            "text": "| {\"_raw_arguments\":\"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/agent_tools.py && sed -n '1,100p' src/trace_mechanism/rep [truncated]"
+            "line": 349,
+            "text": "| pending = parse_codex_session(ROOT / 'examples/codex.jsonl')[0]"
           }
         ]
       },
@@ -5411,18 +4406,18 @@
         "id": "path_delta_0006",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "examples/codex.detailed.txt",
-        "count": 10,
-        "first_line": 58,
-        "last_line": 2617,
+        "path": "src/trace_mechanism/parser.py",
+        "count": 3,
+        "first_line": 148,
+        "last_line": 427,
         "evidence_lines": [
           {
-            "line": 58,
-            "text": "| 1. Compare the same Codex thread in [compact form](examples/codex.compact.txt), [full detail](examples/codex.detailed.txt), and [structured JSON](examples/codex.expected.json)."
+            "line": 148,
+            "text": "| | [parser.py](src/trace_mechanism/parser.py) | Actual provider parsers, data classes and required helpers copied from Agent Trace. |"
           },
           {
-            "line": 2617,
-            "text": "| {\"_raw_arguments\":\"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/replay.py && cat examples/codex.detailed.txt && cat examp [truncated]"
+            "line": 427,
+            "text": "$ {\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"rg -n 'def parse_(codex|claude)_session|tool_call_id|source_record_indices|is_complete|parti [truncated]"
           }
         ]
       },
@@ -5430,18 +4425,18 @@
         "id": "path_delta_0007",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "tests/test_mechanism.py",
-        "count": 10,
-        "first_line": 153,
-        "last_line": 2597,
+        "path": "examples/codex.detailed.txt",
+        "count": 2,
+        "first_line": 58,
+        "last_line": 379,
         "evidence_lines": [
           {
-            "line": 153,
-            "text": "| | [tests](tests/test_mechanism.py) | Provider examples, omissions, call/result pairing, snapshot stability and source hashes. |"
+            "line": 58,
+            "text": "| 1. Compare the same Codex thread in [compact form](examples/codex.compact.txt), [full detail](examples/codex.detailed.txt), and [structured JSON](examples/codex.expected.json)."
           },
           {
-            "line": 2597,
-            "text": "| {\"_raw_arguments\":\"const r = await tools.exec_command({cmd:\\\"sed -n '1,260p' tests/test_mechanism.py && sed -n '1,240p' src/trace_mechanism/parser.py && s [truncated]"
+            "line": 379,
+            "text": "| source = (ROOT / 'examples/codex.detailed.txt').read_bytes()"
           }
         ]
       },
@@ -5449,18 +4444,18 @@
         "id": "path_delta_0008",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "src/trace_mechanism/views.py",
-        "count": 8,
-        "first_line": 149,
-        "last_line": 2587,
+        "path": "docs/structured-clip-source-excerpt.txt",
+        "count": 2,
+        "first_line": 61,
+        "last_line": 140,
         "evidence_lines": [
           {
-            "line": 149,
-            "text": "| | [views.py](src/trace_mechanism/views.py) | Adapted compact, detailed and JSON projections. |"
+            "line": 61,
+            "text": "| 4. Inspect the [actual structured attachment exhibit](examples/production-structured-clip.json) and its [builder logic](docs/structured-clip-source-excerp [truncated]"
           },
           {
-            "line": 2587,
-            "text": "| {\"_raw_arguments\":\"const r = await tools.exec_command({cmd:\\\"sed -n '1,240p' src/trace_mechanism/agent_tools.py && sed -n '1,260p' src/trace_mechanism/vie [truncated]"
+            "line": 140,
+            "text": "| Start at `source_segments` for the exact input, then `reader_index`, `command_ledger` and `source_segment_index` for navigation. The source appears once; [truncated]"
           }
         ]
       },
@@ -5468,75 +4463,75 @@
         "id": "path_delta_0009",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "examples/claude.detailed.txt",
-        "count": 7,
-        "first_line": 59,
-        "last_line": 2617,
+        "path": "src/trace_mechanism/agent_demo.py",
+        "count": 2,
+        "first_line": 62,
+        "last_line": 151,
         "evidence_lines": [
           {
-            "line": 59,
-            "text": "| 2. Compare the Claude Code thread in [compact form](examples/claude.compact.txt), [full detail](examples/claude.detailed.txt), and [structured JSON](examp [truncated]"
+            "line": 62,
+            "text": "| 5. Run the [two-way live example](src/trace_mechanism/agent_demo.py). It models Codex reading Claude's file and Claude reading Codex's file before and aft [truncated]"
           },
           {
-            "line": 2617,
-            "text": "| {\"_raw_arguments\":\"const r = await tools.exec_command({cmd:\\\"sed -n '1,220p' src/trace_mechanism/replay.py && cat examples/codex.detailed.txt && cat examp [truncated]"
+            "line": 151,
+            "text": "| | [agent_demo.py](src/trace_mechanism/agent_demo.py) | Both directions of context retrieval using synthetic files. |"
           }
         ]
       },
       {
         "id": "path_delta_0010",
         "source": "path_entity_context",
-        "delta_state": "generated",
-        "path": "examples/production-structured-clip.json",
-        "count": 7,
-        "first_line": 61,
-        "last_line": 2042,
-        "evidence_lines": [
-          {
-            "line": 61,
-            "text": "| 4. Inspect the [actual structured attachment exhibit](examples/production-structured-clip.json) and its [builder logic](docs/structured-clip-source-excerp [truncated]"
-          },
-          {
-            "line": 2042,
-            "text": "| clip = json.loads((ROOT / 'examples/production-structured-clip.json').read_text())"
-          }
-        ]
-      },
-      {
-        "id": "path_delta_0011",
-        "source": "path_entity_context",
-        "delta_state": "edited",
-        "path": "examples/claude.jsonl",
-        "count": 6,
-        "first_line": 109,
-        "last_line": 2703,
-        "evidence_lines": [
-          {
-            "line": 109,
-            "text": "| .venv/bin/python -m trace_mechanism claude examples/claude.jsonl --view json"
-          },
-          {
-            "line": 2703,
-            "text": "| The first check used the replay fixture, whose tool output is only `ok`; it did not exercise edit bodies. The successful check used `examples/codex.jsonl` [truncated]"
-          }
-        ]
-      },
-      {
-        "id": "path_delta_0012",
-        "source": "path_entity_context",
-        "delta_state": "generated",
+        "delta_state": "discovered",
         "path": "docs/structured-clip-provenance.json",
-        "count": 6,
+        "count": 2,
         "first_line": 140,
-        "last_line": 2049,
+        "last_line": 385,
         "evidence_lines": [
           {
             "line": 140,
             "text": "| Start at `source_segments` for the exact input, then `reader_index`, `command_ledger` and `source_segment_index` for navigation. The source appears once; [truncated]"
           },
           {
-            "line": 2049,
+            "line": 385,
             "text": "| provenance = json.loads((ROOT / 'docs/structured-clip-provenance.json').read_text())"
+          }
+        ]
+      },
+      {
+        "id": "path_delta_0011",
+        "source": "path_entity_context",
+        "delta_state": "discovered",
+        "path": "src/trace_mechanism/views.py",
+        "count": 2,
+        "first_line": 149,
+        "last_line": 167,
+        "evidence_lines": [
+          {
+            "line": 149,
+            "text": "| | [views.py](src/trace_mechanism/views.py) | Adapted compact, detailed and JSON projections. |"
+          },
+          {
+            "line": 167,
+            "text": "$ {\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/repl [truncated]"
+          }
+        ]
+      },
+      {
+        "id": "path_delta_0012",
+        "source": "path_entity_context",
+        "delta_state": "discovered",
+        "path": "src/trace_mechanism/replay.py",
+        "count": 2,
+        "first_line": 152,
+        "last_line": 167,
+        "evidence_lines": [
+          {
+            "line": 152,
+            "text": "| | [replay.py](src/trace_mechanism/replay.py) | Synthetic pending-to-completed record sequences. |"
+          },
+          {
+            "line": 167,
+            "text": "$ {\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/repl [truncated]"
           }
         ]
       },
@@ -5544,18 +4539,18 @@
         "id": "path_delta_0013",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "docs/provenance.json",
-        "count": 6,
-        "first_line": 154,
-        "last_line": 1991,
+        "path": "tests/test_mechanism.py",
+        "count": 2,
+        "first_line": 153,
+        "last_line": 299,
         "evidence_lines": [
           {
-            "line": 154,
-            "text": "| | [provenance.json](docs/provenance.json) | Source and copied-symbol hashes; extraction and adaptation boundaries. |"
+            "line": 153,
+            "text": "| | [tests](tests/test_mechanism.py) | Provider examples, omissions, call/result pairing, snapshot stability and source hashes. |"
           },
           {
-            "line": 1991,
-            "text": "| recorded = json.loads((ROOT / 'docs/provenance.json').read_text())['symbol_sha256']"
+            "line": 299,
+            "text": "$ {\"_raw_arguments\": \"const r = await tools.exec_command({cmd:\\\"cat tests/test_mechanism.py\\\",\\\"workdir\\\":\\\"<review-repository>\\\",\\\"max_output_tokens\\\":13000}); text(r.output);\\n\"}"
           }
         ]
       },
@@ -5563,18 +4558,18 @@
         "id": "path_delta_0014",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "examples/codex.compact.txt",
-        "count": 5,
-        "first_line": 58,
-        "last_line": 1946,
+        "path": "docs/provenance.json",
+        "count": 2,
+        "first_line": 154,
+        "last_line": 327,
         "evidence_lines": [
           {
-            "line": 58,
-            "text": "| 1. Compare the same Codex thread in [compact form](examples/codex.compact.txt), [full detail](examples/codex.detailed.txt), and [structured JSON](examples/codex.expected.json)."
+            "line": 154,
+            "text": "| | [provenance.json](docs/provenance.json) | Source and copied-symbol hashes; extraction and adaptation boundaries. |"
           },
           {
-            "line": 1946,
-            "text": "| examples/codex.compact.txt"
+            "line": 327,
+            "text": "| recorded = json.loads((ROOT / 'docs/provenance.json').read_text())['symbol_sha256']"
           }
         ]
       },
@@ -5582,18 +4577,14 @@
         "id": "path_delta_0015",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "examples/codex.expected.json",
-        "count": 5,
-        "first_line": 58,
-        "last_line": 1939,
+        "path": "O/I/N/E/T",
+        "count": 1,
+        "first_line": 10,
+        "last_line": 10,
         "evidence_lines": [
           {
-            "line": 58,
-            "text": "| 1. Compare the same Codex thread in [compact form](examples/codex.compact.txt), [full detail](examples/codex.detailed.txt), and [structured JSON](examples/codex.expected.json)."
-          },
-          {
-            "line": 1939,
-            "text": "| examples/codex.expected.json"
+            "line": 10,
+            "text": "reading_guide: TIMELINE gives source order; O/I/N/E/T references locate full outputs, inputs, messages, edits and original tool records. SECTION_INDEX gives [truncated]"
           }
         ]
       },
@@ -5601,18 +4592,14 @@
         "id": "path_delta_0016",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "src/trace_mechanism/agent_demo.py",
-        "count": 5,
-        "first_line": 62,
-        "last_line": 1936,
+        "path": "examples/codex.compact.txt",
+        "count": 1,
+        "first_line": 58,
+        "last_line": 58,
         "evidence_lines": [
           {
-            "line": 62,
-            "text": "| 5. Run the [two-way live example](src/trace_mechanism/agent_demo.py). It models Codex reading Claude's file and Claude reading Codex's file before and aft [truncated]"
-          },
-          {
-            "line": 1936,
-            "text": "| src/trace_mechanism/agent_demo.py"
+            "line": 58,
+            "text": "| 1. Compare the same Codex thread in [compact form](examples/codex.compact.txt), [full detail](examples/codex.detailed.txt), and [structured JSON](examples/codex.expected.json)."
           }
         ]
       },
@@ -5620,18 +4607,14 @@
         "id": "path_delta_0017",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "docs/mechanism.md",
-        "count": 5,
-        "first_line": 72,
-        "last_line": 1954,
+        "path": "examples/codex.expected.json",
+        "count": 1,
+        "first_line": 58,
+        "last_line": 58,
         "evidence_lines": [
           {
-            "line": 72,
-            "text": "| These small renderers illustrate the distinction. The full app also retains chronological progress, richer provenance, linked-agent records and navigation [truncated]"
-          },
-          {
-            "line": 1954,
-            "text": "| docs/mechanism.md"
+            "line": 58,
+            "text": "| 1. Compare the same Codex thread in [compact form](examples/codex.compact.txt), [full detail](examples/codex.detailed.txt), and [structured JSON](examples/codex.expected.json)."
           }
         ]
       },
@@ -5640,17 +4623,13 @@
         "source": "path_entity_context",
         "delta_state": "discovered",
         "path": "examples/claude.compact.txt",
-        "count": 4,
+        "count": 1,
         "first_line": 59,
-        "last_line": 1938,
+        "last_line": 59,
         "evidence_lines": [
           {
             "line": 59,
             "text": "| 2. Compare the Claude Code thread in [compact form](examples/claude.compact.txt), [full detail](examples/claude.detailed.txt), and [structured JSON](examp [truncated]"
-          },
-          {
-            "line": 1938,
-            "text": "| examples/claude.compact.txt"
           }
         ]
       },
@@ -5658,37 +4637,29 @@
         "id": "path_delta_0019",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "examples/claude.expected.json",
-        "count": 4,
+        "path": "examples/claude.detailed.txt",
+        "count": 1,
         "first_line": 59,
-        "last_line": 1940,
+        "last_line": 59,
         "evidence_lines": [
           {
             "line": 59,
             "text": "| 2. Compare the Claude Code thread in [compact form](examples/claude.compact.txt), [full detail](examples/claude.detailed.txt), and [structured JSON](examp [truncated]"
-          },
-          {
-            "line": 1940,
-            "text": "| examples/claude.expected.json"
           }
         ]
       },
       {
         "id": "path_delta_0020",
         "source": "path_entity_context",
-        "delta_state": "generated",
-        "path": "docs/structured-clip-source-excerpt.txt",
-        "count": 4,
-        "first_line": 61,
-        "last_line": 1949,
+        "delta_state": "discovered",
+        "path": "examples/claude.expected.json",
+        "count": 1,
+        "first_line": 59,
+        "last_line": 59,
         "evidence_lines": [
           {
-            "line": 61,
-            "text": "| 4. Inspect the [actual structured attachment exhibit](examples/production-structured-clip.json) and its [builder logic](docs/structured-clip-source-excerp [truncated]"
-          },
-          {
-            "line": 1949,
-            "text": "| docs/structured-clip-source-excerpt.txt"
+            "line": 59,
+            "text": "| 2. Compare the Claude Code thread in [compact form](examples/claude.compact.txt), [full detail](examples/claude.detailed.txt), and [structured JSON](examp [truncated]"
           }
         ]
       },
@@ -5696,18 +4667,14 @@
         "id": "path_delta_0021",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "tools/check_layout.py",
-        "count": 4,
-        "first_line": 111,
-        "last_line": 1959,
+        "path": "docs/mcp-source-excerpt.txt",
+        "count": 1,
+        "first_line": 80,
+        "last_line": 80,
         "evidence_lines": [
           {
-            "line": 111,
-            "text": "| python3 tools/check_layout.py"
-          },
-          {
-            "line": 1959,
-            "text": "| tools/check_layout.py"
+            "line": 80,
+            "text": "| - [Actual MCP registration and scope-selection excerpts](docs/mcp-source-excerpt.txt)"
           }
         ]
       },
@@ -5715,18 +4682,14 @@
         "id": "path_delta_0022",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "O/I/N/E/T",
-        "count": 3,
-        "first_line": 10,
-        "last_line": 1827,
+        "path": "docs/skill-source-excerpt.txt",
+        "count": 1,
+        "first_line": 81,
+        "last_line": 81,
         "evidence_lines": [
           {
-            "line": 10,
-            "text": "reading_guide: TIMELINE gives source order; O/I/N/E/T references locate full outputs, inputs, messages, edits and original tool records. SECTION_INDEX gives [truncated]"
-          },
-          {
-            "line": 1827,
-            "text": "reading_guide: TIMELINE gives source order; O/I/N/E/T references locate full outputs, inputs, messages, edits and original tool records. SECTION_INDEX gives [truncated]"
+            "line": 81,
+            "text": "| - [Actual context-retrieval skill excerpt](docs/skill-source-excerpt.txt)"
           }
         ]
       },
@@ -5734,18 +4697,14 @@
         "id": "path_delta_0023",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "docs/mcp-source-excerpt.txt",
-        "count": 3,
-        "first_line": 80,
-        "last_line": 1953,
+        "path": "examples/claude.jsonl",
+        "count": 1,
+        "first_line": 109,
+        "last_line": 109,
         "evidence_lines": [
           {
-            "line": 80,
-            "text": "| - [Actual MCP registration and scope-selection excerpts](docs/mcp-source-excerpt.txt)"
-          },
-          {
-            "line": 1953,
-            "text": "| docs/mcp-source-excerpt.txt"
+            "line": 109,
+            "text": "| .venv/bin/python -m trace_mechanism claude examples/claude.jsonl --view json"
           }
         ]
       },
@@ -5753,18 +4712,14 @@
         "id": "path_delta_0024",
         "source": "path_entity_context",
         "delta_state": "discovered",
-        "path": "docs/skill-source-excerpt.txt",
-        "count": 3,
-        "first_line": 81,
-        "last_line": 1950,
+        "path": "tools/check_layout.py",
+        "count": 1,
+        "first_line": 111,
+        "last_line": 111,
         "evidence_lines": [
           {
-            "line": 81,
-            "text": "| - [Actual context-retrieval skill excerpt](docs/skill-source-excerpt.txt)"
-          },
-          {
-            "line": 1950,
-            "text": "| docs/skill-source-excerpt.txt"
+            "line": 111,
+            "text": "| python3 tools/check_layout.py"
           }
         ]
       },
@@ -5773,89 +4728,13 @@
         "source": "path_entity_context",
         "delta_state": "discovered",
         "path": "tools/NOTICE.md",
-        "count": 3,
+        "count": 1,
         "first_line": 160,
-        "last_line": 1958,
+        "last_line": 160,
         "evidence_lines": [
           {
             "line": 160,
             "text": "| Propose changes as a patch with a synthetic regression case. Do not put real conversation logs in issues, tests or examples. See the [security reporting g [truncated]"
-          },
-          {
-            "line": 1958,
-            "text": "| tools/NOTICE.md"
-          }
-        ]
-      },
-      {
-        "id": "path_delta_0026",
-        "source": "path_entity_context",
-        "delta_state": "discovered",
-        "path": "src/trace_mechanism/__main__.py",
-        "count": 3,
-        "first_line": 734,
-        "last_line": 1932,
-        "evidence_lines": [
-          {
-            "line": 734,
-            "text": "| src/trace_mechanism/__main__.py"
-          },
-          {
-            "line": 1932,
-            "text": "| src/trace_mechanism/__main__.py"
-          }
-        ]
-      },
-      {
-        "id": "path_delta_0027",
-        "source": "path_entity_context",
-        "delta_state": "discovered",
-        "path": "src/trace_mechanism/__init__.py",
-        "count": 3,
-        "first_line": 737,
-        "last_line": 1935,
-        "evidence_lines": [
-          {
-            "line": 737,
-            "text": "| src/trace_mechanism/__init__.py"
-          },
-          {
-            "line": 1935,
-            "text": "| src/trace_mechanism/__init__.py"
-          }
-        ]
-      },
-      {
-        "id": "path_delta_0028",
-        "source": "path_entity_context",
-        "delta_state": "discovered",
-        "path": "docs/repository_layout.json",
-        "count": 2,
-        "first_line": 772,
-        "last_line": 1951,
-        "evidence_lines": [
-          {
-            "line": 772,
-            "text": "| docs/repository_layout.json"
-          },
-          {
-            "line": 1951,
-            "text": "| docs/repository_layout.json"
-          }
-        ]
-      },
-      {
-        "id": "path_delta_0029",
-        "source": "path_entity_context",
-        "delta_state": "committed",
-        "path": "src/trace_mechanism",
-        "count": 1,
-        "first_line": 641,
-        "last_line": 641,
-        "evidence_lines": [
-          {
-            "line": 641,
-            "text": "| This is a deliberately controlled, public-shareable sample run for Agent Trace. Work ONLY in <review-repository>, the standalone review repository. Set th [truncated]"
           }
         ]
       }
@@ -6126,12 +5005,14 @@
       "navigation_manifest"
     ],
     "commands": {
-      "restore_shell": "cat clip.raw.txt > restored_clip.txt",
-      "inspect_index": "jq '.source_segment_index.segments[] | {id,line_range,byte_range_utf8,byte_count}' clip.index.json",
-      "list_commands": "jq '.command_ledger.records[] | {id,role,command,source_line_range,output_line_range,status}' clip.index.json",
-      "terminal_state": "jq '.terminal_state_index' clip.index.json",
-      "print_range_python": "python3 - <<'PY'\nfrom pathlib import Path\nraw=Path('clip.raw.txt').read_bytes()\nstart,end=0,12000\nPath('segment.txt').write_bytes(raw[start:end])\nPY"
+      "restore_shell": "cat -- 'assembled.detailed.raw.txt' > restored_clip.txt",
+      "inspect_index": "jq '.source_segment_index.segments[] | {id,line_range,byte_range_utf8,byte_count}' 'structured-attachment.json'",
+      "list_commands": "jq '.command_ledger.records[] | {id,role,command,source_line_range,output_line_range,status}' 'structured-attachment.json'",
+      "terminal_state": "jq '.terminal_state_index' 'structured-attachment.json'",
+      "print_range_python": "python3 - <<'PY'\nfrom pathlib import Path\nraw=Path(\"assembled.detailed.raw.txt\").read_bytes()\nstart,end=0,12000\nPath('segment.txt').write_bytes(raw[start:end])\nPY"
     },
+    "index_filename": "structured-attachment.json",
+    "index_filename_note": "Commands use the supplied index filename.",
     "segment_count": 17
   },
   "local_capture": {
@@ -6145,7 +5026,7 @@
       "visible_export": false
     },
     "public_export_contains_local_paths": false,
-    "note": "Attachment has exact source_segments; local stores keep backup/full indexes."
+    "note": "The exact supplied source is in the sibling raw sidecar; this JSON contains indexes."
   },
   "source_profile": {
     "detected_trace_format": "generic_tool_trace",
@@ -6153,8 +5034,8 @@
     "provider_family": "generic_tool_trace"
   },
   "summary": {
-    "events": 204,
-    "commands": 27,
+    "events": 58,
+    "commands": 11,
     "mutations": 0,
     "validations": 0,
     "commits": 0,
@@ -6163,12 +5044,12 @@
     "paths": 29,
     "ids": 0,
     "hashes": 26,
-    "sections": 144,
-    "source_chunks": 88,
+    "sections": 34,
+    "source_chunks": 51,
     "patterns": 130
   },
   "navigation_manifest": {
-    "source_chunk_count": 88,
+    "source_chunk_count": 51,
     "included_chunk_count": 8,
     "chunks": [
       {
@@ -6354,7 +5235,7 @@
         }
       }
     ],
-    "section_count": 144,
+    "section_count": 34,
     "included_section_count": 5,
     "sections": [
       {
@@ -6403,7 +5284,7 @@
         "key_count": 0
       }
     ],
-    "timeline_event_count": 204,
+    "timeline_event_count": 58,
     "included_timeline_event_count": 5,
     "timeline": [
       {
@@ -6625,11 +5506,11 @@
     ],
     "counters": {
       "timeline_kind_counts": {
-        "command": 27,
-        "fact": 33,
-        "section": 144
+        "command": 11,
+        "fact": 13,
+        "section": 34
       },
-      "source_chunk_count": 88
+      "source_chunk_count": 51
     },
     "policy": "Pattern families are dynamic. This manifest includes counts, row shapes, and bounded samples; the private full packet keeps complete pattern rows."
   },
@@ -6951,9 +5832,9 @@
     "omitted": {
       "source_text": 0,
       "source_lines": 2755,
-      "source_chunks": 80,
-      "timeline": 199,
-      "sections": 139,
+      "source_chunks": 43,
+      "timeline": 53,
+      "sections": 29,
       "artifacts": 0,
       "duplicate_source_text_string": 149442
     },
@@ -6982,15 +5863,15 @@
   "size_policy": {
     "target": "lossless export, source once, <= source + 25% plus fixed allowance when JSON carrier is feasible",
     "raw_source_bytes": 149482,
-    "export_bytes": 301215,
-    "measured_ratio": 2.0151,
+    "export_bytes": 252313,
+    "measured_ratio": 1.6879,
     "budget_profile": "ratio_plus_fixed_allowance",
     "budget_bytes": 192997,
     "fixed_allowance_bytes": 6144,
     "ratio_target": 1.25,
     "carrier_decision": "raw_sidecar_plus_index",
     "reason": "json_string_escape_overhead_exceeds_ratio_budget",
-    "attempted_single_json_bytes": 311772,
-    "attempted_single_json_ratio": 2.0857
+    "attempted_single_json_bytes": 262940,
+    "attempted_single_json_ratio": 1.759
   }
 }

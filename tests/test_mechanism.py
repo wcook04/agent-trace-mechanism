@@ -28,12 +28,12 @@ class MechanismTests(unittest.TestCase):
     def test_synthetic_examples_match_expected_output(self):
         for provider in ('codex', 'claude'):
             actual = subprocess.check_output([sys.executable, '-m', 'trace_mechanism', provider,
-                                              str(ROOT / f'examples/{provider}.jsonl')], text=True)
-            self.assertEqual(json.loads(actual), json.loads((ROOT / f'examples/{provider}.expected.json').read_text()))
+                                              str(ROOT / ('examples' if provider == 'codex' else 'tests/fixtures') / f'{provider}.jsonl')], text=True)
+            self.assertEqual(json.loads(actual), json.loads((ROOT / ('examples' if provider == 'codex' else 'tests/fixtures') / f'{provider}.expected.json').read_text()))
 
     def test_actual_missing_result_and_view_selection(self):
         for provider, parse in [('codex', parse_codex_session), ('claude', parse_claude_session)]:
-            turns = parse(ROOT / f'examples/{provider}.jsonl')
+            turns = parse(ROOT / ('examples' if provider == 'codex' else 'tests/fixtures') / f'{provider}.jsonl')
             compact, detailed, data = render(turns), render(turns, True), structured(turns)
             self.assertIn('old line', detailed)
             self.assertIn('new line', detailed)
@@ -70,8 +70,8 @@ class MechanismTests(unittest.TestCase):
                 self.assertEqual(tools.read_trace_page(before['sha256'])['text'], old)
                 self.assertEqual(tools.read_trace_page(before['sha256'], before['next_offset'], 10), old_second)
                 self.assertEqual(before['text'] + tools.read_trace_page(before['sha256'], before['next_offset'])['text'], old)
-                self.assertIn('RESULT: ok', after['text'])
-                self.assertNotIn('RESULT: ok', old)
+                self.assertRegex(after['text'], r'RESULT .+ \(c1\): "ok"')
+                self.assertNotRegex(old, r'RESULT .+ \(c1\): "ok"')
                 self.assertIn('STATUS: incomplete', old)
 
     def test_controlled_run_sidecar_and_index_cover_exact_source(self):

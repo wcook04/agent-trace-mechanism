@@ -3,6 +3,8 @@
     "prompt": "Read and update example.txt.",
     "assistant": "Update complete.",
     "complete": true,
+    "turn_ended": true,
+    "tool_evidence_complete": true,
     "partial_reason": null,
     "tools": [
       {
@@ -13,6 +15,9 @@
         },
         "output": "old line\n",
         "error": false,
+        "call_observed": true,
+        "result_observed": true,
+        "missing_call": false,
         "missing_result": false
       },
       {
@@ -25,6 +30,9 @@
         },
         "output": "Updated example.txt.",
         "error": false,
+        "call_observed": true,
+        "result_observed": true,
+        "missing_call": false,
         "missing_result": false
       }
     ]

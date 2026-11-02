@@ -1,0 +1,9 @@
+{
+  "source": "tools/agent_trace_structurer/parser.mjs",
+  "source_commit": "17f9050056c5debb48f6c3fa66704d15d526abc1",
+  "sha256": "4230e7d58e7e7f87762f609a3901b83c1ea1d116bd6c85a069f75bfcce112755",
+  "copy": "src/trace_mechanism/structurer.mjs",
+  "method": "Byte-identical complete standalone production builder. Apache-2.0, copyright Will Cook. No app shell, discovery, or private imports.",
+  "test_source": "tools/agent_trace_structurer/parser.test.mjs",
+  "test_adaptation": "Only the import path changes."
+}

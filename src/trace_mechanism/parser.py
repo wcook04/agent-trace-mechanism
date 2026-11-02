@@ -4,6 +4,7 @@ import datetime as _dt
 import hashlib
 import json
 import re
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -27,6 +28,8 @@ class ToolEvent:
     exit_code: int | None = None
     outcome_pending: bool = False
     source_record_indices: list[int] = field(default_factory=list)
+    call_observed: bool = True
+    result_observed: bool = True
 
 
 @dataclass
@@ -57,6 +60,8 @@ class Turn:
     last_stop_reason: str | None = None
     source_record_indices: list[int] = field(default_factory=list)
     source_ref: dict = field(default_factory=dict)
+    turn_ended: bool = False
+    tool_evidence_complete: bool = True
 
 
 def _sha16(s: str) -> str:
@@ -252,7 +257,7 @@ def parse_claude_session(path: Path) -> list[Turn]:
         assistant_parts: list[str] = []
         assistant_events: list[AssistantEvent] = []
         tool_events: list[ToolEvent] = []
-        pending: dict[str, tuple[dict, int, str | None, str]] = {}
+        pending: dict[str | tuple[int, int], tuple[dict, int, str | None, str]] = {}
         source_indices: list[int] = []
         last_stop_reason: str | None = None
         prompt_record_idx: int | None = None
@@ -312,6 +317,7 @@ def parse_claude_session(path: Path) -> list[Turn]:
                                 output_char_count=len(output_text),
                                 output_sha256_16=_sha16(output_text),
                                 source_record_indices=[idx],
+                                call_observed=False,
                             ))
             elif rtype == "assistant":
                 msg = r.get("message") or {}
@@ -335,14 +341,13 @@ def parse_claude_session(path: Path) -> list[Turn]:
                                     timestamp=ts,
                                 ))
                         elif c.get("type") == "tool_use":
-                            tuid = c.get("id") or ""
-                            if tuid:
-                                pending[tuid] = (
-                                    c.get("input") or {},
-                                    idx,
-                                    ts,
-                                    c.get("name") or "?",
-                                )
+                            tuid = c.get("id") or (idx, len(pending))
+                            pending[tuid] = (
+                                c.get("input") or {},
+                                idx,
+                                ts,
+                                c.get("name") or "?",
+                            )
 
         missing_result_count = len(pending)
         for tuid, (tool_input, src_idx, used_ts, name) in pending.items():
@@ -350,7 +355,7 @@ def parse_claude_session(path: Path) -> list[Turn]:
                 index=0,
                 name=name,
                 input=tool_input,
-                tool_call_id=tuid,
+                tool_call_id=tuid if isinstance(tuid, str) else None,
                 started_at=used_ts,
                 completed_at=None,
                 duration_ms=None,
@@ -359,6 +364,7 @@ def parse_claude_session(path: Path) -> list[Turn]:
                 output_char_count=0,
                 output_sha256_16="",
                 source_record_indices=[src_idx],
+                result_observed=False,
             ))
 
         tool_events.sort(key=lambda e: e.started_at or e.completed_at or "")
@@ -368,24 +374,23 @@ def parse_claude_session(path: Path) -> list[Turn]:
         assistant_text = "\n".join(p for p in assistant_parts if p).strip()
 
         has_successor = ti < n_groups
-        if has_successor:
-            is_complete = True
-            partial_reason: str | None = None
-        elif missing_result_count > 0:
-            is_complete = False
-            partial_reason = f"{missing_result_count} tool call(s) without results"
-        elif last_stop_reason in CLAUDE_COMPLETE_STOP_REASONS:
-            is_complete = True
-            partial_reason = None
-        elif last_stop_reason == "tool_use":
-            is_complete = False
-            partial_reason = "last assistant ended with tool_use; awaiting next assistant turn"
-        elif last_stop_reason is None:
-            is_complete = False
-            partial_reason = "no assistant stop_reason observed yet"
-        else:
-            is_complete = False
-            partial_reason = f"unrecognized stop_reason {last_stop_reason!r}"
+        turn_ended = has_successor or last_stop_reason in CLAUDE_COMPLETE_STOP_REASONS
+        missing_call_count = sum(not e.call_observed for e in tool_events)
+        tool_evidence_complete = missing_result_count == 0 and missing_call_count == 0
+        is_complete = turn_ended and tool_evidence_complete
+        reasons = []
+        if missing_result_count:
+            reasons.append(f"{missing_result_count} tool call(s) without results")
+        if missing_call_count:
+            reasons.append(f"{missing_call_count} tool result(s) without calls")
+        if not turn_ended:
+            if last_stop_reason == "tool_use":
+                reasons.append("last assistant ended with tool_use; awaiting next assistant turn")
+            elif last_stop_reason is None:
+                reasons.append("no assistant stop_reason observed yet")
+            else:
+                reasons.append(f"unrecognized stop_reason {last_stop_reason!r}")
+        partial_reason = "; ".join(reasons) or None
 
         source_ref = {
             "session_file": str(path),
@@ -393,8 +398,9 @@ def parse_claude_session(path: Path) -> list[Turn]:
             "session_file_mtime_utc": file_mtime,
             "record_count_in_turn": len(source_indices),
             "prompt_record_index": prompt_record_idx,
-            "completion_record_index": last_assistant_idx if is_complete else None,
+            "completion_record_index": last_assistant_idx if last_stop_reason in CLAUDE_COMPLETE_STOP_REASONS else None,
             "missing_result_count": missing_result_count,
+            "missing_call_count": missing_call_count,
             "raw_authority": "provider_session_jsonl",
         }
 
@@ -418,6 +424,8 @@ def parse_claude_session(path: Path) -> list[Turn]:
             last_stop_reason=last_stop_reason,
             source_record_indices=source_indices,
             source_ref=source_ref,
+            turn_ended=turn_ended,
+            tool_evidence_complete=tool_evidence_complete,
         ))
 
     return turns
@@ -456,14 +464,15 @@ def parse_codex_session(path: Path) -> list[Turn]:
     cur: dict | None = None
     turn_counter = 0
 
-    def _codex_prompt_part(state: dict, text: str) -> None:
+    def _codex_prompt_part(state: dict, text: str, *, delegated: bool = False) -> None:
         text = (text or "").strip()
         if not text:
             return
-        if text.startswith("# AGENTS.md instructions") or text.startswith("<environment_context>"):
-            return
-        if "<INSTRUCTIONS>" in text and "project-doc" in text:
-            return
+        if not delegated:
+            if text.startswith("# AGENTS.md instructions") or text.startswith("<environment_context>"):
+                return
+            if "<INSTRUCTIONS>" in text and "project-doc" in text:
+                return
         if state["prompt_parts"] and state["prompt_parts"][-1] == text:
             return
         if text in state["prompt_parts"]:
@@ -494,6 +503,31 @@ def parse_codex_session(path: Path) -> list[Turn]:
                 return str(value)
         return str(value)
 
+    def _delegation_input(payload: dict) -> tuple[str, str] | None:
+        # These app-authored delivery records carry the receiving thread's input,
+        # not a result for a tool call made by that thread. Require the complete
+        # known envelope so quoted/ordinary tool output remains result evidence.
+        if (payload.get("namespace") != "codex_app"
+                or payload.get("name") not in {"create_thread", "send_message_to_thread"}
+                or payload.get("call_id")):
+            return None
+        output = payload.get("output")
+        if not isinstance(output, str) or "<!" in output or "<?" in output:
+            return None
+        try:
+            root = ET.fromstring(output)
+        except ET.ParseError:
+            return None
+        if (root.tag != "codex_delegation" or root.attrib
+                or (root.text or "").strip() or len(root) != 2
+                or [child.tag for child in root] != ["source_thread_id", "input"]):
+            return None
+        if any(child.attrib or len(child) or (child.tail or "").strip() for child in root):
+            return None
+        source_thread_id = (root[0].text or "").strip()
+        text = (root[1].text or "").strip()
+        return (text, source_thread_id) if text and source_thread_id else None
+
     def _finalize(state: dict) -> Turn:
         prompt_text = "\n\n".join(state["prompt_parts"]).strip() or state["prompt_text"]
         events: list[ToolEvent] = []
@@ -507,7 +541,7 @@ def parse_codex_session(path: Path) -> list[Turn]:
             if patch_apply_event:
                 tool_input = dict(tool_input)
                 tool_input["_patch_apply_event"] = patch_apply_event
-            out_info = state["outputs"].get(call_id)
+            out_info = state["outputs"].get(call_id) if call_id else None
             if out_info:
                 out_text, out_idx, out_ts = out_info
                 orchestration = name.rsplit(".", 1)[-1] in {"exec", "wait"}
@@ -546,20 +580,36 @@ def parse_codex_session(path: Path) -> list[Turn]:
                     output_sha256_16="",
                     exit_code=None,
                     source_record_indices=[src_idx],
+                    result_observed=False,
                 ))
+
+        known_call_ids = {call[4] for call in state["calls"] if call[4]}
+        for call_id, (out_text, out_idx, out_ts) in state["outputs"].items():
+            if call_id and call_id in known_call_ids:
+                continue
+            events.append(ToolEvent(
+                index=len(events) + 1, name="?", input={},
+                tool_call_id=call_id if isinstance(call_id, str) else None,
+                started_at=None, completed_at=out_ts, duration_ms=None, is_error=False,
+                output_text=out_text, output_char_count=len(out_text),
+                output_sha256_16=_sha16(out_text), source_record_indices=[out_idx],
+                call_observed=False,
+            ))
 
         assistant_text = state["assistant"] or "\n".join(p for p in state["assistant_parts"] if p).strip()
 
-        is_complete = state["completed_at"] is not None
-        if is_complete and missing_outputs > 0:
-            partial_reason: str | None = f"{missing_outputs} function_call(s) without function_call_output"
-            is_complete = False
-        elif is_complete:
-            partial_reason = None
-        elif missing_outputs > 0:
-            partial_reason = f"no task_complete; {missing_outputs} function_call(s) without output"
-        else:
-            partial_reason = "no task_complete event for this turn_id"
+        turn_ended = state["turn_ended"]
+        missing_calls = sum(not e.call_observed for e in events)
+        tool_evidence_complete = missing_outputs == 0 and missing_calls == 0
+        is_complete = turn_ended and tool_evidence_complete
+        reasons = []
+        if not turn_ended:
+            reasons.append("no task_complete event for this turn_id")
+        if missing_outputs:
+            reasons.append(f"{missing_outputs} function_call(s) without function_call_output")
+        if missing_calls:
+            reasons.append(f"{missing_calls} tool result(s) without calls")
+        partial_reason = "; ".join(reasons) or None
 
         source_ref = {
             "session_file": str(path),
@@ -569,6 +619,8 @@ def parse_codex_session(path: Path) -> list[Turn]:
             "prompt_record_index": None,
             "completion_record_index": None,
             "missing_result_count": missing_outputs,
+            "missing_call_count": missing_calls,
+            "delegation_prompt_sources": state["delegation_prompt_sources"],
             "raw_authority": "provider_session_jsonl",
         }
 
@@ -600,6 +652,8 @@ def parse_codex_session(path: Path) -> list[Turn]:
             last_stop_reason=None,
             source_record_indices=state["source_indices"],
             source_ref=source_ref,
+            turn_ended=turn_ended,
+            tool_evidence_complete=tool_evidence_complete,
         )
 
     def _new_state(turn_id: str, started: str | None) -> dict:
@@ -608,11 +662,13 @@ def parse_codex_session(path: Path) -> list[Turn]:
             "index": 0,
             "started_at": started,
             "completed_at": None,
+            "turn_ended": False,
             "prompt_text": "",
             "assistant": "",
             "assistant_parts": [],
             "assistant_events": [],
             "prompt_parts": [],
+            "delegation_prompt_sources": [],
             "calls": [],
             "outputs": {},
             "patch_apply_events": {},
@@ -636,6 +692,7 @@ def parse_codex_session(path: Path) -> list[Turn]:
         elif rtype == "event_msg" and ptype == "task_complete":
             if cur is not None:
                 cur["completed_at"] = ts
+                cur["turn_ended"] = True
                 last = payload.get("last_agent_message")
                 if last:
                     cur["assistant"] = last
@@ -700,7 +757,18 @@ def parse_codex_session(path: Path) -> list[Turn]:
                 ))
                 cur["last_call_id"] = call_id
             elif ptype == "function_call_output":
-                cid = payload.get("call_id") or ""
+                delegation = _delegation_input(payload)
+                if delegation is not None:
+                    text, source_thread_id = delegation
+                    _codex_prompt_part(cur, text, delegated=True)
+                    cur["delegation_prompt_sources"].append({
+                        "source_record_index": idx,
+                        "source_thread_id": source_thread_id,
+                        "namespace": payload["namespace"],
+                        "name": payload["name"],
+                    })
+                    continue
+                cid = payload.get("call_id") or ("orphan", idx)
                 cur["outputs"][cid] = (_codex_output_text(payload.get("output")), idx, ts)
             elif ptype == "custom_tool_call":
                 call_id = payload.get("call_id") or ""
@@ -713,7 +781,7 @@ def parse_codex_session(path: Path) -> list[Turn]:
                 ))
                 cur["last_call_id"] = call_id
             elif ptype == "custom_tool_call_output":
-                cid = payload.get("call_id") or ""
+                cid = payload.get("call_id") or ("orphan", idx)
                 output = _codex_output_text(payload.get("output"))
                 try:
                     out_obj = json.loads(output)
