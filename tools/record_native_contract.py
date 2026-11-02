@@ -65,8 +65,10 @@ async def capture():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true', help='Fail if the saved responses differ')
+    parser.add_argument('--show', action='store_true', help='Print the search and retrieved output')
     args = parser.parse_args()
-    encoded = json.dumps(asyncio.run(capture()), indent=2, ensure_ascii=False) + '\n'
+    captured = asyncio.run(capture())
+    encoded = json.dumps(captured, indent=2, ensure_ascii=False) + '\n'
     if args.check:
         if not TARGET.is_file() or TARGET.read_text() != encoded:
             raise SystemExit('Native MCP response capture differs; run tools/record_native_contract.py and inspect it.')
@@ -74,6 +76,12 @@ def main():
     else:
         TARGET.write_text(encoded)
         print('Updated examples/native-command-response.json')
+    if args.show:
+        search, read = captured['calls']
+        print(f"\nSearch: {search['arguments']['query']!r}")
+        print(f"Read: {read['arguments']['field']}")
+        text = ''.join(part['text'] for part in read['result']['content'] if part['type'] == 'text')
+        print(json.loads(text))
 
 
 if __name__ == '__main__':

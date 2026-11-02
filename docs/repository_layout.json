@@ -47,8 +47,11 @@
   ],
   "content_routes": {
     "README.md": [
-      "tools/check_layout.py",
+      "docs/development.md",
       "docs/provenance.json"
+    ],
+    "docs/development.md": [
+      "tools/check_layout.py"
     ]
   },
   "exceptions": {}

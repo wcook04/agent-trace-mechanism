@@ -1,6 +1,31 @@
 # Development
 
-Python 3.10+ runs the record reader and MCP server. Node.js 22+ runs the separate structured-text index builder.
+[Usage](mcp.md) · [How it works](mechanism.md) · [README](../README.md)
+
+## Source map
+
+The current MCP retrieval path is three files:
+
+| Source | Responsibility |
+|---|---|
+| [codex_native.py](../src/trace_mechanism/codex_native.py) | Read events, normalize items, render views, search fields and compare states |
+| [agent_tools.py](../src/trace_mechanism/agent_tools.py) | Select sessions and children, save captures and serve pages |
+| [mcp_server.py](../src/trace_mechanism/mcp_server.py) | Load the manifest, define tools and run stdio transport |
+
+The rest of the repository supports those files or the older text-processing path:
+
+| Location | Contents |
+|---|---|
+| [tests/](../tests/) | Compatibility, identity, availability, paging and transport checks |
+| [tools/](../tools/) | Run checks, capture MCP responses and regenerate examples |
+| [examples/](../examples/) | Selected source records and generated outputs |
+| [docs/](./) | Usage, implementation details and source provenance |
+| [parser.py](../src/trace_mechanism/parser.py), [views.py](../src/trace_mechanism/views.py) | Older transcript formats and their views |
+| [structurer.mjs](../src/trace_mechanism/structurer.mjs) | A separate index builder for rendered trace text |
+
+## Run checks
+
+Python 3.10+ runs the reader and server; Node.js 22+ runs the text index builder.
 
 ```sh
 python3 -m venv .venv
@@ -13,23 +38,14 @@ node --test tests/structurer.test.mjs
 .venv/bin/python tools/check_layout.py
 ```
 
-The first MCP command searches an actual recorded development command and retrieves its output through a separate stdio server process. It checks the responses against [the published capture](../examples/native-command-response.json). To intentionally update that capture, run it without `--check` and inspect the changes. `demo_codex.py` exercises the retained legacy transcript path. Neither command executes tools from a recording.
+`record_native_contract.py` searches an actual recorded command and retrieves its output through a separate MCP server process. `--show` prints the retrieved evidence. Without `--check`, it updates [the saved responses](../examples/native-command-response.json). `demo_codex.py` checks the legacy transcript path. Neither executes commands from a recording.
 
-## Source map
+When changing a tool, update [its reference](mcp.md) and test its actual stdio call, including the next operation that consumes the returned handle. These checks cover specific records and behavior; they are not retrieval-quality or performance benchmarks.
 
-| Source | Role |
-|---|---|
-| `src/trace_mechanism/codex_native.py` | Shared record reader: native events, normalization, views, item search, field retrieval and state comparison |
-| `src/trace_mechanism/agent_tools.py` | Public adapter: explicit session selection, child traversal, captures and paging |
-| `src/trace_mechanism/mcp_server.py` | Manifest loading, tool schemas and transport |
-| `src/trace_mechanism/parser.py`, `views.py` | Older transcript formats and their views |
-| `src/trace_mechanism/structurer.mjs` | Separate index over supplied rendered trace text; not needed by the native MCP path |
-| `tests/` | Record compatibility, identity, status, availability, paging, tool composition, stdio transport and legacy regressions |
+## Provenance and compatibility records
 
-The core and JavaScript builder are copied from the desktop application. [Core provenance](provenance.json) and [builder provenance](structurer-provenance.json) identify the copied bytes. Public checks can verify those bytes and their behavior; their relationship to the private application source is a maintainer declaration, not something a public hash alone independently proves.
+The native reader and JavaScript builder are copied from the desktop app. [Reader provenance](provenance.json) and [builder provenance](structurer-provenance.json) identify their versions and bytes. Public checks verify those bytes and behavior; the relationship to private source is a maintainer declaration.
 
-`tools/regenerate_examples.py` owns the retained legacy projections and indexes. The [earlier retrieval recording](codex-retrieval.md), [controlled run](controlled-run.md), [production MCP excerpt](mcp-source-excerpt.txt) and [desktop skill excerpt](skill-source-excerpt.txt) are historical reference material. They are not setup instructions for the current public server. Its supported operations are in [the MCP guide](mcp.md).
+The [earlier retrieval recording](codex-retrieval.md), [controlled run](controlled-run.md), [production MCP excerpt](mcp-source-excerpt.txt) and [desktop skill excerpt](skill-source-excerpt.txt) document earlier versions. They support compatibility checks, not current setup. `regenerate_examples.py` owns their generated projections and indexes.
 
-Tests and recorded responses establish the listed behavior on their covered inputs. They do not measure retrieval quality or context savings against other history tools, and they do not establish compatibility with every Codex release or fork layout.
-
-The [layout policy](repository_layout.json) places runtime code in `src`, tests in `tests`, maintenance commands in `tools`, records in `examples`, and explanations in `docs`. When changing a public tool, update its guide and exercise its actual stdio call, including any next operation that consumes its returned handle.
+[The layout policy](repository_layout.json) defines directory responsibilities and the required public paths. Keep those paths stable when reorganizing files.
