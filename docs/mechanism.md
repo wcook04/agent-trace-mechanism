@@ -1,31 +1,33 @@
-# Native Codex record pipeline
+# Reading Codex history
 
-`local records → canonical native items → selected views / item queries → MCP`
+The reader converts local Codex records into messages, commands, tool calls and file changes. The app displays or copies these records; agents can search and read them through MCP.
 
 ## Record identity
 
-The portable [core](../src/trace_mechanism/codex_native.py) consumes typed native events from Codex JSONL and the read-only `thread_items` SQLite projection. It normalizes the JSONL/SQLite naming conventions and keeps exact session, turn and item IDs. Updates replace the earlier representation of that item; source references retain the record locations. Outer `functions.exec` wrappers are not copied over the native operations they contain.
+The [record reader](../src/trace_mechanism/codex_native.py) supports Codex's JSONL session files and the `thread_items` table in its local SQLite database, which it opens read-only. These sources use different field names; the reader converts them to one representation while keeping the session, turn and item IDs. Each item also retains a reference to its source location.
 
-Supported types include `CommandExecution`, `FileChange`, `McpToolCall`, `SubAgentActivity`, `UserMessage`, `AgentMessage`, `Reasoning` and `Extension`. Command status uses typed exit/status fields. Quoted output cannot turn a failure into a pass. Reasoning contributes its recorded visible summaries.
+An operation can appear more than once as its state changes. The reader updates the existing item by ID rather than appending another copy. It also omits an outer `functions.exec` wrapper when the operations inside it have their own native records.
+
+Supported types include `CommandExecution`, `FileChange`, `McpToolCall`, `SubAgentActivity`, `UserMessage`, `AgentMessage`, `Reasoning` and `Extension`. Command outcomes come from the exit-code and status fields. The reader does not infer success from words in the output. Reasoning records contribute their visible summaries.
 
 ## Views and exact access
 
-Compact retains messages, visible summaries, command previews, outcomes, changed paths and useful settings. It omits outputs and patch bodies. Detailed expands evidence, shares repeated bodies and gives oversized fields bounded previews with exact retrieval references. The underlying native snapshots retain the full captured payloads; searches inspect those full values.
+Compact retains messages, visible summaries, command previews, outcomes, changed paths and recorded settings. It omits outputs and patch bodies. Detailed includes inputs, outputs and patches, storing repeated text blocks once. Oversized fields have a beginning-and-end preview and a reference containing the session ID, snapshot hash, item ID and field path. The full values remain in the saved records and are included in searches.
 
-`search_trace_items` returns small handles, including the item's own session ID and native item ID. `read_trace_item` opens one item or selected field, with stable paging for large values. `read_trace_changes` compares immutable captures and reports added, updated or removed items. Repeated identical lifecycle records do not count as new work.
+`search_trace_items` returns matching records with previews and their session and item IDs. `read_trace_item` reads one item or a selected field, such as `/aggregated_output`. Large values can be read in pages from the same saved version. `read_trace_changes` compares two saved versions and reports added, updated or removed items. Identical repeated records do not appear as changes.
 
-The [index builder](../src/trace_mechanism/structurer.mjs) consumes the typed native view directly, retaining references into the original text. It does not guess command outcomes from stdout.
+The [index builder](../src/trace_mechanism/structurer.mjs) reads this structured view and produces a JSON index of actions, retaining references into the supplied trace text.
 
 ## App and plugin
 
-The desktop app discovers local sessions, watches activity and provides copy/export scopes. Its native cache checks the renderer version and every selected source, so a worker advancing can invalidate a cached parent view. Exact recorded parent/child IDs build the tree; a session appears once. Missing child sources remain identifiable.
+The desktop app discovers local sessions, watches their files and lets you select which turns to copy. Before reusing a cached view, it checks the renderer version and every selected source file. A change in a subagent's file therefore causes the next read to rebuild the combined view. Recorded parent/child IDs determine which sessions belong together; each session is included once. A missing child's ID is retained even when its records cannot be read.
 
-The installed MCP plugin exposes retrieval without requiring the panel. The accompanying [skill](skill-source-excerpt.txt) teaches selection, compact-first reading, exact evidence retrieval and incremental reads. Full-thread, latest-response and last-N-turn scopes use the same native core.
+The installed MCP plugin lets an agent search and read these records without opening the panel. The accompanying [skill](skill-source-excerpt.txt) explains how to find a chat, read a compact view, retrieve individual records and request subsequent changes. Full-thread, latest-response and last-N-turn selections use the same record reader.
 
-This public adapter uses an explicit manifest instead of the app's discovery. Child entries must match the parent recorded in their session metadata. It rereads selected files on request and keeps snapshots for the server process. The app owns live watchers and persistent storage. Older records retain the legacy parser route.
+The MCP server in this repository reads sessions listed in a manifest. Child entries must match the parent recorded in their session metadata. It rereads selected files on request and keeps saved versions in memory for the life of the server process. The desktop app adds automatic discovery, file watching and storage that persists between runs. Older records without native items use the earlier text parser.
 
-## Integration surface
+## Codex history API
 
-These are local records owned by the user. The inspected desktop runtime also exposes `thread/items/list`, `thread/items/read`, `thread/turns/list` and update notifications through its app-server protocol. The present implementation reads local JSONL / SQLite; a supported protocol adapter is a possible next integration.
+The inspected desktop runtime, Codex 0.166.0-alpha.5.1, also includes `thread/items/list`, `thread/items/read`, `thread/turns/list` and update notifications through its app-server protocol. Agent Trace currently reads local files. Using a supported history API could replace that file-reading layer while keeping the same views and agent tools.
 
 [Core provenance](provenance.json) · [Builder provenance](structurer-provenance.json) · [MCP configuration](mcp.md)
