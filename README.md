@@ -1,10 +1,12 @@
 # Agent Trace
 
+[![Agent Trace desktop app showing a running Codex chat, its workers and copy controls](docs/images/agent-trace.png)](docs/images/agent-trace.png)
+
 **Let an agent read another Codex chat's commands, outputs and patches without loading the whole transcript.**
 
 Choose a chat, search its recorded activity, and retrieve the output or field you need. Include its workers, keep a reference to what you read, and check what changed as the chats continue running.
 
-This repository contains a Python library and an MCP server for local Codex session files. You register the files it can read. The desktop app shown below uses the same reader and adds automatic discovery, file watching and copy controls.
+This repository contains a Python library and an MCP server for local Codex session files. You register the files it can read. The desktop app shown above uses the same reader and adds automatic discovery, file watching and copy controls.
 
 <a id="what-agent-trace-adds"></a>
 <a id="compact-and-detailed"></a>
@@ -40,14 +42,5 @@ The reader turns Codex item events into records keyed by session, turn and item 
 Start with [the reader](src/trace_mechanism/codex_native.py) and [the retrieval adapter](src/trace_mechanism/agent_tools.py). [The MCP server](src/trace_mechanism/mcp_server.py) defines the callable tools.
 
 [Usage and tool reference](docs/mcp.md) · [How records are processed](docs/mechanism.md) · [Development and repository map](docs/development.md)
-
-<details>
-<summary>Desktop app</summary>
-
-[![Agent Trace desktop app showing chats, workers and copy controls](docs/images/agent-trace.png)](docs/images/agent-trace.png)
-
-The separate desktop app, shown at an earlier revision. Its copy sizes describe whole exports; MCP reads return selected results or pages.
-
-</details>
 
 [Apache-2.0](LICENSE) · Will Cook · [Source provenance](docs/provenance.json) · [Security](SECURITY.md)
