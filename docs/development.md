@@ -30,3 +30,9 @@ The index is optional and can be larger than its source. Small examples use a se
 Tests distinguish source preservation from interpretation: missing calls/results and empty results; terminal versus evidence completeness; chronological records; opaque quoted roles; real MCP initialization/search/read/refresh/paging; instructions versus edits/commits; successful and failed patches; bounded executed checks versus mentioned checks; coverage uncertainty; graph semantics; correct carrier filenames; reconstruction and source hashes. These cases do not establish compatibility with every provider release.
 
 The [layout policy](repository_layout.json) assigns runtime to `src`, tests to `tests`, commands to `tools`, selected/synthetic data to `examples`, and explanations/provenance to `docs`. The [review record](review-fixes.md) maps the supplied review to changes and remaining evidence limits.
+
+## Release verification
+
+The implementation at `a6bef0c801d967c0f6e61a50969dba16e15e752f` passed a fresh-clone installation on Python 3.12: 19 Python tests, 71 JavaScript tests, the stdio MCP replay, generated-output comparison, installed builder inclusion and layout check. The clone stayed clean. Gitleaks found no leaks in the candidate export or repository history.
+
+[GitHub Actions](https://github.com/wcook04/agent-trace-mechanism/actions/runs/41522987351) also passed the Python 3.10, 3.12 and 3.14 matrix. Subsequent README wording does not change that implementation.

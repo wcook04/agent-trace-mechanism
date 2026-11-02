@@ -56,6 +56,6 @@ The provider parsers and JavaScript builder are copied from Agent Trace. The pub
 
 ## The feedback I’m looking for
 
-Before releasing the full app, I’d like advice on the Codex integration: should a local history reader use the documented app-server interface instead of reading session files directly, and which stability expectations should it follow? The useful part here is selecting and reusing recorded context. This example makes no claim about accessing unrecorded reasoning or its value for model training.
+Before releasing the full app, I’d like advice on the Codex integration: should a local history reader use the documented app-server interface instead of reading session files directly, and which stability expectations should it follow? The useful part here is selecting and reusing recorded context.
 
 [Apache-2.0](LICENSE). Independent software by Will Cook. [Security reporting](SECURITY.md).
