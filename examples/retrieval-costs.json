@@ -1,0 +1,81 @@
+{
+  "source_bytes": 5571196,
+  "source_sha256": "28f9f762ca3ed78d6e887d2b6f389c89b18d2c74c7be349d09f3c4d47724df04",
+  "query": "AssertionError",
+  "repeats": 3,
+  "environment": {
+    "os": "Darwin",
+    "machine": "arm64",
+    "python": "3.12.7"
+  },
+  "method": "One frozen source; MCP initialization excluded. Calls run sequentially, fresh search first. Filesystem caches are not cleared. Response bytes count the JSON-serialized MCP result including both content representations, not transport framing or model tokens. No memory measurement.",
+  "fresh_search": [
+    {
+      "seconds": 0.03324520799651509,
+      "response_bytes": 9738,
+      "matching_items": 3
+    },
+    {
+      "seconds": 0.030181041001924314,
+      "response_bytes": 9738,
+      "matching_items": 3
+    },
+    {
+      "seconds": 0.029821666998032015,
+      "response_bytes": 9738,
+      "matching_items": 3
+    }
+  ],
+  "retained_search": [
+    {
+      "seconds": 0.0024053329980233684,
+      "response_bytes": 9738
+    },
+    {
+      "seconds": 0.0022467500020866282,
+      "response_bytes": 9738
+    },
+    {
+      "seconds": 0.002196166002249811,
+      "response_bytes": 9738
+    }
+  ],
+  "retained_output": [
+    {
+      "seconds": 0.0007903340010670945,
+      "response_bytes": 8537,
+      "total_chars": 7735,
+      "has_more": false
+    },
+    {
+      "seconds": 0.0007428750031976961,
+      "response_bytes": 8537,
+      "total_chars": 7735,
+      "has_more": false
+    },
+    {
+      "seconds": 0.0007499589992221445,
+      "response_bytes": 8537,
+      "total_chars": 7735,
+      "has_more": false
+    }
+  ],
+  "rg": [
+    {
+      "seconds": 0.009778750005352776,
+      "stdout_bytes": 333004,
+      "matching_lines": 21
+    },
+    {
+      "seconds": 0.004571500001475215,
+      "stdout_bytes": 333004,
+      "matching_lines": 21
+    },
+    {
+      "seconds": 0.004374709002149757,
+      "stdout_bytes": 333004,
+      "matching_lines": 21
+    }
+  ],
+  "rg_version": "ripgrep 15.1.0"
+}

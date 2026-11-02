@@ -1,0 +1,75 @@
+{
+  "source_date": "2026-11-02",
+  "source_sha256": "28f9f762ca3ed78d6e887d2b6f389c89b18d2c74c7be349d09f3c4d47724df04",
+  "source_bytes": 5571196,
+  "selection": "Session metadata and five item_completed records from an existing Agent Trace development worker. Other records are omitted. This is selected historical evidence, not a complete conversation or a new agent run.",
+  "redactions": [
+    "Session metadata reduced to IDs, timestamp, recorded parent/source and CLI version.",
+    "Local checkout path replaced with <app-checkout> in cwd and output. Commands, outputs, native IDs, timestamps and ordinals otherwise retained."
+  ],
+  "records": [
+    {
+      "item_id": "exec-dd02d623-5755-4630-a327-b039589d14a1",
+      "original_line": 66,
+      "original_record_sha256": "0ad361989931c710dec8e19ba9ace6d365e6f35619eed50f9763d348b5786ec2"
+    },
+    {
+      "item_id": "exec-31ac40f6-d9e0-4099-ae13-4096e65285ac",
+      "original_line": 352,
+      "original_record_sha256": "35695030ecba0cec023a80687d4dcd6ee78763ae58bf8cc40befabd42d7974af"
+    },
+    {
+      "item_id": "exec-8c739de9-cee8-4af0-9fb0-5bdf1167bdc5",
+      "original_line": 366,
+      "original_record_sha256": "44c19681136034a1e2206a729b9f9dd849fc059417ccbb941cbe0e7ea1ae789f"
+    },
+    {
+      "item_id": "exec-c7085f0d-0622-4128-b54f-bd114ab6f5b3",
+      "original_line": 371,
+      "original_record_sha256": "44524f04e3d751a7e764acbe8bcc60433623c0cdbf3bfb4c2b261e2f935e4c07"
+    },
+    {
+      "item_id": "exec-09178280-9355-47f4-a6ce-b1d912cc9dab",
+      "original_line": 372,
+      "original_record_sha256": "61f1b977365f4f350178e3e3ca6919e32818b7a63716c2e2480c5383e6547486"
+    }
+  ],
+  "selected_file_sha256": "762bf1140b84ad8b49b36c069e143b5d5ba0432cec7d0bbcd43fc01bce05b09d",
+  "inspection": {
+    "scope": "Existing parent chat and 16 recorded descendants; maintainer-assisted MCP investigation. Full responses remain local because they contain unrelated private work.",
+    "searches": [
+      {
+        "query": "test",
+        "total_matches": 46
+      },
+      {
+        "query": "test_agent_tools",
+        "total_matches": 2
+      },
+      {
+        "query": "AssertionError",
+        "total_matches": 12
+      },
+      {
+        "query": "capsule validation uses the observed output",
+        "total_matches": 11
+      },
+      {
+        "query": "parser.test.mjs tools/agent_trace_structurer/workbench_interaction.test.mjs",
+        "total_matches": 15
+      }
+    ],
+    "retained_read_check": {
+      "item_id": "exec-31ac40f6-d9e0-4099-ae13-4096e65285ac",
+      "before_capture": "3d689584989d1b76f648175397686eb27aad8592bb515d762302c6953ccdfd3d",
+      "after_capture": "7dc5b7e2a1a43de90a9b714bdb64512aed666c6ecf0a15d8764f71ca1e58ab23",
+      "content_identical_after_refresh": true,
+      "content_sha256": "10dffdf78853a594e1327f8f5ff842e598e9e77843d2357e5a425fc50491d641"
+    },
+    "change_paging_check": {
+      "total_changes": 16,
+      "end_capture_identical_on_next_page": true
+    },
+    "public_verifier_scope": "The checked-in script retrieves the five selected commands. It does not replay the discovery or live comparison."
+  }
+}

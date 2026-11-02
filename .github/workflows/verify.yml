@@ -21,6 +21,8 @@ jobs:
       - run: python -m pytest tests -q
       - run: python tools/demo_codex.py
       - run: python tools/record_native_contract.py --check
+      - run: python tools/inspect_recorded_run.py
+      - run: python tools/measure_retrieval.py examples/validation-history.jsonl --repeats 1
       - run: python tools/check_layout.py
       - run: node --test tests/structurer.test.mjs
       - run: python tools/regenerate_examples.py --check

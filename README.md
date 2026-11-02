@@ -35,6 +35,8 @@ python3 -m venv .venv
 
 This searches a recorded development command through the MCP server and prints its retrieved output. [Connect an agent and register your own chats →](docs/mcp.md#setup)
 
+[A real investigation: checking a worker's failed tests, correction and retry →](docs/investigation.md)
+
 ## How it works
 
 The reader turns Codex item events into records keyed by session, turn and item ID. The server selects a chat and its workers, saves a capture, then serves searches, fields and comparisons from it. Captures stay available until the server exits; a fresh capture rereads the files.
@@ -42,5 +44,14 @@ The reader turns Codex item events into records keyed by session, turn and item 
 Start with [the reader](src/trace_mechanism/codex_native.py) and [the retrieval adapter](src/trace_mechanism/agent_tools.py). [The MCP server](src/trace_mechanism/mcp_server.py) defines the callable tools.
 
 [Usage and tool reference](docs/mcp.md) · [How records are processed](docs/mechanism.md) · [Development and repository map](docs/development.md)
+
+<details>
+<summary>Inside Codex</summary>
+
+[![Agent Trace plugin inside Codex with chat selection and attach, copy and preview controls](docs/images/codex-plugin.png)](docs/images/codex-plugin.png)
+
+The desktop app's plugin lets you select a chat and attach, copy or preview its context inside Codex. Agents can also retrieve context directly through its tools. This repository contains the reader and standalone MCP server used to inspect the mechanism.
+
+</details>
 
 [Apache-2.0](LICENSE) · Will Cook · [Source provenance](docs/provenance.json) · [Security](SECURITY.md)

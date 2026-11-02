@@ -15,10 +15,10 @@
       "purpose": "Regression and provenance tests"
     },
     "examples": {
-      "purpose": "Selected native command and current MCP responses, plus retained legacy parser regressions"
+      "purpose": "Selected native records, current MCP responses, retrieval measurements and retained legacy parser regressions"
     },
     "tools": {
-      "purpose": "Native MCP contract capture, compatibility replay, example regeneration and layout checks"
+      "purpose": "Native MCP checks, retrieval measurements, compatibility replay, example regeneration and layout checks"
     },
     "docs": {
       "purpose": "Mechanism, production excerpts, provenance, layout policy and supplied app screenshots"
