@@ -1,0 +1,28 @@
+[
+  {
+    "prompt": "Check the example.",
+    "assistant": "First command succeeded.",
+    "complete": false,
+    "partial_reason": "1 function_call(s) without function_call_output",
+    "tools": [
+      {
+        "name": "shell",
+        "call_id": "call-1",
+        "input": {
+          "cmd": "echo ok"
+        },
+        "output": "ok\nProcess exited with code 0",
+        "error": false
+      },
+      {
+        "name": "shell",
+        "call_id": "call-2",
+        "input": {
+          "cmd": "pending"
+        },
+        "output": "[no output recorded]",
+        "error": false
+      }
+    ]
+  }
+]

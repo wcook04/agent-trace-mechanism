@@ -1,0 +1,19 @@
+{
+  "source": "Agent Trace cli_prompt_trace.py",
+  "source_sha256": "8f466ca0cfd499af735b2b8ffb735d16088d3b28c5f91987bc7e7ed49553b0cc",
+  "symbol_sha256": {
+    "ToolEvent": "a805483ae99736f2ea830f0e4434e60e109ea92cc8221f352982fc22c745bb8c",
+    "AssistantEvent": "4811b110676ac326bdc003fd25d7c5724b3e0fcf288e7f9a38171a0f70e128f6",
+    "Turn": "f95e6b847b7d828d0fbc2de62b8da65fd6555d4aa191c1f9234ca551e751e1db",
+    "_sha16": "620cf1a32af10ef9c460f3c369e48f2e5d9767949a03732bedfcd2fec03feb06",
+    "_iso_diff_ms": "fb7c74c48c25e41a7afd6e684dddf50719c185f8e0217f2c56c3a839cf0ec171",
+    "_flatten_claude_content": "1bf53341d928979c5da662fd24a10007dc359f2409ae4df1ff72779334a8f23c",
+    "_is_real_claude_prompt": "bacff9f741cd3780075d8d8d3a9b68b68ea99db4d0b84f1ece02fc05333f8e87",
+    "_parse_codex_exit_code": "aa654518c93fbefcf2d26c97a29e5ed74a2cb9b87b5292f1601f6a544fd2f43e",
+    "_codex_nested_command_receipts": "0adbe50e26e10b8208becce3eb559fadd146389c6db1e2e30278222f442909b3",
+    "_codex_tool_outcome": "86f124ba9e239d186d71ca890377d218af100f90f93c6d994d4999d4df6df192",
+    "parse_claude_session": "5837f9d0ff24578144b93d8411bf608ea24bed36cfaf0e38d88ad3d624389760",
+    "parse_codex_session": "fa978af7e3486cbc3d954d2bda490dc5de1071994526b49597429d186b5a103f"
+  },
+  "method": "Exact source blocks, including decorators, in dependency order. Imports and one regex constant are included separately."
+}

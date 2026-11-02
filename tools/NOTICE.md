@@ -1,0 +1,1 @@
+`check_layout.py` is copied from the portable repository-organization skill's scripts. It is included for local layout validation; its source skill records its upstream provenance. It is not part of the Agent Trace parser extraction.

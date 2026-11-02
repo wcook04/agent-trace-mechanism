@@ -1,0 +1,14 @@
+{
+  "schema": "repository_layout@1",
+  "root_files": ["README.md", "LICENSE", "pyproject.toml", ".gitignore"],
+  "directories": {
+    "src": {"purpose": "Standalone parsing package"},
+    "tests": {"purpose": "Regression and provenance tests"},
+    "examples": {"purpose": "Synthetic inputs and expected outputs"},
+    "tools": {"purpose": "Repository maintenance checks"},
+    "docs": {"purpose": "Provenance and layout policy"}
+  },
+  "required_files": ["README.md", "LICENSE", "pyproject.toml", "docs/provenance.json", "docs/repository_layout.json", "src/trace_mechanism/parser.py", "tools/check_layout.py"],
+  "content_routes": {"README.md": ["tools/check_layout.py", "docs/provenance.json"]},
+  "exceptions": {}
+}

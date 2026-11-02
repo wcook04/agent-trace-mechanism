@@ -1,0 +1,4 @@
+{"type":"user","sessionId":"synthetic-claude","message":{"content":"Check the example."}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"call-1","name":"Bash","input":{"command":"echo ok"}}],"stop_reason":"tool_use"}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"call-1","content":"ok"}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"The command succeeded."}],"stop_reason":"end_turn"}}

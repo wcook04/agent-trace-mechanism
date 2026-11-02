@@ -1,0 +1,19 @@
+[
+  {
+    "prompt": "Check the example.",
+    "assistant": "The command succeeded.",
+    "complete": true,
+    "partial_reason": null,
+    "tools": [
+      {
+        "name": "Bash",
+        "call_id": "call-1",
+        "input": {
+          "command": "echo ok"
+        },
+        "output": "ok",
+        "error": false
+      }
+    ]
+  }
+]
