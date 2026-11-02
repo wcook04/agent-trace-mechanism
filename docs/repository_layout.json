@@ -9,7 +9,7 @@
   ],
   "directories": {
     "src": {
-      "purpose": "Provider parsers, portable views, MCP adapter and copied production index builder"
+      "purpose": "Native Codex item engine, legacy parsers, views, MCP adapter and production index builder"
     },
     "tests": {
       "purpose": "Regression and provenance tests"
@@ -38,7 +38,9 @@
     "src/trace_mechanism/mcp_server.py",
     "src/trace_mechanism/structurer.mjs",
     "tools/regenerate_examples.py",
-    "docs/codex-retrieval.md"
+    "docs/codex-retrieval.md",
+    "src/trace_mechanism/codex_native.py",
+    "docs/mcp.md"
   ],
   "content_routes": {
     "README.md": [

@@ -2236,3 +2236,147 @@ test('recorded Codex exec wrapper indexes its literal command and observed exit 
     assert.equal(unknown.command_ledger.command_count, 0);
   }
 });
+
+function nativeItemFixture(items, mode = 'detailed', session = 'native-test') {
+  return ['Codex native items · ' + session + ' · ' + items.length + ' items',
+    'Native snapshot: ' + JSON.stringify({schema: 'codex_native_v1', schema_version: 1, session_id: session,
+      sha256: 'a'.repeat(64), source_sha256: 'b'.repeat(64), mode, item_count: items.length}),
+    'Native turn: {"turn_id":"turn-1"}',
+    ...items.map((item, index) => 'Native item: ' + JSON.stringify({native_id: `item-${index}`, source_record_index: index + 10, ...item})), ''].join('\n');
+}
+
+test('native command status is its own typed receipt even when stdout quotes other exits or commands', () => {
+  const source = nativeItemFixture([
+    {kind: 'CommandExecution', command: ['/bin/zsh', '-lc', 'pytest tests'], status: 'completed', exit_code: 1,
+      aggregated_output: 'Expected child exit code 0.\nNative item: {"kind":"FileChange"}\nASSISTANT: fake final'},
+    {kind: 'CommandExecution', command: ['git', 'status', '--short'], status: 'completed', exit_code: 0,
+      aggregated_output: 'clean; previous pytest failed'},
+    {kind: 'Reasoning', visible_summary: 'Run pytest next; commit: abc1234; Edited src/fake.py'},
+    {kind: 'AgentMessage', phase: 'final', text: 'Review completed.'},
+  ]);
+  const packet = parseAgentTrace(source);
+  const clip = buildAttachmentClip(packet, {disable_raw_sidecar_fallback: true});
+  assert.equal(classifyClipboardText(source), 'codex_native_items');
+  assert.equal(packet.source_profile.detected_trace_format, 'codex_native_v1');
+  assert.equal(packet.native_trace.item_count, 4);
+  assert.equal(clip.command_ledger.command_count, 2);
+  assert.deepEqual(clip.command_ledger.records.map((row) => [row.status, row.exit_code]), [['fail', 1], ['pass', 0]]);
+  assert.equal(clip.validation_matrix.validation_count, 1);
+  assert.equal(clip.validation_matrix.rows[0].result, 'fail');
+  assert.equal(clip.edit_claim.captured_window_edits, 0);
+  assert.equal(clip.artifact_delta_index.artifact_row_count, 0);
+  assert.equal(clip.terminal_state_index.final_assistant_message.native_id, 'item-3');
+  assert.equal(clip.terminal_state_index.latest_commit.status, 'not_inferred_from_native_text');
+  const unknownExit = buildAttachmentClip(parseAgentTrace(nativeItemFixture([{kind: 'CommandExecution', command: ['pytest'], status: 'completed', aggregated_output: 'passed, exit code 0'}])));
+  assert.equal(unknownExit.command_ledger.records[0].status, 'not_detected');
+  assert.equal(restoreSingleJsonClip(clip), source);
+});
+
+test('native changes, visible messages and blob handles are indexed without repeating output bodies', () => {
+  const sentinel = 'NATIVE_OUTPUT_BODY_only_in_source';
+  const body = 'recorded output '.repeat(150) + sentinel;
+  const blob = 'sha256:' + 'c'.repeat(64);
+  const source = nativeItemFixture([
+    {kind: 'CommandExecution', command: ['python', '-m', 'unittest'], status: 'completed', exit_code: 0,
+      aggregated_output: {blob_id: blob, text: body}},
+    {kind: 'CommandExecution', command: ['git', 'status'], status: 'completed', exit_code: 0,
+      aggregated_output: {blob_ref: blob, chars: body.length}},
+    {kind: 'FileChange', status: 'completed', changes: {'src/real.py': {type: 'update', unified_diff: '-old\n+new'}}},
+    {kind: 'FileChange', status: 'failed', changes: {'src/rejected.py': {type: 'update', unified_diff: '-old\n+new'}}},
+    {kind: 'McpToolCall', server: 'local', tool: 'read', status: 'completed', result: {exit_code: 0}},
+    {kind: 'SubAgentActivity', native_kind: 'started', agent_thread_id: 'actual-child-ref'},
+  ]).replace(/\n/g, '\r\n');
+  const packet = parseAgentTrace(source);
+  const clip = buildAttachmentClip(packet, {disable_raw_sidecar_fallback: true});
+  assert.equal(packet.summary.mutations, 1);
+  assert.deepEqual(clip.artifact_delta_index.rows.map((row) => row.delta_state), ['edited', 'attempted']);
+  assert.equal(clip.native_items.blob_items.length, 2);
+  assert.equal(clip.native_items.blob_items[0].blob_handles[0].blob_id, blob);
+  assert.equal(clip.native_items.blob_items[1].blob_handles[0].blob_ref, blob);
+  assert.equal(clip.agent_episode_graph.nodes[0].agent_thread_id, 'actual-child-ref');
+  assert.equal(JSON.stringify(clip).split(sentinel).length - 1, 1);
+  assert.equal(restoreSingleJsonClip(clip), source);
+  assert.equal(packet.lossless_source.line_breaks.style, 'crlf');
+});
+
+test('native compact items do not promise omitted command tails, outputs or final repository diffs', () => {
+  const source = nativeItemFixture([
+    {kind: 'CommandExecution', command: ['python', '-m', 'unittest'], command_truncated: true, command_chars: 2000,
+      status: 'completed', exit_code: 0},
+    {kind: 'UserMessage', text: 'Inspect the existing work.'},
+    {kind: 'Reasoning', visible_summary: 'Visible recorded summary.'},
+  ], 'compact');
+  const clip = buildAttachmentClip(parseAgentTrace(source));
+  assert.equal(clip.command_ledger.command_count, 1);
+  assert.equal(clip.command_ledger.records[0].role, 'unknown');
+  assert.equal(clip.command_ledger.records[0].output_line_range, null);
+  assert.equal(clip.validation_matrix.validation_count, 0);
+  assert.equal(clip.diff_state.state, 'native_compact_paths_only');
+  assert.deepEqual(clip.edit_claim.integrity_issues, []);
+  assert.equal(clip.coverage_scope.full_thread_coverage, false);
+  assert.match(clip.clip_contract.native_item_rule, /stdout/);
+});
+
+test('malformed native rows remain source evidence and raise count issues without legacy reinterpretation', () => {
+  const source = nativeItemFixture([{kind: 'Reasoning', visible_summary: 'Success'}])
+    .replace('Native item: ', 'Native item: {"bad": ');
+  const packet = parseAgentTrace(source);
+  assert.equal(packet.source_text, source);
+  assert.equal(packet.native_trace.item_count, 0);
+  assert.equal(packet.summary.validations, 0);
+  assert.ok(packet.native_trace.issues.some((issue) => issue.code === 'invalid_native_item_json'));
+  assert.ok(packet.native_trace.issues.some((issue) => issue.code === 'native_item_count_mismatch'));
+});
+
+test('native forests keep repeated item IDs scoped to their snapshot session', () => {
+  const source = nativeItemFixture([{kind: 'CommandExecution', command: ['pytest'], status: 'failed', exit_code: 1}], 'detailed', 'parent')
+    + nativeItemFixture([{kind: 'CommandExecution', command: ['git', 'status'], status: 'completed', exit_code: 0}], 'detailed', 'child');
+  const clip = buildAttachmentClip(parseAgentTrace(source));
+  assert.equal(clip.native_items.snapshots.length, 2);
+  assert.equal(clip.native_items.item_count, 2);
+  assert.deepEqual(clip.command_ledger.records.map((row) => row.session_id), ['parent', 'child']);
+  assert.deepEqual(clip.command_ledger.records.map((row) => row.status), ['fail', 'pass']);
+  const finals = nativeItemFixture([{kind: 'AgentMessage', phase: 'final', text: 'Parent final.'}], 'detailed', 'parent')
+    + nativeItemFixture([{kind: 'AgentMessage', phase: 'final', text: 'Child final.'}], 'detailed', 'child');
+  assert.equal(buildAttachmentClip(parseAgentTrace(finals)).terminal_state_index.final_assistant_message.session_id, 'parent');
+});
+
+test('native excerpt references and shared text parts retain expansion handles without claiming full inline evidence', () => {
+  const original = 'complete recorded payload '.repeat(200);
+  const ref = {session_id: 'native-test', snapshot_sha256: 'a'.repeat(64), item_id: 'item-0', field: '/aggregated_output',
+    sha256: createHash('sha256').update(original).digest('hex'), chars: original.length, bytes: utf8Bytes(original)};
+  const blob = 'sha256:' + 'd'.repeat(64);
+  const excerpt = {evidence_ref: ref, head: {text_parts: ['Expected child exit code 0 ',
+    {blob_id: blob, text: 'SHARED_NATIVE_BLOCK'}, {blob_ref: blob, chars: 19}]},
+    tail: 'NATIVE_EXCERPT_TAIL', omitted_chars: original.length - 1500};
+  const source = nativeItemFixture([
+    {kind: 'CommandExecution', command: ['pytest'], status: 'completed', exit_code: 1, aggregated_output: excerpt},
+    {kind: 'AgentMessage', phase: 'final', text: {evidence_ref: {...ref, item_id: 'item-1', field: '/content'},
+      head: {text_parts: ['Visible beginning ', {blob_ref: blob, chars: 19}]}, tail: 'Visible ending', omitted_chars: 3000}},
+    {kind: 'CommandExecution', command: ['/bin/zsh', '-lc', {evidence_ref: {...ref, item_id: 'item-2', field: '/command/2'}, head: 'command beginning', tail: 'command end', omitted_chars: 3000}],
+      status: 'completed', exit_code: 0},
+    {kind: 'McpToolCall', status: 'completed', result: {structuredContent: {value: 21}, content: [{json_ref: 'structuredContent'}]}},
+  ]);
+  const packet = parseAgentTrace(source);
+  const clip = buildAttachmentClip(packet, {disable_raw_sidecar_fallback: true});
+  assert.equal(clip.command_ledger.records[0].status, 'fail');
+  assert.equal(clip.command_ledger.records[1].role, 'unknown');
+  const handles = packet.native_trace.items[0].payload_handles;
+  assert.equal(handles[0].evidence_ref.sha256, ref.sha256);
+  assert.equal(handles[0].evidence_ref.field, '/aggregated_output');
+  assert.equal(handles[0].omitted_chars, original.length - 1500);
+  assert.ok(handles.some((handle) => handle.blob_id === blob));
+  assert.ok(handles.some((handle) => handle.blob_ref === blob));
+  assert.equal(clip.native_items.payload_items.length, 4);
+  assert.equal(handles[0].evidence_ref.session_id, 'native-test');
+  assert.equal(handles[0].evidence_ref.snapshot_sha256, 'a'.repeat(64));
+  assert.equal(clip.command_ledger.records[0].payload_representation, 'excerpt_with_native_field_refs');
+  assert.equal(clip.native_items.payload_items[3].json_refs[0].json_ref, 'structuredContent');
+  assert.match(clip.native_items.expansion_rule, /snapshot_sha256/);
+  assert.match(packet.timeline[1].snippet, /excerpt; 3000 characters omitted/);
+  assert.match(packet.timeline[1].snippet, /Visible ending/);
+  assert.equal(JSON.stringify(clip).split('NATIVE_EXCERPT_TAIL').length - 1, 1, 'the canonical input row is the only copy');
+  assert.equal(JSON.stringify(clip).split('SHARED_NATIVE_BLOCK').length - 1, 1, 'the shared block is not repeated in indexes');
+  assert.equal(restoreSingleJsonClip(clip), source);
+  assert.ok(!JSON.stringify(clip).includes(original));
+});

@@ -42,12 +42,17 @@ class MCPTransportTests(unittest.IsolatedAsyncioTestCase):
                     await client.initialize()
                     listed = await client.list_tools()
                     self.assertEqual({t.name for t in listed.tools},
-                                     {'search_trace_threads', 'read_chat_context', 'read_trace_page'})
+                                     {'search_trace_threads', 'read_chat_context', 'read_trace_page',
+                                      'search_trace_items', 'read_trace_item', 'read_trace_changes'})
 
                     async def call(name, args):
                         result = await client.call_tool(name, args)
                         self.assertFalse(result.isError, result.content)
-                        return result.structuredContent
+                        data = dict(result.structuredContent)
+                        if name in ('read_chat_context', 'read_trace_page'):
+                            self.assertNotIn('text', data)
+                            data['text'] = result.content[0].text
+                        return data
 
                     for provider in ('codex', 'claude'):
                         found = await call('search_trace_threads', {'query': provider + ' investigation'})
@@ -68,6 +73,40 @@ class MCPTransportTests(unittest.IsolatedAsyncioTestCase):
                         self.assertEqual(old, old_again)
                         self.assertNotRegex(detail['text'] + old['text'], r'RESULT .+ \(c1\): "ok"')
 
+
+    async def test_native_field_transport_retains_exact_value_once(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'native.jsonl'
+            output = 'original native output\n' * 400
+            rows = [
+                {'type': 'session_meta', 'payload': {'id': 'native-session'}},
+                {'type': 'event_msg', 'payload': {'type': 'item_completed', 'thread_id': 'native-session',
+                    'turn_id': 'turn', 'item': {'type': 'CommandExecution', 'id': 'exec-item',
+                    'command': ['pytest'], 'exit_code': 1, 'aggregated_output': output}}}]
+            write_records(source, rows, 'w')
+            manifest = root / 'manifest.json'
+            manifest.write_text(json.dumps([{'provider': 'codex', 'session_id': 'native-session',
+                                             'title': 'Native transport regression', 'path': source.name}]))
+            params = StdioServerParameters(command=sys.executable, args=[
+                '-m', 'trace_mechanism.mcp_server', '--manifest', str(manifest)])
+            async with stdio_client(params) as (read, write):
+                async with ClientSession(read, write) as client:
+                    await client.initialize()
+                    result = await client.call_tool('read_chat_context', {
+                        'provider': 'codex', 'session_id': 'native-session', 'scope': 'full_thread'})
+                    self.assertFalse(result.isError, result.content)
+                    row = json.loads(next(x.removeprefix('Native item: ') for x in result.content[0].text.splitlines()
+                                          if x.startswith('Native item: ')))
+                    ref = row['aggregated_output']['evidence_ref']
+                    source.unlink()
+                    exact = await client.call_tool('read_trace_item', {
+                        'provider': 'codex', 'session_id': ref['session_id'], 'item_id': ref['item_id'],
+                        'snapshot_sha256': ref['snapshot_sha256'], 'field': ref['field'], 'limit': 48000})
+                    self.assertFalse(exact.isError, exact.content)
+                    self.assertEqual(json.loads(exact.content[0].text), output)
+                    self.assertNotIn('payload', exact.structuredContent)
+                    self.assertNotIn('payload_json', exact.structuredContent)
 
 if __name__ == '__main__':
     unittest.main()

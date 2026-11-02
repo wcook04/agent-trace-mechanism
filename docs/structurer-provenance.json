@@ -1,7 +1,7 @@
 {
   "source": "tools/agent_trace_structurer/parser.mjs",
-  "source_commit": "17f9050056c5debb48f6c3fa66704d15d526abc1",
-  "sha256": "4230e7d58e7e7f87762f609a3901b83c1ea1d116bd6c85a069f75bfcce112755",
+  "source_commit": "831afd81ba8e1806e0d625da930a500b3ce06202",
+  "sha256": "82755807df2374f4f9e948cfee0ef54ce3fa35a5531d5954d492c4bf83bf0139",
   "copy": "src/trace_mechanism/structurer.mjs",
   "method": "Byte-identical complete standalone production builder. Apache-2.0, copyright Will Cook. No app shell, discovery, or private imports.",
   "test_source": "tools/agent_trace_structurer/parser.test.mjs",

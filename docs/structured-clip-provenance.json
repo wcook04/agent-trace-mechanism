@@ -1,6 +1,6 @@
 {
   "source_file": "src/trace_mechanism/structurer.mjs",
-  "source_sha256": "4230e7d58e7e7f87762f609a3901b83c1ea1d116bd6c85a069f75bfcce112755",
+  "source_sha256": "82755807df2374f4f9e948cfee0ef54ce3fa35a5531d5954d492c4bf83bf0139",
   "fixture": "examples/codex.detailed.txt",
   "fixture_sha256": "8bc08b869090092d59ff993162228e0d9476d22bbbd3db6a40674fa6fd3604f6",
   "output": "examples/production-structured-clip.json",

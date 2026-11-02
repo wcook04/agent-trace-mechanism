@@ -74,7 +74,7 @@
   },
   "structured_index_rebuilt": {
     "builder": "src/trace_mechanism/structurer.mjs",
-    "source_sha256": "4230e7d58e7e7f87762f609a3901b83c1ea1d116bd6c85a069f75bfcce112755",
+    "source_sha256": "82755807df2374f4f9e948cfee0ef54ce3fa35a5531d5954d492c4bf83bf0139",
     "command": "node tools/build_index.mjs examples/controlled-run/assembled.detailed.txt examples/controlled-run/structured-attachment.json",
     "boundary": "Historical native rendered text is frozen. Only the interpretation index is rebuilt."
   }

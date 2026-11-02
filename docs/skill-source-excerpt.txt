@@ -5,8 +5,16 @@ A supplied exact provider/session ID can go straight to a reader. Otherwise call
 | Need | Tool and scope |
 |---|---|
 | Resume the latest work | `read_chat_context(provider, session_id, scope="latest_prompt_cycle")` |
+| Recover a saved compaction | `read_saved_compaction(provider, session_id)`; then read latest context to cover work after that summary |
 | Recall decisions across the conversation | `read_chat_context(..., scope="full_thread_concise")` |
 | Inspect a few recent turns | `read_chat_context(..., scope="last_n_turns:3")` (1–99 supported) |
-| Resolve an exact command, failure or evidence gap | `read_chat_context(..., scope="full_thread")`, only as needed |
+| Find a command, output, patch or visible summary in Codex | `search_trace_items(provider="codex", session_id, query="...", kind="", failures_only=false, include_children=false)`; kind may be `CommandExecution`, `FileChange`, `McpToolCall`, `Reasoning`, or another recorded native kind |
+| Read an exact result or diff | `read_trace_item(provider="codex", session_id, item_id, snapshot_sha256, field="")` from a search or evidence handle; use the returned item's own session ID for a child |
+| Check what changed while work continued | `read_trace_changes(provider="codex", session_id, since_sha256, include_children)` with the same child selection as the earlier search |
+| Inspect all recorded detail | `read_chat_context(..., scope="full_thread")`, only when selective retrieval is insufficient |
 | Check live parent/worker activity | `read_trace_activity` / `read_trace_team`, or the host's native chat-status tools |
+
+For native item queries, `snapshot_sha256` pins the selected root/child set. Page search results with that hash and `next_offset`; page a large item with its exact session/item/hash and `next_offset`. Read new work with `read_trace_changes`, which returns only added, updated or removed items. Compact means commands/status and visible summaries without outputs or diffs; it is not a model context-compaction summary. Long input/output previews retain exact item handles for expansion. A detailed `evidence_ref` carries the session, immutable snapshot, item and JSON Pointer field (for example `/aggregated_output`); pass these to `read_trace_item`. The response contains only that value, with paging for large fields. Native command outcomes come from recorded exit codes, never words quoted in stdout.
+
+Follow `next_offset` with `read_trace_page(sha256, offset)` when the answer needs another page. The hash identifies one immutable snapshot; never combine page offsets from different hashes. A live-source re-read creates a new snapshot. Follow `next_before` from an unsuccessful compaction lookup to inspect the preceding bounded source window; null means the scan reached the beginning. A missing summary is not missing conversation history: use the compact trace when appropriate.
 

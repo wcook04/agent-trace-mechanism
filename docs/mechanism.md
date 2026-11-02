@@ -1,28 +1,31 @@
-# Mechanism and boundaries
+# Native Codex record pipeline
 
-A provider writes local records. The parser groups them into turns and pairs calls/results by their recorded IDs. A view selects compact context or recorded detail. MCP makes search, read and paging available to a connected agent. Each read reopens the selected file; a hash identifies the returned text so later pages cannot silently switch to a newer version.
+`local records → canonical native items → selected views / item queries → MCP`
 
-## Executable path
+## Record identity
 
-The public server requires an explicit file manifest; it does not scan a home directory. [MCP setup](mcp.md) shows how to connect it to a host. It exposes `search_trace_threads`, `read_chat_context` and `read_trace_page` over real stdio transport. Its snapshots are held in memory until server exit. The manifest is trusted configuration, and configured file contents become available to the connected client.
+The portable [core](../src/trace_mechanism/codex_native.py) consumes typed native events from Codex JSONL and the read-only `thread_items` SQLite projection. It normalizes the JSONL/SQLite naming conventions and keeps exact session, turn and item IDs. Updates replace the earlier representation of that item; source references retain the record locations. Outer `functions.exec` wrappers are not copied over the native operations they contain.
 
-`full_thread_concise` means compact. `full_thread` means detailed. Both cover the selected file’s parsed turns, not independently verified original-session completeness. Compact retains prompts, visible messages, named calls and allowlisted command/path fields. Detailed retains arguments and results. Distinct source records remain in order; events inside one provider record do not acquire a fabricated order. JSON-string bodies are opaque text, so a quoted `TOOL` or `ASSISTANT` line is not another action.
+Supported types include `CommandExecution`, `FileChange`, `McpToolCall`, `SubAgentActivity`, `UserMessage`, `AgentMessage`, `Reasoning` and `Extension`. Command status uses typed exit/status fields. Quoted output cannot turn a failure into a pass. Reasoning contributes its recorded visible summaries.
 
-`turn_ended` records a terminal boundary. `tool_evidence_complete` says whether observed calls/results have counterparts. `complete` requires both; it does not promise the provider file contains every event. A result with no initiating call has `missing_call`, not `missing_result`. A later prompt cannot supply an absent result. Codex app delivery envelopes are recognized narrowly as request inputs, with original record/thread provenance.
+## Views and exact access
 
-The JavaScript builder creates an optional JSON index with pointers into the exact supplied text. It does not prove that interpreted actions happened, establish original-session completeness, or compress every input. See [reproduction and semantic tests](development.md).
+Compact retains messages, visible summaries, command previews, outcomes, changed paths and useful settings. It omits outputs and patch bodies. Detailed expands evidence, shares repeated bodies and gives oversized fields bounded previews with exact retrieval references. The underlying native snapshots retain the full captured payloads; searches inspect those full values.
 
-## Full app, plugin and skill
+`search_trace_items` returns small handles, including the item's own session ID and native item ID. `read_trace_item` opens one item or selected field, with stable paging for large values. `read_trace_changes` compares immutable captures and reports added, updated or removed items. Repeated identical lifecycle records do not count as new work.
 
-The desktop app adds session discovery, watchers, copy/export controls, richer native views and linked-child handling. Its plugin registers a local MCP server. Its retrieval skill tells an agent when to search, select an exact provider/session ID, start compact and ask for detail. The skill does not itself grant access. An agent can call tools directly without somebody opening the panel or copying text.
+The [index builder](../src/trace_mechanism/structurer.mjs) consumes the typed native view directly, retaining references into the original text. It does not guess command outcomes from stdout.
 
-[Native MCP excerpt](mcp-source-excerpt.txt) and [retrieval skill excerpt](skill-source-excerpt.txt) document that integration. The full app also supports latest-response and last-N-turn scopes. Those are outside this public adapter. The Codex demonstration uses the installed plugin; the runnable replay uses this repository’s adapter.
+## App and plugin
 
+The desktop app discovers local sessions, watches activity and provides copy/export scopes. Its native cache checks the renderer version and every selected source, so a worker advancing can invalidate a cached parent view. Exact recorded parent/child IDs build the tree; a session appears once. Missing child sources remain identifiable.
 
-## Existing Codex history access
+The installed MCP plugin exposes retrieval without requiring the panel. The accompanying [skill](skill-source-excerpt.txt) teaches selection, compact-first reading, exact evidence retrieval and incremental reads. Full-thread, latest-response and last-N-turn scopes use the same native core.
 
-Agent Trace’s added mechanism is search, consistent selection, evidence pairing, stable pages and reuse through agent tools.
+This public adapter uses an explicit manifest instead of the app's discovery. Child entries must match the parent recorded in their session metadata. It rereads selected files on request and keeps snapshots for the server process. The app owns live watchers and persistent storage. Older records retain the legacy parser route.
 
-At the inspected [public Codex revision](https://github.com/openai/codex/commit/43ad1cbf3016e9944b3b5d0b0e127ce7148c9d7c), the [record types](https://github.com/openai/codex/blob/43ad1cbf3016e9944b3b5d0b0e127ce7148c9d7c/codex-rs/history/src/rollout_payload.rs) and [writer](https://github.com/openai/codex/blob/43ad1cbf3016e9944b3b5d0b0e127ce7148c9d7c/codex-rs/rollout/src/recorder.rs) describe timestamped JSONL. That does not make the files a future-stable API.
+## Integration surface
 
-The documented [app-server protocol](https://learn.chatgpt.com/docs/app-server) has history-reading methods. Installed versions and storage determine what is available. That is why the integration question is whether a reader should use that interface. No Codex implementation is vendored here.
+These are local records owned by the user. The inspected desktop runtime also exposes `thread/items/list`, `thread/items/read`, `thread/turns/list` and update notifications through its app-server protocol. The present implementation reads local JSONL / SQLite; a supported protocol adapter is a possible next integration.
+
+[Core provenance](provenance.json) · [Builder provenance](structurer-provenance.json) · [MCP configuration](mcp.md)

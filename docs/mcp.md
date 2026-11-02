@@ -1,31 +1,39 @@
-# MCP transport demo
+# Agent interface
 
-The optional server exposes the same search, read and page tool names used by Agent Trace over real MCP stdio. It reads **only files named in a required manifest**, rather than discovering the user's sessions. The manifest is trusted configuration: absolute paths and paths outside its directory are allowed. Transcript contents are returned to the connected client and may contain private information.
-
-Install the optional SDK in a virtual environment:
+Install Python 3.10+ and the MCP extra:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install '.[mcp]'
-.venv/bin/python -m unittest discover -s tests -p test_mcp_transport.py -v
 ```
 
-The test launches the server as a separate process through the MCP SDK client. It initializes a session, lists tools, searches the test threads, reads compact and detailed views, appends records, and checks that old pages remain stable while a new read sees the update. It creates its inputs in a temporary directory and does not access a model or account.
-
-For a host integration, create a JSON manifest that explicitly names the files it may expose. Paths can be absolute or relative to the manifest file:
+Create a JSON manifest listing the files the server may read. Use the actual `session_meta.id` for native Codex records:
 
 ```json
 [
-  {"provider": "codex", "session_id": "sample-codex", "title": "Sample Codex thread", "path": "codex.jsonl"}
+  {"provider": "codex", "session_id": "ACTUAL_THREAD_ID", "title": "My work", "path": "/absolute/path/to/rollout.jsonl"}
 ]
 ```
 
-Launch it via the host's MCP stdio configuration, with the executable and arguments equivalent to:
+Launch via the host's stdio MCP configuration:
 
 ```sh
 .venv/bin/python -m trace_mechanism.mcp_server --manifest /absolute/path/to/manifest.json
 ```
 
-The host calls `search_trace_threads`, then `read_chat_context` with the chosen provider and session ID. Scope `full_thread_concise` is compact; `full_thread` includes recorded detail. If `next_offset` is present, pass it and `sha256` to `read_trace_page`. Snapshots live in the server process and disappear when it exits. A fresh read reparses the selected file; there is no watcher.
+| Tool | Access |
+|---|---|
+| `search_trace_threads` | Find a registered chat by title or ID |
+| `search_trace_items` | Search full native values, filter kind/failures, optionally include children |
+| `read_trace_item` | Retrieve one exact item or field from the selected immutable snapshot |
+| `read_trace_changes` | Added, updated and removed items since a previous native snapshot |
+| `read_chat_context` | Compact (`full_thread_concise`) or detailed (`full_thread`) text |
+| `read_trace_page` | Continue a fixed text snapshot |
 
-This is an adapter around the public example's parser and views. Its registry, snapshots and rendering are smaller than the production app's discovery, richer renderers, linked-child handling and MCP interface. It does not install a skill, call a model or establish that either host has been configured. The underlying provider records determine what can be returned; unavailable or truncated content cannot be reconstructed.
+Item searches return `snapshot_sha256`, exact `session_id` / `item_id` handles and `next_offset`. Reuse the snapshot hash for subsequent search or item pages. A child's item must be read using the child's session ID. For incremental reads, pass the earlier hash as `since_sha256` and keep the same `include_children` setting.
+
+Use `field="/aggregated_output"` to read only stdout, or a JSON Pointer such as `/changes/escaped-file-path/unified_diff` for a patch. An empty field selects the complete item. Use the exact pointer supplied by a large-payload reference.
+
+A manifest child can include `parent_session_id`. The server verifies it against that child's recorded `session_meta.source.subagent.thread_spawn.parent_thread_id`; titles do not establish a relationship. Trees are capped at 64 selected sessions.
+
+Text pages use their separate `sha256` identifier. Snapshots last for the server process; each fresh read checks the selected files again. The app supplies automatic discovery, persistent snapshots, watchers and additional recent-turn scopes.

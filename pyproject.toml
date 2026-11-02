@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-trace-mechanism"
-version = "0.1.0"
-description = "A local, explicit-file extraction of Agent Trace's provider parsers"
+version = "0.2.0"
+description = "Query native Codex commands, outputs, patches and agent trees as reusable context"
 requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.30,<2"]
+test = ["pytest>=8,<10"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

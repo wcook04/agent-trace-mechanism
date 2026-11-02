@@ -24,8 +24,16 @@
     "src/trace_mechanism/agent_demo.py",
     "src/trace_mechanism/mcp_server.py"
   ],
-  "production_prepare_sha256": "5ddf078ad35eec6805a4d0e9c5992494e87565c8c9df7e88b223f5a674166930",
+  "production_prepare_sha256": "e8c2ed4f964b92147f3e6673d878d7127bc2917306dae6a2f25bc3566cc3de09",
   "production_prepare_source": "Agent Trace mcp_server.py::prepare",
-  "boundary": "The parser blocks are exact; renderers, registry, snapshots and demos are inspection adaptations. Source excerpts are not runnable integration code.",
-  "source_commit": "dd8e4e0797dbd6a526d08f2b82229bfe391d92d4"
+  "boundary": "Native core and legacy parser blocks are exact copies. The public registry/MCP adapter is a smaller explicit-file integration; desktop discovery is separate.",
+  "source_commit": "dd8e4e0797dbd6a526d08f2b82229bfe391d92d4",
+  "native_core": {
+    "source": "tools/agent_trace_structurer/codex_native.py",
+    "source_commit": "0d5041d2ed7427c9515f07968eb432c9aacf27fa",
+    "copy": "src/trace_mechanism/codex_native.py",
+    "sha256": "51bfbc6c47ce57b784eb9c9349a11b39bc6c0914932f140a6f2e35ce4032d6a9",
+    "method": "Byte-identical portable production module. Test copy changes only the import path."
+  },
+  "production_prepare_commit": "e43a644d4509ffeef5482377288b2fa3d7b5980b"
 }
