@@ -1,0 +1,7 @@
+USER: Read and update example.txt.
+STATUS: complete
+TOOL Read (read): {"file_path": "example.txt"}
+RESULT: [omitted in compact view]
+TOOL Edit (edit): {"file_path": "example.txt"}
+RESULT: [omitted in compact view]
+ASSISTANT: Update complete.

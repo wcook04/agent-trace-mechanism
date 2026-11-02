@@ -1,0 +1,67 @@
+# parent
+
+User:
+
+This is a deliberately controlled, public-shareable sample run for Agent Trace. Work ONLY in <review-repository>, the standalone review repository. Set that exact workdir for every command. Do not inspect the parent private checkout, home directories, other chats, credentials, network, email or personal data. Do not modify files, install tools, commit, push, publish or send messages. Read README.md and the relevant src/trace_mechanism files in this repository. The human explicitly requests that you, Terra, launch exactly two subagents using model gpt-6-luna with fork_turns none, on independent read-only verification tasks. Name one call_pairing and ask it to inspect the synthetic Codex and Claude fixtures, parser and tests, then run an in-memory or temporary-file check showing that a missing result remains incomplete and an appended matching result completes the correct call. Name the other scope_snapshot and ask it to inspect agent_tools.py and views.py, then verify compact omits recorded tool-output/edit bodies, detailed retains them, and an older paged snapshot stays unchanged after a new read of an appended fixture. Each Luna must use only this repository and its invented fixtures, avoid all other files, and return concise observed evidence plus limitations. Use Python only with the repository's .venv/bin/python and avoid changing repository inputs or expected files. Report the child IDs, commands/checks run, observed outcomes and any genuine issue. Review their returned evidence yourself, then write a short final report distinguishing executable checks from broader claims. Do not invent a failure to make the demonstration interesting. This sample is to be captured later by the human's supervising chat through Agent Trace; you must not export any conversation yourself. Stop once these bounded checks and the final report are complete.
+
+Assistant:
+
+I’ll use the requested read-only checks in the standalone review repository and launch the two specified Luna subagents. I’ll independently review their evidence before reporting the results.
+
+spawn_agent `{"task_name":"call_pairing","model":"gpt-6-luna","fork_turns":"none"}` [message omitted]
+
+spawn_agent `{"task_name":"scope_snapshot","model":"gpt-6-luna","fork_turns":"none"}` [message omitted]
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"cat README.md","workdir":"<review-repository>","max_output_tokens":5000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"cat src/trace_mechanism/agent_tools.py src/trace_mechanism/views.py src/trace_mechanism/replay.py","workdir":"<review-repository>","max_output_tokens":14000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"cat tests/test_mechanism.py","workdir":"<review-repository>","max_output_tokens":13000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":3000}); text(r.output);
+
+```
+
+The repository’s six tests pass, including its replay and snapshot checks. The first subagent also confirmed the pending-to-complete replay for both synthetic providers; I’m checking the second subagent’s scope and paging evidence.
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"rg -n 'def parse_(codex|claude)_session|tool_call_id|source_record_indices|is_complete|partial_reason' src/trace_mechanism/parser.py","workdir":"<review-repository>","max_output_tokens":4000}); text(r.output);
+
+```
+
+wait_agent `{"timeout_ms":20000}`
+
+followup_task `{"target":"scope_snapshot"}` [message omitted]
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"PYTHONDONTWRITEBYTECODE=1 .venv/bin/python - <<'PY'\nimport json\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\nfrom trace_mechanism.agent_tools import AgentTools\nfrom trace_mechanism.replay import records\nwith TemporaryDirectory() as d:\n    for provider in ('codex', 'claude'):\n        p = Path(d) / provider\n        initial, later, _ = records(provider)\n        p.write_text(''.join(json.dumps(x)+'\\n' for x in initial))\n        t = AgentTools([dict(provider=provider, session_id='test', title='synthetic', path=p)])\n        first = t.read_chat_context(provider, 'test', 'full_thread', limit=10)\n        old_page = t.read_trace_page(first['sha256'], first['next_offset'], 10)\n        with p.open('a') as f:\n            for row in later: f.write(json.dumps(row)+'\\n')\n        fresh = t.read_chat_context(provider, 'test', 'full_thread', limit=10)\n        print(provider, 'fresh_hash_changed=', first['sha256'] != fresh['sha256'], 'old_second_page_unchanged=', old_page == t.read_trace_page(first['sha256'], first['next_offset'], 10))\nPY","workdir":"<review-repository>","max_output_tokens":1000}); text(r.output);
+
+```
+
+wait_agent `{"timeout_ms":20000}`
+
+The bounded checks passed for both synthetic Codex and Claude records. I reviewed the subagents’ evidence and independently checked paging after an append.
+
+- **`/root/call_pairing`** ran the repository’s replay test: a call without a result was incomplete; after a matching result was appended, call `c1` had output `ok` and the turn was complete.
+- **`/root/scope_snapshot`** checked the supplied fixtures: compact views omitted the recorded `old line` and `new line` bodies, while detailed views retained them. It also verified that an older second page remained unchanged after a fresh read.
+- I ran `PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests -v`: all six tests passed. I also checked both providers with the same detailed scope before and after an append: the fresh snapshot hash changed, and the old second page stayed unchanged.
+
+The scope subagent’s fresh-read comparison used different scopes, so that comparison alone could not attribute the changed hash to the append. My same-scope check addresses that limitation.
+
+These are executable checks of the standalone extraction and its invented fixtures. They do not establish compatibility with every real provider format or verify the full app’s live refresh behavior. No genuine issue was demonstrated.

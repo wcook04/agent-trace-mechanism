@@ -1,0 +1,71 @@
+# scope-snapshot
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"sed -n '1,240p' src/trace_mechanism/agent_tools.py && sed -n '1,260p' src/trace_mechanism/views.py && rg --files | rg 'fixture|invented'","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":7000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"rg --files","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":3000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"sed -n '1,260p' tests/test_mechanism.py && sed -n '1,240p' src/trace_mechanism/parser.py && sed -n '1,180p' examples/codex.jsonl && sed -n '1,160p' examples/claude.jsonl","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":6000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:".venv/bin/python -c 'import json,tempfile; from pathlib import Path; from trace_mechanism.agent_tools import AgentTools; from trace_mechanism.replay import records\nwith tempfile.TemporaryDirectory() as d:\n for provider in (\"codex\",\"claude\"):\n  path=Path(d)/provider; initial,later,_=records(provider); path.write_text(\"\".join(json.dumps(x)+\"\\\\n\" for x in initial)); tools=AgentTools([{\"provider\":provider,\"session_id\":\"s\",\"title\":\"fixture\",\"path\":path}]); compact=tools.read_chat_context(provider,\"s\",limit=80); first=tools.read_trace_page(compact[\"sha256\"]); old=first[\"text\"]; snap=compact[\"sha256\"]\n  with path.open(\"a\") as f:\n   for row in later: f.write(json.dumps(row)+\"\\\\n\")\n  detailed=tools.read_chat_context(provider,\"s\",scope=\"full_thread\"); body=tools.read_trace_page(detailed[\"sha256\"])[\"text\"]\n  assert \"[omitted in compact view]\" in tools.read_trace_page(snap)[\"text\"] and \"old line\" not in tools.read_trace_page(snap)[\"text\"] and \"new line\" not in tools.read_trace_page(snap)[\"text\"]\n  assert \"old line\" in body and \"new line\" in body\n  assert \"old_string\" in body or provider==\"codex\"\n  assert tools.read_trace_page(snap)[\"text\"]==old\n  print(provider, \"compact omission; detailed bodies retained; prior page stable\", compact[\"sha256\"], detailed[\"sha256\"])'","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":1000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:".venv/bin/python - <<'PY'\nimport json, tempfile\nfrom pathlib import Path\nfrom trace_mechanism.agent_tools import AgentTools\nfrom trace_mechanism.replay import records\nwith tempfile.TemporaryDirectory() as d:\n    for provider in ('codex', 'claude'):\n        path = Path(d) / provider\n        initial, later, _ = records(provider)\n        path.write_text(''.join(json.dumps(row) + '\\n' for row in initial))\n        tools = AgentTools([{'provider': provider, 'session_id': 's', 'title': 'fixture', 'path': path}])\n        compact = tools.read_chat_context(provider, 's', limit=80)\n        old = tools.read_trace_page(compact['sha256'])['text']\n        with path.open('a') as f:\n            for row in later:\n                f.write(json.dumps(row) + '\\n')\n        detailed = tools.read_chat_context(provider, 's', scope='full_thread')\n        body = tools.read_trace_page(detailed['sha256'])['text']\n        compact_all = ''.join(tools.read_trace_page(compact['sha256'], offset, 80)['text'] for offset in range(0, tools.read_trace_page(compact['sha256'])['total_chars'], 80))\n        assert '[omitted in compact view]' in compact_all\n        assert 'old line' not in compact_all and 'new line' not in compact_all\n        assert 'old line' in body and 'new line' in body\n        assert tools.read_trace_page(compact['sha256'])['text'] == old\n        print(provider, 'compact omission; detailed bodies retained; prior first page stable', compact['sha256'][:12], detailed['sha256'][:12])\nPY","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":1000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:".venv/bin/python - <<'PY'\nimport json, tempfile\nfrom pathlib import Path\nfrom trace_mechanism.agent_tools import AgentTools\nfrom trace_mechanism.replay import records\nwith tempfile.TemporaryDirectory() as d:\n for provider in ('codex','claude'):\n  path=Path(d)/provider; initial,later,_=records(provider); path.write_text(''.join(json.dumps(row)+'\\n' for row in initial)); tools=AgentTools([{'provider':provider,'session_id':'s','title':'fixture','path':path}]); compact=tools.read_chat_context(provider,'s',limit=80); old=tools.read_trace_page(compact['sha256'])['text']; before=tools.read_trace_page(compact['sha256'])['total_chars']; compact_all=''.join(tools.read_trace_page(compact['sha256'],offset,80)['text'] for offset in range(0,before,80)); print(provider,repr(compact_all));\n  with path.open('a') as f:\n   for row in later:f.write(json.dumps(row)+'\\n')\n  detailed=tools.read_chat_context(provider,'s',scope='full_thread'); body=tools.read_trace_page(detailed['sha256'])['text']; print('detailed contains', 'old line' in body, 'new line' in body); print('stable',tools.read_trace_page(compact['sha256'])['text']==old)\nPY","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":1000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"sed -n '1,220p' src/trace_mechanism/replay.py && cat examples/codex.detailed.txt && cat examples/claude.detailed.txt","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":3000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:".venv/bin/python - <<'PY'\nimport json, tempfile\nfrom pathlib import Path\nfrom trace_mechanism.agent_tools import AgentTools\nfrom trace_mechanism.replay import records\nwith tempfile.TemporaryDirectory() as d:\n for provider in ('codex', 'claude'):\n  src=Path('examples')/(provider+'.jsonl'); path=Path(d)/(provider+'.jsonl'); path.write_bytes(src.read_bytes())\n  tools=AgentTools([{'provider':provider,'session_id':'synthetic-'+provider,'title':'invented fixture','path':path}])\n  compact=tools.read_chat_context(provider,'synthetic-'+provider,limit=80)\n  oldpage=tools.read_trace_page(compact['sha256'])['text']; total=tools.read_trace_page(compact['sha256'])['total_chars']\n  compact_all=''.join(tools.read_trace_page(compact['sha256'],offset,80)['text'] for offset in range(0,total,80))\n  with path.open('a') as f:\n   for row in records(provider)[1]: f.write(json.dumps(row)+'\\n')\n  detailed=tools.read_chat_context(provider,'synthetic-'+provider,scope='full_thread')\n  body=tools.read_trace_page(detailed['sha256'])['text']\n  assert '[omitted in compact view]' in compact_all and 'old line' not in compact_all and 'new line' not in compact_all\n  assert 'old line' in body and 'new line' in body\n  assert tools.read_trace_page(compact['sha256'])['text']==oldpage\n  print(provider, 'compact omits old/new bodies; detailed retains them; old snapshot page unchanged')\nPY","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":1000}); text(r.output);
+
+```
+
+Assistant:
+
+Verified with `.venv/bin/python` using the invented Codex and Claude fixtures copied to temporary files. For both providers, compact view omitted the recorded `old line` and `new line` bodies, detailed view retained them, and the first page of the original snapshot was unchanged after appending records and reading again.
+
+The first check used the replay fixture, whose tool output is only `ok`; it did not exercise edit bodies. The successful check used `examples/codex.jsonl` and `examples/claude.jsonl`, which contain the read and edit bodies. No repository files were modified.
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"sed -n '1,220p' src/trace_mechanism/agent_tools.py && sed -n '1,100p' src/trace_mechanism/replay.py","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":2000}); text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:".venv/bin/python - <<'PY'\nimport json, tempfile\nfrom pathlib import Path\nfrom trace_mechanism.agent_tools import AgentTools\nfrom trace_mechanism.replay import records\nwith tempfile.TemporaryDirectory() as d:\n for p in ('codex','claude'):\n  path=Path(d)/(p+'.jsonl'); path.write_bytes((Path('examples')/(p+'.jsonl')).read_bytes()); session='synthetic-'+p\n  tools=AgentTools([{'provider':p,'session_id':session,'title':'fixture','path':path}]); before=tools.read_chat_context(p,session,limit=80); old_total=tools.read_trace_page(before['sha256'])['total_chars']; old_all=''.join(tools.read_trace_page(before['sha256'],o,80)['text'] for o in range(0,old_total,80)); old_second=tools.read_trace_page(before['sha256'],80)['text']\n  with path.open('a') as f:\n   for row in records(p)[1]: f.write(json.dumps(row)+'\\n')\n  after=tools.read_chat_context(p,session,scope='full_thread',limit=80); new_total=tools.read_trace_page(after['sha256'])['total_chars']; new_all=''.join(tools.read_trace_page(after['sha256'],o,80)['text'] for o in range(0,new_total,80))\n  assert before['sha256']!=after['sha256'] and len(new_all)!=len(old_all) and old_second==tools.read_trace_page(before['sha256'],80)['text']\n  print(p, 'digest differs:',before['sha256']!=after['sha256'],'chars:',old_total,'->',new_total,'old second page stable')\nPY","workdir":"<review-repository>","yield_time_ms":10000,"max_output_tokens":500}); text(r.output);
+
+```
+
+send_message `{"target":"/root"}` [message omitted]
+
+Sent the exact check and clarification to the parent: the original check covered only the first page; a follow-up verified the second page at offset 80 stayed unchanged for both providers. The appended records changed each new snapshot’s digest and length.

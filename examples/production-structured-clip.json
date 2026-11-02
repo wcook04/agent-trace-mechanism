@@ -1,0 +1,571 @@
+{
+  "schema_version": "agent_trace_lossless_clip_v2",
+  "carrier_mode": "single_json",
+  "manifest_role": "lossless_segmented_source_with_bounded_navigation_indexes",
+  "clip_contract": {
+    "schema_version": "agent_trace_clip_contract_v1",
+    "standard_ref": "codex/standards/std_agent_trace_lossless_clip.json",
+    "artifact_class": "lossless_agent_trace_clip",
+    "source_authority_field": "source_segments[].text",
+    "parse_order": [
+      "clip_contract",
+      "source_integrity",
+      "coverage_scope",
+      "agent_episode_graph",
+      "edit_claim",
+      "reader_index",
+      "terminal_state_index",
+      "command_ledger",
+      "validation_matrix",
+      "artifact_delta_index",
+      "long_line_index",
+      "source_segment_index",
+      "source_segments",
+      "size_policy"
+    ],
+    "required_fields": [
+      "schema_version",
+      "carrier_mode",
+      "clip_contract",
+      "coverage_scope",
+      "agent_episode_graph",
+      "edit_claim",
+      "diff_state",
+      "reader_index",
+      "terminal_state_index",
+      "command_ledger",
+      "validation_matrix",
+      "artifact_delta_index",
+      "long_line_index",
+      "source_integrity",
+      "source_segment_index",
+      "size_policy"
+    ],
+    "compactness_rule": "The exact copied source appears once. Other fields are bounded maps, range indexes, or local capture refs.",
+    "reader_index_rule": "reader_index is mandatory and range-only; never treat it as a semantic summary or source authority.",
+    "command_ledger_rule": "command_ledger preserves detected commands as pointers with bounded output excerpts and hashes; full output remains in the source range.",
+    "terminal_state_rule": "terminal_state_index points to captured terminal-state evidence and must not override exact source authority or live re-verification.",
+    "edit_zero_claim_rule": "edits=0 is window-local unless edit_claim.type_b_consumer_rule.unqualified_no_edits_allowed is true; downstream readers must say \"no edits captured in this trace window\" for selected or partial windows.",
+    "diff_state_rule": "diff_state must say whether exact plus/minus substrate hunks are attached, missing, or intentionally summary-only for full_thread_concise.",
+    "prompt_capture_rule": "Toolbar prompt captures use capture_context.capture_kind=prompt in the private packet and keep this same clip contract in the visible export.",
+    "operator_thread_export_rule": "AIW thread exports use capture_context.capture_kind=operator_thread_export and may carry operator_tab_match metadata that binds copied text to HUD/CDP tab identity without trusting visual tab number alone.",
+    "status_semantics": {
+      "not_detected": "Parser did not find a signal in the captured source.",
+      "not_applicable": "Signal is not expected for this artifact variant or capture shape.",
+      "unavailable": "Signal requires an omitted/lossless source variant or live re-verification.",
+      "missing_required": "Signal is required for promotion but absent from the captured evidence."
+    },
+    "variant_contracts": {
+      "denoised_v0_operator_summary": {
+        "variant_id": "agent_trace_denoised_packet_v0",
+        "slice_variant": "denoised_v0_operator_summary",
+        "materialization_state": "ready_for_handoff",
+        "replay_state": "blocked_without_lossless_sources",
+        "promotion_gate": "handoff_ready_not_replay_ready",
+        "standalone_for": [
+          "operational_handoff",
+          "next_move"
+        ],
+        "not_standalone_for": [
+          "replay",
+          "byte_reconstruction",
+          "raw_source_reconstruction"
+        ],
+        "requires_for_replay": [
+          "agent_trace_compact_json_v2",
+          "agent_trace_canonical_full_json_v1",
+          "provider_session_jsonl_source_v1"
+        ],
+        "lossiness": {
+          "raw_source_reconstructable": false,
+          "model_lossless": false,
+          "copied_source_reconstructable": false,
+          "byte_lossless": false
+        },
+        "omitted": {
+          "event_stream": true,
+          "large_bodies": true
+        }
+      }
+    }
+  },
+  "generated_at": "2026-01-01T00:00:00Z",
+  "source_integrity": {
+    "source_text_hash": "8f09c935",
+    "source_text_bytes": 388,
+    "source_text_chars": 388,
+    "source_line_count": 12,
+    "exact_source_text_in_attachment": true,
+    "exact_source_text_stored_locally": true,
+    "source_text_attachment_field": "source_segments[].text",
+    "source_lines_reconstructable_from_source_text": true,
+    "reconstruction_authority": "Concatenate attachment.source_segments[].text in ordinal order; local backend raw/full capture triplet is backup and full index authority."
+  },
+  "reader_index": {
+    "schema_version": "agent_trace_clip_reader_index_v1",
+    "purpose": "Range-only start map; source text stays in source_segments or raw sidecar.",
+    "read_order": [
+      "reader_index",
+      "coverage_scope",
+      "edit_claim",
+      "reader_index.capsule_evidence",
+      "reader_index.high_value_ranges",
+      "terminal_state_index",
+      "terminal_state_index.landed_commit_sequence",
+      "command_ledger",
+      "validation_matrix",
+      "source_segment_index",
+      "source_segments_or_raw_sidecar",
+      "navigation_manifest_when_present"
+    ],
+    "source_shape": {
+      "detected_trace_format": "plain_text",
+      "primary_content_kind": "conversation_trace",
+      "provider_family": "unknown",
+      "source_line_count": 12,
+      "source_byte_count": 388
+    },
+    "high_value_ranges": [],
+    "compaction_hints": {
+      "schema_version": "agent_trace_compaction_hints_v1",
+      "capture_kind": "conversation_trace",
+      "source_partition": "clip=bulk evidence; user text=salience/control unless SOURCE/facts",
+      "specimen_vs_target": "clip/compaction request => trace is specimen, not task to continue",
+      "density_guard": "default compact; expand only restart-changing distinctions",
+      "section_gate": "optional sections need restart delta; otherwise []",
+      "example_guard": "examples/prior answers are specimens unless labeled SOURCE",
+      "schema_overfit_guard": "smallest output shape; no prior-schema copying by default"
+    },
+    "source_segment_ranges": [
+      {
+        "id": "seg_0001",
+        "line_range": {
+          "start": 1,
+          "end": 11
+        },
+        "byte_range_utf8": {
+          "start": 0,
+          "end": 388
+        },
+        "starts_mid_line": false,
+        "ends_mid_line": false
+      }
+    ],
+    "policy": "Choose ranges to restore; do not copy index rows as source facts."
+  },
+  "coverage_scope": {
+    "schema_version": "agent_trace_coverage_scope_v1",
+    "source_window": "unknown",
+    "copy_scope": "unknown",
+    "thread_totality": "unknown_or_external_clip",
+    "full_thread_coverage": false,
+    "full_thread_concise": false,
+    "selected_window_only": true,
+    "coverage_class": "unknown_or_external_clip",
+    "zero_edit_totality": "not_thread_total"
+  },
+  "agent_episode_graph": {
+    "schema_version": "agent_episode_graph_v1",
+    "projection_authority": "derived_from_copied_source_window",
+    "nodes": [
+      {
+        "node_id": "episode_1",
+        "kind": "observation_episode",
+        "source_window": "unknown"
+      }
+    ],
+    "edges": [],
+    "copy_scope": "unknown",
+    "thread_totality": "unknown_or_external_clip",
+    "selected_window_only": true,
+    "warning": "episode graph is selected-window scoped; prior/future thread episodes may exist outside this copy"
+  },
+  "edit_claim": {
+    "schema_version": "agent_trace_edit_claim_v1",
+    "coverage_scope": {
+      "schema_version": "agent_trace_coverage_scope_v1",
+      "source_window": "unknown",
+      "copy_scope": "unknown",
+      "thread_totality": "unknown_or_external_clip",
+      "full_thread_coverage": false,
+      "full_thread_concise": false,
+      "selected_window_only": true,
+      "coverage_class": "unknown_or_external_clip",
+      "zero_edit_totality": "not_thread_total"
+    },
+    "captured_window_edits": 0,
+    "captured_file_artifact_edits": 0,
+    "visible_ui_diff_count": 0,
+    "visible_ui_diff_summary": [],
+    "substrate_diff_contract": {
+      "actual_plus_minus_required": true,
+      "exempt_when_source_window": "full_thread_concise",
+      "actual_plus_minus_available": false,
+      "source": "not_captured_in_parser_clip",
+      "inline_substrate_diff_rows": [],
+      "required_followup": null
+    },
+    "diff_state": {
+      "schema_version": "agent_trace_diff_state_v1",
+      "state": "no_diff_evidence_in_selected_window",
+      "exact_plus_minus_required": true,
+      "exact_plus_minus_available": false,
+      "reason": "no edit evidence was captured in this selected/partial source window"
+    },
+    "mutation_event_count": 0,
+    "positive_landing_receipts": {
+      "status": "not_detected"
+    },
+    "positive_receipt_edit_evidence_count": 0,
+    "commit_evidence": {
+      "status": "not_detected",
+      "commit_diff_missing": false
+    },
+    "explicit_no_edit_rows": [],
+    "explicit_no_edit_claim_allowed_marker": null,
+    "mode_boundaries": {
+      "schema_version": "agent_trace_mode_boundary_signals_v1",
+      "plan_mode": {
+        "status": "not_detected"
+      },
+      "goal_mode": {
+        "status": "not_detected"
+      },
+      "implementation_mode": {
+        "status": "not_detected"
+      },
+      "commit_closeout": {
+        "status": "not_detected"
+      },
+      "compaction_boundary": {
+        "status": "not_detected"
+      }
+    },
+    "mode_lifecycle": {
+      "schema_version": "agent_trace_mode_lifecycle_v1",
+      "mode_state": "not_detected",
+      "plan_marker_confidence": "none",
+      "goal_marker_confidence": "none",
+      "implementation_marker_confidence": "none",
+      "plan_to_implementation_bound": false,
+      "edits_in_plan_marked_region": false,
+      "coverage_scope": "unknown_or_external_clip",
+      "conflicts": []
+    },
+    "operator_interventions": {
+      "schema_version": "agent_trace_operator_intervention_ledger_v2",
+      "count": 0,
+      "selected_window_count": 0,
+      "full_thread_count": null,
+      "outside_selected_window_count": null,
+      "full_thread_available": true,
+      "status": "not_detected",
+      "rows": [],
+      "rule": "Operator/user interruptions are lifecycle events and can revise plan, scope, or execution authority. Zero counts are scoped to the copied source window unless full_thread_count is numeric."
+    },
+    "goal_pass_ledger": {
+      "schema_version": "agent_trace_goal_pass_ledger_v1",
+      "status": "not_detected",
+      "pass_count": 0,
+      "create_goal_count": 0,
+      "update_goal_count": 0,
+      "rows": [],
+      "rule": "Goal markers describe a pass ledger; they do not prove edit/no-edit state without diff and coverage evidence."
+    },
+    "actor_edit_separation": {
+      "schema_version": "agent_trace_actor_edit_separation_v1",
+      "subagent_read_only_claims": {
+        "status": "not_detected"
+      },
+      "subagent_read_only_claim_count": 0,
+      "controller_edit_evidence_count": 0,
+      "controller_edit_evidence_classes": [],
+      "rule": "Read-only subagent claims are advisory for those subagents only and must not erase controller/thread edit evidence."
+    },
+    "thread_total_edits": "unknown_not_full_thread",
+    "type_b_consumer_rule": {
+      "unqualified_no_edits_allowed": false,
+      "safe_zero_edit_phrase": "no edits captured in unknown window; thread_total_edits=unknown",
+      "forbidden_phrase": "no edits were made",
+      "claim_basis": "not_enough_totality_or_diff_commit_evidence_for_unqualified_no_edit_claim",
+      "required_before_unqualified_no_edits": [
+        "full_thread source_window",
+        "complete source integrity",
+        "zero visible UI diff summaries",
+        "zero file artifact edit rows",
+        "zero commit evidence",
+        "zero positive scoped-commit or containment receipts",
+        "explicit terminal no-edit evidence"
+      ]
+    },
+    "integrity_issues": [
+      {
+        "code": "selected_or_partial_window_edits_zero_not_thread_total",
+        "severity": "blocking_for_unqualified_no_edit_claim",
+        "message": "Zero captured edits only describes this source window."
+      }
+    ]
+  },
+  "diff_state": {
+    "schema_version": "agent_trace_diff_state_v1",
+    "state": "no_diff_evidence_in_selected_window",
+    "exact_plus_minus_required": true,
+    "exact_plus_minus_available": false,
+    "reason": "no edit evidence was captured in this selected/partial source window"
+  },
+  "terminal_state_index": {
+    "schema_version": "agent_trace_terminal_state_index_v1",
+    "purpose": "Pointers to terminal state evidence without deciding live truth beyond captured source text.",
+    "final_assistant_message": {
+      "status": "not_detected"
+    },
+    "final_closeout_prose": {
+      "status": "not_detected"
+    },
+    "latest_commit": {
+      "status": "not_detected"
+    },
+    "landed_commit_sequence": {
+      "status": "not_detected"
+    },
+    "positive_landing_receipts": {
+      "status": "not_detected"
+    },
+    "post_commit_status_checks": {
+      "status": "not_applicable",
+      "reason": "no_commit_claim_detected"
+    },
+    "validation_summary": {
+      "status": "not_applicable",
+      "reason": "no_validation_rows_detected"
+    },
+    "receipt_status": {
+      "status": "not_detected"
+    },
+    "explicit_not_done_or_blocked_boundaries": {
+      "status": "not_detected"
+    },
+    "authority": "Terminal indexes are captured-source pointers. Re-run live commands before claiming current repo state."
+  },
+  "command_ledger": {
+    "schema_version": "agent_trace_command_ledger_v1",
+    "purpose": "All detected shell/tool commands as bounded pointers; output is excerpted and hashed, source text remains authoritative in source_segments or raw sidecar.",
+    "command_count": 0,
+    "role_counts": {},
+    "status_counts": {},
+    "records": [],
+    "policy": "Every command detected by the parser is represented once. Read source_line_range/output_line_range for exact wording and output."
+  },
+  "validation_matrix": {
+    "schema_version": "agent_trace_validation_matrix_v1",
+    "purpose": "Typed evidence rows: checks, governance receipts, and diagnostics stay separated.",
+    "status_semantics": {
+      "not_detected": "Parser did not find a signal in the captured source.",
+      "not_applicable": "Signal is not expected for this artifact variant or capture shape.",
+      "unavailable": "Signal requires an omitted/lossless source variant or live re-verification.",
+      "missing_required": "Signal is required for promotion but absent from the captured evidence."
+    },
+    "validation_count": 0,
+    "command_validation_count": 0,
+    "source_claimed_validation_count": 0,
+    "governance_receipt_count": 0,
+    "diagnostic_count": 0,
+    "evidence_count": 0,
+    "result_counts": {},
+    "rows": [],
+    "proof_index": [],
+    "policy": "Preserve command/result boundaries without mirroring full outputs."
+  },
+  "artifact_delta_index": {
+    "schema_version": "agent_trace_artifact_delta_index_v1",
+    "purpose": "Artifact and path deltas as source pointers; exact file content remains only in source text or local full packet.",
+    "artifact_row_count": 0,
+    "path_row_count": 0,
+    "visible_ui_diff_summary_count": 0,
+    "state_counts": {},
+    "rows": [],
+    "visible_ui_diff_summaries": [],
+    "delta_stat_rows": [],
+    "omitted_policy": "Rows are bounded to keep the visible clip small. Use source ranges and local full packet for complete path/entity listings."
+  },
+  "long_line_index": {
+    "schema_version": "agent_trace_long_line_index_v1",
+    "purpose": "Very long source lines with segment spans so downstream compactors do not rely on line-only navigation.",
+    "threshold_bytes": 1000,
+    "long_line_count": 0,
+    "max_line_bytes": 0,
+    "rows": [],
+    "omitted_long_line_count": 0,
+    "policy": "Use segment_ids and byte_range_utf8 to restore exact long-line spans from source_segments or raw sidecar."
+  },
+  "source": {
+    "name": "codex.detailed.txt",
+    "input_hash": "8f09c935",
+    "input_bytes": 388,
+    "input_chars": 388,
+    "input_lines": 12,
+    "line_breaks": {
+      "style": "lf",
+      "crlf": 0,
+      "lf": 11,
+      "cr": 0,
+      "ends_with_line_break": true
+    }
+  },
+  "capture_context": {
+    "capture_kind": null,
+    "captured_from": null,
+    "captured_at": null,
+    "content_kind": null,
+    "source_bytes": null,
+    "content_bytes": null,
+    "file_count": null
+  },
+  "navigation_tutorial": {
+    "purpose": "Lossless segmented clip plus small indexes. Rebuild or inspect source_segments; indexes are just maps.",
+    "read_order": [
+      "clip_contract",
+      "source_integrity",
+      "reader_index",
+      "terminal_state_index",
+      "command_ledger",
+      "validation_matrix",
+      "artifact_delta_index",
+      "long_line_index",
+      "source_segment_index",
+      "navigation_tutorial",
+      "source_segments"
+    ],
+    "commands": {
+      "restore_jq": "jq -rj '.source_segments[].text' clip.json > restored_clip.txt",
+      "restore_python": "python3 - <<'PY'\nimport json,sys\np=json.load(open('clip.json'))\nsys.stdout.write(''.join(s['text'] for s in p['source_segments']))\nPY",
+      "list_ranges": "jq '.source_segment_index.segments[] | {id,line_range,byte_range_utf8,byte_count}' clip.json",
+      "list_commands": "jq '.command_ledger.records[] | {id,role,command,source_line_range,output_line_range,status}' clip.json",
+      "terminal_state": "jq '.terminal_state_index' clip.json",
+      "print_segment": "jq -rj '.source_segments[] | select(.id == \"seg_0001\").text' clip.json"
+    },
+    "segment_count": 1
+  },
+  "local_capture": {
+    "storage_scope": "local_recent_capture_triplet",
+    "retention_limit": 10,
+    "input_hash": "8f09c935",
+    "refs_available": {
+      "full_packet": false,
+      "raw_source": false,
+      "private_clip": false,
+      "visible_export": false
+    },
+    "public_export_contains_local_paths": false,
+    "note": "Attachment has exact source_segments; local stores keep backup/full indexes."
+  },
+  "summary": {
+    "events": 7,
+    "artifacts": 0,
+    "source_chunks": 1,
+    "compacted_index_profile": "tiny_source_clip_content_is_primary"
+  },
+  "source_segment_index": {
+    "schema_version": "lossless_source_segments_v1",
+    "source_text_complete": true,
+    "segment_count": 1,
+    "target_segment_bytes": 64000,
+    "max_segment_lines": 1000,
+    "total_segment_bytes": 388,
+    "reconstruction_rule": "Concatenate source_segments[].text in ordinal order to recover the exact copied clip content.",
+    "line_break_policy": "Segment text preserves the original line endings from the copied source.",
+    "segments": [
+      {
+        "id": "seg_0001",
+        "ordinal": 1,
+        "line_range": {
+          "start": 1,
+          "end": 11
+        },
+        "byte_range_utf8": {
+          "start": 0,
+          "end": 388
+        },
+        "char_count": 388,
+        "byte_count": 388,
+        "starts_mid_line": false,
+        "ends_mid_line": false
+      }
+    ]
+  },
+  "source_segments": [
+    {
+      "id": "seg_0001",
+      "ordinal": 1,
+      "line_range": {
+        "start": 1,
+        "end": 11
+      },
+      "byte_range_utf8": {
+        "start": 0,
+        "end": 388
+      },
+      "char_count": 388,
+      "byte_count": 388,
+      "starts_mid_line": false,
+      "ends_mid_line": false,
+      "text": "USER: Read and update example.txt.\nSTATUS: incomplete\nTOOL read_file (read): {\"path\": \"example.txt\"}\nRESULT: old line\n\nTOOL apply_patch (edit): {\"patch\": \"--- example.txt\\n+++ example.txt\\n-old line\\n+new line\"}\nRESULT: Applied patch.\nTOOL shell (pending): {\"cmd\": \"check\"}\nRESULT: [no output recorded]\nASSISTANT: Update prepared.\nPARTIAL: 1 function_call(s) without function_call_output\n"
+    }
+  ],
+  "reader_contract": {
+    "read_order": [
+      "clip_contract",
+      "source_integrity",
+      "coverage_scope",
+      "agent_episode_graph",
+      "edit_claim",
+      "reader_index",
+      "terminal_state_index",
+      "command_ledger",
+      "validation_matrix",
+      "artifact_delta_index",
+      "long_line_index",
+      "source_segment_index",
+      "navigation_tutorial",
+      "source_segments",
+      "summary",
+      "omission_receipt"
+    ],
+    "rule": "Copied content appears once in ordered source_segments. Other fields are bounded maps.",
+    "no_edit_claim_rule": "Do not say \"no edits were made\" unless edit_claim.type_b_consumer_rule.unqualified_no_edits_allowed is true. For selected/latest windows, say only that no edits were captured in that window.",
+    "exact_text_request": "Concatenate source_segments[].text; local full packet keeps duplicate full projections.",
+    "continuation_selection_rule": "Use indexes to choose evidence for semantic carryforward or restart state; do not expand all source ranges unless terminal or semantic state remains ambiguous."
+  },
+  "omission_receipt": {
+    "reason": "Lossless clip preserves the copied content exactly once as source_segments and omits duplicate high-volume projections that can be reconstructed or read from the local full packet.",
+    "omitted": {
+      "source_text": 0,
+      "source_lines": 12,
+      "source_chunks": 1,
+      "timeline": 7,
+      "sections": 0,
+      "artifacts": 0,
+      "duplicate_source_text_string": 388
+    },
+    "full_authority": [
+      "attachment.source_segments",
+      "backend.raw_source",
+      "backend.full_packet",
+      "backend.private_clip"
+    ]
+  },
+  "size_policy": {
+    "target": "lossless export, source once, <= source + 25% plus fixed allowance when JSON carrier is feasible",
+    "raw_source_bytes": 388,
+    "export_bytes": 18202,
+    "measured_ratio": 46.9124,
+    "budget_profile": "tiny_fixed_overhead",
+    "budget_bytes": 18388,
+    "fixed_allowance_bytes": 18000,
+    "ratio_target": null,
+    "carrier_decision": "single_json",
+    "reason": "single_json_carrier_within_measured_budget",
+    "attempted_single_json_bytes": null,
+    "attempted_single_json_ratio": null
+  }
+}

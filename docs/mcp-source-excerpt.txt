@@ -1,0 +1,63 @@
+INSPECTION EXCERPT: actual production functions, not a standalone MCP server.
+
+def prepare(provider: str, session_id: str, scope: str = 'latest_prompt_cycle') -> dict:
+    row = find_thread(provider, session_id)
+    allowed = ('latest_prompt_cycle', 'full_thread_concise', 'full_thread')
+    last_n = re.fullmatch(r'last_n_turns:([1-9][0-9]?)', scope)
+    if scope not in allowed and not last_n:
+        raise ValueError('Choose latest response, full compact, full detailed, or 1–99 recent turns.')
+    with _render_lock:
+        path = Path(row['session_file'])
+        turns = trace.parse_claude_session(path) if row['provider'] == 'claude_code' else trace.parse_codex_session(path)
+        if not turns:
+            raise ValueError('This chat has no readable turns yet.')
+        if last_n:
+            selected = trace.merge_prompt_cycle(turns[-int(last_n[1]):], threshold_words=0)
+        else:
+            selected = trace.select_trace_window(turns, turn_arg=None, active=True, allow_partial=True,
+                prompt_cycle=scope == 'latest_prompt_cycle', full_thread=scope.startswith('full_thread'),
+                threshold_words=trace.SHORT_PROMPT_CHAIN_WORD_THRESHOLD)
+        title = row.get('title') or f"{row['provider']} {session_id[:8]}"
+        if scope == 'full_thread_concise':
+            body = trace.render_thread_closeout_report(selected, title=title, include_linked_child_compacts=True)
+        else:
+            body, _ = trace.render_trace_capsule_text(selected, title=title, source_window=scope)
+        raw = body.encode()
+        if len(raw) > MAX_TRACE_BYTES:
+            raise ValueError('This trace is larger than 16 MB. Choose Full thread compact or fewer recent turns.')
+        digest = hashlib.sha256(raw).hexdigest()
+        folder = SUPPORT / 'MCP Traces'
+        folder.mkdir(parents=True, exist_ok=True)
+        destination = folder / (digest + '.md')
+        if not destination.exists():
+            temp = folder / (digest + '.tmp')
+            temp.write_bytes(raw)
+            temp.replace(destination)
+        label = {'full_thread_concise':'full thread compact','full_thread':'full thread detailed','latest_prompt_cycle':'latest response'}.get(scope, scope.replace('last_n_turns:', 'last ') + ' turns')
+        resource = {'type':'resource_link', 'uri':f'agent-trace://artifact/{digest}', 'name':f'{title} — {label}',
+                    'mimeType':'text/markdown', 'size':len(raw), 'description':f"{row['provider']} · {session_id} · {label}"}
+        return {'ok':True, 'provider':row['provider'], 'session_id':session_id, 'scope':scope,
+                'title':title, 'bytes':len(raw), 'sha256':digest, 'resource':resource, 'text':body,
+                'turn_index':selected.turn_index}
+
+
+    @server.tool(title='Search chats to mention', annotations=readonly,
+                 meta={'ui':{'visibility':['app','model']}, 'openai/extensions':{'mentions/search':{}}})
+    async def search_trace_threads(query: str = '') -> CallToolResult:
+        data = {'items': await asyncio.to_thread(search_threads, query)}
+        return CallToolResult(content=[TextContent(type='text', text=json.dumps(data))], structuredContent=data)
+
+    @server.tool(title='Read chat context', annotations=cached_write, meta={'ui':{'visibility':['app','model']}})
+    async def read_chat_context(provider: str, session_id: str, scope: str = 'full_thread_concise') -> CallToolResult:
+        """Read a selected chat directly, without the UI or manual copying. Search first for its exact ID. Returns the first 24000 characters and a stable continuation cursor."""
+        data = await asyncio.to_thread(prepare, provider, session_id, scope)
+        page = await asyncio.to_thread(trace_page, data['sha256'])
+        metadata = {k:v for k,v in data.items() if k != 'text'}
+        return CallToolResult(content=[TextContent(type='text', text=page['text'])], structuredContent={**metadata,**{k:v for k,v in page.items() if k != 'text'}})
+
+    @server.tool(title='Read next trace page', annotations=readonly)
+    async def read_trace_page(sha256: str, offset: int, limit: int = 24000) -> CallToolResult:
+        """Continue a content-addressed snapshot returned by read_chat_context; pages do not change when the source chat advances."""
+        page = await asyncio.to_thread(trace_page, sha256, offset, limit)
+        return CallToolResult(content=[TextContent(type='text', text=page.pop('text'))], structuredContent=page)
+

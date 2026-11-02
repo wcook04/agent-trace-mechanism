@@ -1,8 +1,9 @@
-{"type":"session_meta","payload":{"id":"synthetic-codex"}}
-{"type":"event_msg","payload":{"type":"task_started","turn_id":"turn-1"}}
-{"type":"event_msg","payload":{"type":"user_message","message":"Check the example."}}
-{"type":"response_item","payload":{"type":"function_call","name":"shell","arguments":"{\"cmd\":\"echo ok\"}","call_id":"call-1"}}
-{"type":"response_item","payload":{"type":"function_call_output","call_id":"call-1","output":"ok\nProcess exited with code 0"}}
-{"type":"response_item","payload":{"type":"function_call","name":"shell","arguments":"{\"cmd\":\"pending\"}","call_id":"call-2"}}
-{"type":"compacted","payload":{"message":"Synthetic saved summary."}}
-{"timestamp":"2026-01-01T00:00:00Z","type":"event_msg","payload":{"type":"task_complete","last_agent_message":"First command succeeded."}}
+{"type": "session_meta", "payload": {"id": "synthetic-codex"}}
+{"type": "event_msg", "payload": {"type": "task_started", "turn_id": "turn-1"}}
+{"type": "event_msg", "payload": {"type": "user_message", "message": "Read and update example.txt."}}
+{"type": "response_item", "payload": {"type": "function_call", "name": "read_file", "arguments": "{\"path\": \"example.txt\"}", "call_id": "read"}}
+{"type": "response_item", "payload": {"type": "function_call_output", "call_id": "read", "output": "old line\n"}}
+{"type": "response_item", "payload": {"type": "function_call", "name": "apply_patch", "arguments": "{\"patch\": \"--- example.txt\\n+++ example.txt\\n-old line\\n+new line\"}", "call_id": "edit"}}
+{"type": "response_item", "payload": {"type": "function_call_output", "call_id": "edit", "output": "Applied patch."}}
+{"type": "response_item", "payload": {"type": "function_call", "name": "shell", "arguments": "{\"cmd\": \"check\"}", "call_id": "pending"}}
+{"type": "event_msg", "timestamp": "2026-01-01T00:00:00Z", "payload": {"type": "task_complete", "last_agent_message": "Update prepared."}}

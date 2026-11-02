@@ -1,0 +1,52 @@
+# call-pairing
+
+Assistant:
+
+I’ll inspect the specified repository’s fixtures, parser, and tests, then run a focused temporary/in-memory check using only its `.venv/bin/python`.
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"pwd && rg --files -g 'AGENTS.md' -g '*fixture*' -g '*test*' -g '*.py' | head -100",workdir:"<review-repository>",yield_time_ms:10000,max_output_tokens:3000});
+text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"rg --files",workdir:"<review-repository>",yield_time_ms:10000,max_output_tokens:4000});
+text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"sed -n '1,260p' src/trace_mechanism/parser.py && sed -n '1,300p' tests/test_mechanism.py && sed -n '1,260p' examples/codex.jsonl && sed -n '1,260p' examples/claude.jsonl",workdir:"<review-repository>",yield_time_ms:10000,max_output_tokens:9000});
+text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"sed -n '260,620p' src/trace_mechanism/parser.py && sed -n '1,280p' src/trace_mechanism/replay.py && cat examples/codex.expected.json | head -c 1000 && cat examples/claude.expected.json | head -c 1000",workdir:"<review-repository>",yield_time_ms:10000,max_output_tokens:8000});
+text(r.output);
+
+```
+
+exec [wrapper]:
+```
+const r = await tools.exec_command({cmd:"sed -n '1,220p' examples/codex.detailed.txt && sed -n '1,220p' examples/claude.detailed.txt && sed -n '1,180p' examples/codex.compact.txt && sed -n '1,180p' examples/claude.compact.txt && .venv/bin/python -m unittest tests.test_mechanism.MechanismTests.test_explicit_replay_matches_call_and_result -v",workdir:"<review-repository>",yield_time_ms:10000,max_output_tokens:5000});
+text(r.output);
+
+```
+
+Inspected the synthetic Codex and Claude JSONL fixtures, expected outputs, parser, and replay test.
+
+Ran from `<review-repository>`:
+
+```sh
+.venv/bin/python -m unittest tests.test_mechanism.MechanismTests.test_explicit_replay_matches_call_and_result -v
+```
+
+It passed for both providers. The test writes initial records to temporary files, parses them as incomplete with a missing result, appends matching result records, and reparses. The after-state is complete; the tool call ID is `c1` and its output is `ok`.
+
+The fixture snapshots also show the incomplete state explicitly: Codex has a pending `shell` call with no output, and Claude’s expected output contains its completed matched calls. This verifies synthetic parser behavior only; it does not establish behavior on real provider exports.

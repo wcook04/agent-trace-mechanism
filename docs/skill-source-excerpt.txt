@@ -1,0 +1,12 @@
+A supplied exact provider/session ID can go straight to a reader. Otherwise call `search_trace_threads` with a short distinctive title, ID, or prompt phrase. Search matches all query terms against titles, provider, session ID and the first-prompt preview; it is not an embedding search. If empty, broaden the terms once or use the native chat inventory. Compare title, provider, ID and date before choosing among similar chats. Ask only when the intended conversation remains materially ambiguous.
+
+## Recover enough context
+
+| Need | Tool and scope |
+|---|---|
+| Resume the latest work | `read_chat_context(provider, session_id, scope="latest_prompt_cycle")` |
+| Recall decisions across the conversation | `read_chat_context(..., scope="full_thread_concise")` |
+| Inspect a few recent turns | `read_chat_context(..., scope="last_n_turns:3")` (1–99 supported) |
+| Resolve an exact command, failure or evidence gap | `read_chat_context(..., scope="full_thread")`, only as needed |
+| Check live parent/worker activity | `read_trace_activity` / `read_trace_team`, or the host's native chat-status tools |
+

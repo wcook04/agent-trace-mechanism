@@ -1,18 +1,31 @@
 [
   {
-    "prompt": "Check the example.",
-    "assistant": "The command succeeded.",
+    "prompt": "Read and update example.txt.",
+    "assistant": "Update complete.",
     "complete": true,
     "partial_reason": null,
     "tools": [
       {
-        "name": "Bash",
-        "call_id": "call-1",
+        "name": "Read",
+        "call_id": "read",
         "input": {
-          "command": "echo ok"
+          "file_path": "example.txt"
         },
-        "output": "ok",
-        "error": false
+        "output": "old line\n",
+        "error": false,
+        "missing_result": false
+      },
+      {
+        "name": "Edit",
+        "call_id": "edit",
+        "input": {
+          "file_path": "example.txt",
+          "old_string": "old line",
+          "new_string": "new line"
+        },
+        "output": "Updated example.txt.",
+        "error": false,
+        "missing_result": false
       }
     ]
   }

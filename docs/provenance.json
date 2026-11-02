@@ -15,5 +15,15 @@
     "parse_claude_session": "5837f9d0ff24578144b93d8411bf608ea24bed36cfaf0e38d88ad3d624389760",
     "parse_codex_session": "fa978af7e3486cbc3d954d2bda490dc5de1071994526b49597429d186b5a103f"
   },
-  "method": "Exact source blocks, including decorators, in dependency order. Imports and one regex constant are included separately."
+  "method": "Exact parser source blocks, including decorators, in dependency order. Imports and two constants are included separately.",
+  "adapted_files": [
+    "src/trace_mechanism/__main__.py",
+    "src/trace_mechanism/views.py",
+    "src/trace_mechanism/replay.py",
+    "src/trace_mechanism/agent_tools.py",
+    "src/trace_mechanism/agent_demo.py"
+  ],
+  "production_prepare_sha256": "5ddf078ad35eec6805a4d0e9c5992494e87565c8c9df7e88b223f5a674166930",
+  "production_prepare_source": "Agent Trace mcp_server.py::prepare",
+  "boundary": "The parser blocks are exact; renderers, registry, snapshots and demos are inspection adaptations. Source excerpts are not runnable integration code."
 }

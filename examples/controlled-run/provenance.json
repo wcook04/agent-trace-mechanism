@@ -1,0 +1,75 @@
+{
+  "renderer_source_sha256": "8f466ca0cfd499af735b2b8ffb735d16088d3b28c5f91987bc7e7ed49553b0cc",
+  "renderer_functions": [
+    "parse_codex_session",
+    "merge_prompt_cycle",
+    "render_thread_closeout_report",
+    "render_trace_capsule_text"
+  ],
+  "structured_builder_source_sha256": "fdba33de2a2ef978caff242856dde289e2f20e8b64b01ec76d43b3ea75ebadc8",
+  "structured_builder_functions": [
+    "parseAgentTrace",
+    "buildAttachmentClip"
+  ],
+  "method": "Production renderers invoked independently for each sanitized input with child discovery disabled; two-turn child merged. Outputs assembled with explicit labels. Structured builder consumes assembled detailed text with default carrier settings. Post-render paths replaced with placeholders.",
+  "source_window": "full_thread",
+  "generated_at_for_compact": "2026-01-01T00:00:00Z",
+  "files": {
+    "assembled.compact.txt": {
+      "bytes": 18890,
+      "sha256": "3923eaecf2c5352167dff5f7b869dc9b2f0f4800eb14ae42ab7ada493a9f9c3d"
+    },
+    "assembled.detailed.raw.txt": {
+      "bytes": 149482,
+      "sha256": "7afe7c99f7badbb39aeb653da4986c3358b1122f2a0c54330ad90a3364a12765"
+    },
+    "assembled.detailed.txt": {
+      "bytes": 149482,
+      "sha256": "7afe7c99f7badbb39aeb653da4986c3358b1122f2a0c54330ad90a3364a12765"
+    },
+    "call-pairing.compact.txt": {
+      "bytes": 2547,
+      "sha256": "c9aad805c2bf7ce388aad4eacb3adeff07a522c07371bd7066b5df8e0bc4678e"
+    },
+    "call-pairing.detailed.txt": {
+      "bytes": 49878,
+      "sha256": "bd5a926b1add91ca4235814189aa83d3037b6e2d935fd31864783bf2439f6f89"
+    },
+    "call-pairing.jsonl": {
+      "bytes": 48342,
+      "sha256": "1aebf3e0f38610bb0aead0ec9f9066ca7fa061afacbc8504366a0b6f13a18ed7"
+    },
+    "parent.compact.txt": {
+      "bytes": 6291,
+      "sha256": "3bf315762f6a8fc74aac6b3a69c057f65eaabdd011b4cda1f0ff5dc5fa0b822b"
+    },
+    "parent.detailed.txt": {
+      "bytes": 45400,
+      "sha256": "5443bc6723e381004c0a28a72079f986f978ca57a299328f6693aa1c0a71a401"
+    },
+    "parent.jsonl": {
+      "bytes": 41405,
+      "sha256": "a601572d36b5c12fbda6fb2343978b67a4b968ff8a6c2499bacda875a407a7e9"
+    },
+    "scope-snapshot.compact.txt": {
+      "bytes": 9853,
+      "sha256": "b2ecbd9d96c290786fdd0e8a1b89542f62eb4fb0a9bdc2950ac474f68f8d9e53"
+    },
+    "scope-snapshot.detailed.txt": {
+      "bytes": 54002,
+      "sha256": "af1a01aa0990a8f72ffe22d91b676358a6084379a7c7218483c34ffe668ef7a5"
+    },
+    "scope-snapshot.jsonl": {
+      "bytes": 50481,
+      "sha256": "839504f4bbb1fafb41156a10ef30c44e09ff8890311d3633987f8ccee7873e7e"
+    },
+    "selection-receipt.json": {
+      "bytes": 4478,
+      "sha256": "e45b6f73f1bda86eb79c96160e364d95f6c0ce30f342d258636d09b7cf59d496"
+    },
+    "structured-attachment.json": {
+      "bytes": 227198,
+      "sha256": "48fe93c67ab2c17ad7970d908294cce1079c87c063c1a56dd11eb0c73e4b00a4"
+    }
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "runs": {
+    "parent": {
+      "thread_id": "01a19dcb-e1c3-7ec0-adce-3291e2282925",
+      "model_observed": [
+        "gpt-6.1-terra"
+      ],
+      "source_sha256": "80f55d98459999374d8a821117e9de4e2198d4252d2e737006d1ff52be87030c",
+      "source_records": 109,
+      "omitted_source_records_sha256": "162fd2ba031c7c1021d901b70263da8ea1d4ae77a50b5a7a2b52eca64eef379c",
+      "retained_records": {
+        "event_msg:task_started": 1,
+        "response_item:message": 3,
+        "response_item:function_call": 5,
+        "response_item:function_call_output": 5,
+        "response_item:custom_tool_call": 6,
+        "response_item:custom_tool_call_output": 6,
+        "event_msg:task_complete": 1
+      },
+      "omitted_records_by_type": {
+        "session_meta:other": 1,
+        "response_item:additional_tools": 1,
+        "response_item:message": 6,
+        "world_state:other": 3,
+        "turn_context:other": 1,
+        "event_msg:thread_settings_applied": 1,
+        "response_item:function_call_output": 1,
+        "event_msg:item_completed": 26,
+        "response_item:reasoning": 8,
+        "token_usage_record:other": 13,
+        "event_msg:token_count": 13,
+        "inter_agent_communication_metadata:other": 4,
+        "response_item:agent_message": 4
+      },
+      "constructed_session_meta": 1,
+      "original_task_text": "extracted from create_thread output input element; outer metadata excluded"
+    },
+    "call-pairing": {
+      "thread_id": "01a19dcb-fe3d-7910-9513-0d610d0dfa47",
+      "model_observed": [
+        "gpt-6-luna"
+      ],
+      "source_sha256": "cacb277d9eed296eb6d700bc41b4ebe00639c46cce87473eacbbbbfc70ee6fd2",
+      "source_records": 57,
+      "omitted_source_records_sha256": "2923f4eab619cbd15a7c022ffc3111ae2dd62845e12f99de13233af0c168cb6f",
+      "retained_records": {
+        "event_msg:task_started": 1,
+        "response_item:message": 2,
+        "response_item:custom_tool_call": 5,
+        "response_item:custom_tool_call_output": 5,
+        "event_msg:task_complete": 1
+      },
+      "omitted_records_by_type": {
+        "session_meta:other": 1,
+        "response_item:additional_tools": 1,
+        "response_item:message": 5,
+        "world_state:other": 1,
+        "turn_context:other": 1,
+        "event_msg:thread_settings_applied": 1,
+        "inter_agent_communication_metadata:other": 1,
+        "response_item:agent_message": 1,
+        "event_msg:item_completed": 13,
+        "response_item:reasoning": 6,
+        "token_usage_record:other": 6,
+        "event_msg:token_count": 6
+      },
+      "constructed_session_meta": 1,
+      "original_task_text": "encrypted child assignment excluded"
+    },
+    "scope-snapshot": {
+      "thread_id": "01a19dcc-0ec0-7de2-b000-2777981829eb",
+      "model_observed": [
+        "gpt-6-luna"
+      ],
+      "source_sha256": "f7fa86ec52304982b041bedd8b4122bafb2734e8e517608556b34bba1ca194bd",
+      "source_records": 102,
+      "omitted_source_records_sha256": "fcfe56cb8039b40d06d6729f8936062a29fde32ce4078bf01dd09f6b805f7370",
+      "retained_records": {
+        "event_msg:task_started": 2,
+        "response_item:custom_tool_call": 10,
+        "response_item:custom_tool_call_output": 10,
+        "response_item:message": 2,
+        "event_msg:task_complete": 2,
+        "response_item:function_call": 1,
+        "response_item:function_call_output": 1
+      },
+      "omitted_records_by_type": {
+        "session_meta:other": 1,
+        "response_item:additional_tools": 1,
+        "response_item:message": 5,
+        "world_state:other": 1,
+        "turn_context:other": 2,
+        "event_msg:thread_settings_applied": 1,
+        "inter_agent_communication_metadata:other": 2,
+        "response_item:agent_message": 2,
+        "event_msg:item_completed": 23,
+        "response_item:reasoning": 10,
+        "token_usage_record:other": 13,
+        "event_msg:token_count": 13
+      },
+      "constructed_session_meta": 1,
+      "original_task_text": "encrypted child assignment excluded"
+    }
+  },
+  "replacement_counts": {
+    "workspace_paths": 25,
+    "private_checkout_paths": 0,
+    "encrypted_strings": 4
+  },
+  "method": "Allowlisted assistant commentary/finals, task lifecycle, calls and results; provider-shaped session identity constructed; removed injected user records, reasoning, metadata, encrypted fields and nonselected event types; paths and encrypted argument strings replaced. Counts describe source records, not payload-level replacement counts."
+}

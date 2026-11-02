@@ -1,27 +1,39 @@
 [
   {
-    "prompt": "Check the example.",
-    "assistant": "First command succeeded.",
+    "prompt": "Read and update example.txt.",
+    "assistant": "Update prepared.",
     "complete": false,
     "partial_reason": "1 function_call(s) without function_call_output",
     "tools": [
       {
-        "name": "shell",
-        "call_id": "call-1",
+        "name": "read_file",
+        "call_id": "read",
         "input": {
-          "cmd": "echo ok"
+          "path": "example.txt"
         },
-        "output": "ok\nProcess exited with code 0",
-        "error": false
+        "output": "old line\n",
+        "error": false,
+        "missing_result": false
+      },
+      {
+        "name": "apply_patch",
+        "call_id": "edit",
+        "input": {
+          "patch": "--- example.txt\n+++ example.txt\n-old line\n+new line"
+        },
+        "output": "Applied patch.",
+        "error": false,
+        "missing_result": false
       },
       {
         "name": "shell",
-        "call_id": "call-2",
+        "call_id": "pending",
         "input": {
-          "cmd": "pending"
+          "cmd": "check"
         },
         "output": "[no output recorded]",
-        "error": false
+        "error": false,
+        "missing_result": true
       }
     ]
   }

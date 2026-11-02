@@ -1,0 +1,34 @@
+{
+  "source_file": "tools/agent_trace_structurer/parser.mjs",
+  "source_sha256": "fdba33de2a2ef978caff242856dde289e2f20e8b64b01ec76d43b3ea75ebadc8",
+  "functions": [
+    "parseAgentTrace",
+    "buildAttachmentClip"
+  ],
+  "fixture": "examples/codex.detailed.txt",
+  "fixture_sha256": "21755a933cd31772bdff4287c7256058af26d69bd6ab81267a92c77404f39690",
+  "output": "examples/production-structured-clip.json",
+  "output_sha256": "4d8012a24213311a8b4c6c9c98f0cf9c68840a1a4d8f357dac34299b21962b0f",
+  "excerpt": "docs/structured-clip-source-excerpt.txt",
+  "excerpt_sha256": "798ef6ce38f7bf20411cb27bec18337fdaad3ce21f15b47dbbc62f7dd4a1c0fa",
+  "excerpt_line_ranges": [
+    [
+      4789,
+      4812
+    ],
+    [
+      4891,
+      4917
+    ],
+    [
+      4925,
+      4939
+    ],
+    [
+      4967,
+      4979
+    ]
+  ],
+  "invocation": "buildAttachmentClip(parseAgentTrace(source, \"codex.detailed.txt\", \"2026-01-01T00:00:00Z\")) using production parser.mjs; default options",
+  "validation": "Concatenated segment text equals fixture; each UTF-8 byte range maps to its segment and total bytes equal input."
+}

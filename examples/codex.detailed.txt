@@ -1,0 +1,11 @@
+USER: Read and update example.txt.
+STATUS: incomplete
+TOOL read_file (read): {"path": "example.txt"}
+RESULT: old line
+
+TOOL apply_patch (edit): {"patch": "--- example.txt\n+++ example.txt\n-old line\n+new line"}
+RESULT: Applied patch.
+TOOL shell (pending): {"cmd": "check"}
+RESULT: [no output recorded]
+ASSISTANT: Update prepared.
+PARTIAL: 1 function_call(s) without function_call_output

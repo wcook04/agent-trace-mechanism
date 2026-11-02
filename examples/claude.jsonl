@@ -1,4 +1,6 @@
-{"type":"user","sessionId":"synthetic-claude","message":{"content":"Check the example."}}
-{"type":"assistant","message":{"content":[{"type":"tool_use","id":"call-1","name":"Bash","input":{"command":"echo ok"}}],"stop_reason":"tool_use"}}
-{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"call-1","content":"ok"}]}}
-{"type":"assistant","message":{"content":[{"type":"text","text":"The command succeeded."}],"stop_reason":"end_turn"}}
+{"type": "user", "sessionId": "synthetic-claude", "message": {"content": "Read and update example.txt."}}
+{"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "read", "name": "Read", "input": {"file_path": "example.txt"}}], "stop_reason": "tool_use"}}
+{"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "read", "content": "old line\n"}]}}
+{"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "edit", "name": "Edit", "input": {"file_path": "example.txt", "old_string": "old line", "new_string": "new line"}}], "stop_reason": "tool_use"}}
+{"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "edit", "content": "Updated example.txt."}]}}
+{"type": "assistant", "message": {"content": [{"type": "text", "text": "Update complete."}], "stop_reason": "end_turn"}}

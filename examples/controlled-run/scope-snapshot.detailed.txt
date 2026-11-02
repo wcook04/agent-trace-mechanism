@@ -1,0 +1,936 @@
+# scope-snapshot
+TRACE CAPSULE v3
+provider: codex
+session: 01a19dcc
+window: full_thread turns=1-2 count=2 mode=short_prompt_chain
+presentation: full_thread_detailed_v1
+
+READER_DECISION_CARD
+reading_guide: TIMELINE gives source order; O/I/N/E/T references locate full outputs, inputs, messages, edits and original tool records. SECTION_INDEX gives local 1-based lines. Child scopes have their own IDs and indexes. EDIT_EVENT_LOG records edit attempts; FINAL_DELTA is the recovered final patch.
+
+SUMMARY
+status: full_thread_complete
+changed: edits not captured: commands of kind scripted write ran and their file effects were not extracted
+
+SECTION_INDEX
+index_contract: local 1-based lines
+READER_DECISION_CARD line=8
+SUMMARY line=11
+COMMAND_RETURNS line=26
+TOOL_INPUTS line=765
+TOOL_SOURCE_RECORDS line=822
+VISIBLE_PROGRESS line=879
+TIMELINE line=893
+OMISSIONS line=933
+
+COMMAND_RETURNS
+O001 C001 srch inline input_ref=I001
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\"sed -n '1,240p' src/trace_mechanism/agent_tools.py && sed -n '1,260p' src/trace_mechanism/views.py && rg --files | rg 'fixture|invented'\"
+BEGIN_output O001
+output:
+| Script completed
+| Wall time 0.1 seconds
+| Output:
+|
+| """Adapted in-memory tool boundary: explicit registry, no MCP transport or home scan."""
+| import hashlib
+| from .parser import parse_claude_session, parse_codex_session
+| from .views import render
+|
+|
+| class AgentTools:
+|     def __init__(self, entries):
+|         # Caller supplies provider, session_id, title and path; no discovery.
+|         self.entries = list(entries)
+|         self.snapshots = {}
+|
+|     def search_trace_threads(self, query):
+|         terms = query.casefold().split()
+|         return [{key: row[key] for key in ('provider', 'session_id', 'title')}
+|                 for row in self.entries if all(term in
+|                 f"{row['provider']} {row['session_id']} {row['title']}".casefold() for term in terms)]
+|
+|     def read_chat_context(self, provider, session_id, scope='full_thread_concise', limit=24000):
+|         rows = [r for r in self.entries if (r['provider'], r['session_id']) == (provider, session_id)]
+|         if len(rows) != 1 or provider not in ('codex', 'claude'):
+|             raise ValueError('Choose one registered provider and session ID.')
+|         if scope not in ('full_thread_concise', 'full_thread'):
+|             raise ValueError('This demo supports compact and detailed full-thread scopes only.')
+|         parser = parse_codex_session if provider == 'codex' else parse_claude_session
+|         text = render(parser(rows[0]['path']), detail=scope == 'full_thread')
+|         digest = hashlib.sha256(text.encode()).hexdigest()
+|         self.snapshots[digest] = text
+|         return {'provider': provider, 'session_id': session_id, 'scope': scope,
+|                 **self.read_trace_page(digest, 0, limit)}
+|
+|     def read_trace_page(self, sha256, offset=0, limit=24000):
+|         if sha256 not in self.snapshots or offset < 0 or limit < 1:
+|             raise ValueError('Unknown snapshot or invalid page.')
+|         text = self.snapshots[sha256]
+|         if offset > len(text):
+|             raise ValueError('Offset is beyond the snapshot.')
+|         end = min(offset + limit, len(text))
+|         return {'sha256': sha256, 'text': text[offset:end],
+|                 'next_offset': end if end < len(text) else None, 'total_chars': len(text)}
+| """Small, intentionally non-equivalent projections of the production trace views."""
+| import json
+|
+|
+| def structured(turns):
+|     return [{'prompt': turn.prompt_text, 'assistant': turn.assistant_text,
+|              'complete': turn.is_complete, 'partial_reason': turn.partial_reason,
+|              'tools': [{'name': e.name, 'call_id': e.tool_call_id, 'input': e.input,
+|                         'output': e.output_text, 'error': e.is_error,
+|                         'missing_result': len(e.source_record_indices) < 2} for e in turn.tool_events]}
+|             for turn in turns]
+|
+|
+| def render(turns, detail=False):
+|     lines = []
+|     for turn in turns:
+|         lines.extend([f'USER: {turn.prompt_text}', f'STATUS: {"complete" if turn.is_complete else "incomplete"}'])
+|         for event in turn.tool_events:
+|             allowed = {'path', 'file_path', 'filename', 'command', 'cmd'}
+|             displayed = event.input if detail else {k: v for k, v in event.input.items() if k in allowed}
+|             lines.append(f'TOOL {event.name} ({event.tool_call_id}): {json.dumps(displayed, ensure_ascii=False, sort_keys=True)}')
+|             lines.append(f'RESULT: {event.output_text}' if detail else 'RESULT: [omitted in compact view]')
+|         if turn.assistant_text:
+|             lines.append(f'ASSISTANT: {turn.assistant_text}')
+|         if turn.partial_reason:
+|             lines.append(f'PARTIAL: {turn.partial_reason}')
+|     return '\n'.join(lines)
+|
+END_output O001
+O002 C002 srch inline input_ref=I002
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\"rg --files\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":3000}); text(r.output);\n"}
+BEGIN_output O002
+output:
+| Script completed
+| Wall time 0.1 seconds
+| Output:
+|
+| src/trace_mechanism/views.py
+| src/trace_mechanism/agent_tools.py
+| src/trace_mechanism/__main__.py
+| src/trace_mechanism/replay.py
+| src/trace_mechanism/parser.py
+| src/trace_mechanism/__init__.py
+| src/trace_mechanism/agent_demo.py
+| SECURITY.md
+| examples/claude.compact.txt
+| examples/codex.expected.json
+| examples/claude.expected.json
+| examples/claude.detailed.txt
+| examples/codex.jsonl
+| examples/claude.jsonl
+| examples/codex.detailed.txt
+| examples/production-structured-clip.json
+| examples/codex.compact.txt
+| README.md
+| docs/structured-clip-provenance.json
+| docs/structured-clip-source-excerpt.txt
+| docs/skill-source-excerpt.txt
+| docs/repository_layout.json
+| docs/provenance.json
+| docs/mcp-source-excerpt.txt
+| docs/mechanism.md
+| tests/test_mechanism.py
+| pyproject.toml
+| LICENSE
+| tools/NOTICE.md
+| tools/check_layout.py
+|
+END_output O002
+O003 C003 srch inline input_ref=I003
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\"sed -n '1,260p' tests/test_mechanism.py && sed -n '1,240p' src/trace_mechanism/parser.py && sed -n '1,180p' examples/codex.jsonl && sed -n
+BEGIN_output O003
+output:
+| Script completed
+| Wall time 0.1 seconds
+| Output:
+|
+| import ast
+| import hashlib
+| import json
+| from pathlib import Path
+| import subprocess
+| import sys
+| import tempfile
+| import unittest
+| from trace_mechanism.parser import parse_codex_session, parse_claude_session
+| from trace_mechanism.replay import replay, records
+| from trace_mechanism.agent_tools import AgentTools
+| from trace_mechanism.views import render, structured
+|
+| ROOT = Path(__file__).resolve().parents[1]
+|
+|
+| class MechanismTests(unittest.TestCase):
+|     def test_extracted_symbols_match_recorded_original_hashes(self):
+|         source = (ROOT / 'src/trace_mechanism/parser.py').read_text()
+|         lines = source.splitlines(keepends=True)
+|         nodes = {n.name: n for n in ast.parse(source).body if isinstance(n, (ast.FunctionDef, ast.ClassDef))}
+|         recorded = json.loads((ROOT / 'docs/provenance.json').read_text())['symbol_sha256']
+|         for name, expected in recorded.items():
+|             node = nodes[name]
+|             start = min([node.lineno] + [d.lineno for d in node.decorator_list])
+|             self.assertEqual(hashlib.sha256(''.join(lines[start-1:node.end_lineno]).encode()).hexdigest(), expected, name)
+|
+|     def test_synthetic_examples_match_expected_output(self):
+|         for provider in ('codex', 'claude'):
+|             actual = subprocess.check_output([sys.executable, '-m', 'trace_mechanism', provider,
+|                                               str(ROOT / f'examples/{provider}.jsonl')], text=True)
+|             self.assertEqual(json.loads(actual), json.loads((ROOT / f'examples/{provider}.expected.json').read_text()))
+|
+|     def test_actual_missing_result_and_view_selection(self):
+|         for provider, parse in [('codex', parse_codex_session), ('claude', parse_claude_session)]:
+|             turns = parse(ROOT / f'examples/{provider}.jsonl')
+|             compact, detailed, data = render(turns), render(turns, True), structured(turns)
+|             self.assertIn('old line', detailed)
+|             self.assertIn('new line', detailed)
+|             self.assertNotIn('old line', compact)
+|             self.assertNotIn('new line', compact)
+|             self.assertIn('[omitted in compact view]', compact)
+|             self.assertTrue(any(e['output'].startswith('old line') for e in data[0]['tools']))
+|         pending = parse_codex_session(ROOT / 'examples/codex.jsonl')[0]
+|         self.assertFalse(pending.is_complete)
+|         self.assertEqual(pending.tool_events[-1].output_text, '[no output recorded]')
+|         self.assertIn('without function_call_output', pending.partial_reason)
+|
+|     def test_agent_search_scopes_and_stable_snapshot(self):
+|         with tempfile.TemporaryDirectory() as directory:
+|             for provider in ('codex', 'claude'):
+|                 path = Path(directory) / provider
+|                 initial, later, _ = records(provider)
+|                 path.write_text(''.join(json.dumps(row) + '\n' for row in initial))
+|                 tools = AgentTools([{'provider': provider, 'session_id': 'test', 'title': 'Example', 'path': path}])
+|                 self.assertEqual(tools.search_trace_threads('example')[0]['provider'], provider)
+|                 self.assertEqual(tools.search_trace_threads('absent'), [])
+|                 with self.assertRaises(ValueError):
+|                     tools.read_chat_context(provider, 'unknown')
+|                 before = tools.read_chat_context(provider, 'test', limit=10)
+|                 old = tools.read_trace_page(before['sha256'])['text']
+|                 with path.open('a') as f:
+|                     for row in later:
+|                         f.write(json.dumps(row) + '\n')
+|                 after = tools.read_chat_context(provider, 'test', scope='full_thread')
+|                 self.assertNotEqual(before['sha256'], after['sha256'])
+|                 self.assertEqual(tools.read_trace_page(before['sha256'])['text'], old)
+|                 self.assertEqual(before['text'] + tools.read_trace_page(before['sha256'], before['next_offset'])['text'], old)
+|                 self.assertIn('RESULT: ok', after['text'])
+|                 self.assertIn('[omitted in compact view]', old)
+|
+|     def test_production_clip_preserves_synthetic_source(self):
+|         clip = json.loads((ROOT / 'examples/production-structured-clip.json').read_text())
+|         source = (ROOT / 'examples/codex.detailed.txt').read_bytes()
+|         segments = sorted(clip['source_segments'], key=lambda item: item['ordinal'])
+|         self.assertEqual(''.join(item['text'] for item in segments).encode(), source)
+|         for item in segments:
+|             bounds = item['byte_range_utf8']
+|             self.assertEqual(source[bounds['start']:bounds['end']], item['text'].encode())
+|         provenance = json.loads((ROOT / 'docs/structured-clip-provenance.json').read_text())
+|         self.assertEqual(hashlib.sha256(source).hexdigest(), provenance['fixture_sha256'])
+|
+|     def test_explicit_replay_matches_call_and_result(self):
+|         with tempfile.TemporaryDirectory() as directory:
+|             for provider in ('codex', 'claude'):
+|                 result = replay(provider, Path(directory) / provider)
+|                 before, after = result['before'][0], result['after'][0]
+|                 self.assertFalse(before['complete'])
+|                 self.assertTrue(before['tools'][0]['missing_result'])
+|                 self.assertTrue(after['complete'])
+|                 self.assertFalse(after['tools'][0]['missing_result'])
+|                 self.assertEqual(after['tools'][0]['call_id'], 'c1')
+|                 self.assertEqual(after['tools'][0]['output'], 'ok')
+|
+|
+| if __name__ == '__main__':
+|     unittest.main()
+| """Provider JSONL parsing functions extracted unchanged from Agent Trace."""
+| from __future__ import annotations
+| import datetime as _dt
+| import hashlib
+| import json
+| import re
+| from dataclasses import dataclass, field
+| from pathlib import Path
+| from typing import Any
+|
+| CLAUDE_COMPLETE_STOP_REASONS = {"end_turn", "max_tokens", "stop_sequence", "refusal"}
+| CODEX_EXIT_CODE_RE = re.compile(r"Process exited with code\s+(-?\d+)")
+|
+| @dataclass
+| class ToolEvent:
+|     index: int
+|     name: str
+|     input: dict
+|     tool_call_id: str | None
+|     started_at: str | None
+|     completed_at: str | None
+|     duration_ms: int | None
+|     is_error: bool
+|     output_text: str
+|     output_char_count: int
+|     output_sha256_16: str
+|     exit_code: int | None = None
+|     outcome_pending: bool = False
+|     source_record_indices: list[int] = field(default_factory=list)
+|
+|
+| @dataclass
+| class AssistantEvent:
+|     text: str
+|     source_record_index: int
+|     timestamp: str | None = None
+|
+|
+| @dataclass
+| class Turn:
+|     provider: str
+|     session_id: str
+|     session_file: str
+|     turn_id: str
+|     turn_index: int
+|     cwd: str | None
+|     started_at: str | None
+|     completed_at: str | None
+|     prompt_text: str
+|     prompt_char_count: int
+|     prompt_sha256_16: str
+|     tool_events: list[ToolEvent]
+|     assistant_text: str
+|     assistant_events: list[AssistantEvent] = field(default_factory=list)
+|     is_complete: bool = False
+|     partial_reason: str | None = None
+|     last_stop_reason: str | None = None
+|     source_record_indices: list[int] = field(default_factory=list)
+|     source_ref: dict = field(default_factory=dict)
+|
+|
+| def _sha16(s: str) -> str:
+|     return hashlib.sha256(s.encode("utf-8")).hexdigest()[:16]
+|
+|
+| def _iso_diff_ms(a: str | None, b: str | None) -> int | None:
+|     if not a or not b:
+|         return None
+|     try:
+|         t1 = _dt.datetime.fromisoformat(a.replace("Z", "+00:00"))
+|         t2 = _dt.datetime.fromisoformat(b.replace("Z", "+00:00"))
+|         return int((t2 - t1).total_seconds() * 1000)
+|     except Exception:
+|         return None
+|
+|
+| def _flatten_claude_content(content: Any) -> str:
+|     if isinstance(content, str):
+|         return content
+|     if not isinstance(content, list):
+|         return ""
+|     parts: list[str] = []
+|     for c in content:
+|         if not isinstance(c, dict):
+|             continue
+|         ct = c.get("type")
+|         if ct == "text":
+|             parts.append(c.get("text", ""))
+|         elif ct == "image":
+|             parts.append("[image attachment]")
+|         elif ct == "tool_use":
+|             parts.append(f"[tool_use {c.get('name')!r}]")
+|         elif ct == "tool_result":
+|             inner = c.get("content")
+|             if isinstance(inner, str):
+|                 parts.append(inner)
+|             elif isinstance(inner, list):
+|                 for b in inner:
+|                     if isinstance(b, dict) and b.get("type") == "text":
+|                         parts.append(b.get("text", ""))
+|     return "\n".join(p for p in parts if p)
+|
+|
+| def _is_real_claude_prompt(rec: dict) -> bool:
+|     if rec.get("type") != "user":
+|         return False
+|     msg = rec.get("message") or {}
+|     content = msg.get("content")
+|     if isinstance(content, str):
+|         return True
+|     if isinstance(content, list):
+|         if not content:
+|             return False
+|         return not any(isinstance(c, dict) and c.get("type") == "tool_result" for c in content)
+|     return False
+|
+|
+| def _parse_codex_exit_code(output: str) -> int | None:
+|     if not output:
+|         return None
+|     m = CODEX_EXIT_CODE_RE.search(output)
+|     if not m:
+|         return None
+|     try:
+|         return int(m.group(1))
+|     except Exception:
+|         return None
+|
+|
+| def _codex_nested_command_receipts(output: str) -> list[dict[str, Any]]:
+|     """Decode printed command transport receipts, never JSON inside their output."""
+|     receipts: list[dict[str, Any]] = []
+|     decoder = json.JSONDecoder()
+|     text = output or ""
+|     consumed_until = 0
+|     for match in re.finditer(r"(?m)^[ \t]*[\[{]", text):
+|         start = match.end() - 1
+|         if start < consumed_until:
+|             continue
+|         try:
+|             value, consumed_until = decoder.raw_decode(text, start)
+|         except (ValueError, TypeError):
+|             continue
+|         # Skip the entire decoded value; nested command output is untrusted data.
+|         values = value if isinstance(value, list) else [value]
+|         for value_index, row in enumerate(values):
+|             receipt_index = value_index if isinstance(value, list) else None
+|             # The standard indexed allSettled printer nests the settlement
+|             # under result. Only unwrap this transport envelope, never output.
+|             if (isinstance(row, dict) and isinstance(row.get("i"), int)
+|                     and not isinstance(row.get("i"), bool)
+|                     and isinstance(row.get("result"), dict)):
+|                 receipt_index = row["i"]
+|                 row = {**row["result"], "i": receipt_index}
+|             if isinstance(row, dict) and row.get("status") == "fulfilled" and isinstance(row.get("value"), dict):
+|                 receipt_index = row.get("i", receipt_index)
+|                 row = row["value"]
+|             elif (isinstance(row, dict) and row.get("status") == "rejected"
+|                   and "reason" in row and isinstance(row.get("i", receipt_index), int)):
+|                 receipts.append({"exit_code": 1, "output": str(row["reason"]),
+|                                  "settled_status": "rejected", "receipt_index": row.get("i", receipt_index)})
+|                 continue
+|             if not isinstance(row, dict) or not isinstance(row.get("output"), str):
+|                 continue
+|             if not isinstance(row.get("wall_time_seconds"), (int, float)):
+|                 continue
+|             if not any(key in row for key in ("chunk_id", "session_id", "exit_code")):
+|                 continue
+|             code = row.get("exit_code")
+|             if code is not None and (not isinstance(code, int) or isinstance(code, bool)):
+|                 continue
+|             if code is None and row.get("session_id") is None:
+|                 continue
+|             receipts.append({**row, **({"receipt_index": receipt_index} if receipt_index is not None else {})})
+|     return receipts
+|
+|
+| def _codex_tool_outcome(name: str, output: str, exit_code: int | None,
+|                         is_error: bool) -> tuple[int | None, bool, bool]:
+|     """Aggregate explicit command outcomes independently of script completion."""
+|     if name.rsplit(".", 1)[-1] not in {"exec", "wait"}:
+|         pending = exit_code is None and bool(re.search(
+|             r"(?m)^\s*Process running with session ID \d+", output or ""
+|         ))
+|         return exit_code, is_error, pending
+|     receipts = _codex_nested_command_receipts(output)
+|     codes = [row["exit_code"] for row in receipts if row.get("exit_code") is not None]
+|     failures = [code for code in codes if code != 0]
+|     pending = any(row.get("exit_code") is None and row.get("session_id") is not None for row in receipts)
+|     pending = pending or bool(re.search(
+|         r"(?m)^\s*(?:Process running with session ID \d+|Script running with cell ID \S+)", output or ""
+|     ))
+|     if failures:
+|         return failures[0], True, pending
+|     if is_error or (exit_code is not None and exit_code != 0):
+|         return exit_code, True, pending
+|     if pending:
+|         return None, False, True
+|     return (0 if codes else exit_code), False, False
+|
+|
+| def parse_claude_session(path: Path) -> list[Turn]:
+|     try:
+|         stat = path.stat()
+|         file_size = stat.st_size
+|         file_mtime = _dt.datetime.fromtimestamp(stat.st_mtime, _dt.timezone.utc).isoformat()
+|     except Exception:
+|         file_size = None
+|         file_mtime = None
+|
+|     records: list[tuple[int, dict]] = []
+|     with path.open() as f:
+|         for i, line in enumerate(f):
+|             line = line.strip()
+|             if not line:
+|                 continue
+|             try:
+|                 records.append((i, json.loads(line)))
+|             except Exception:
+|                 continue
+|
+|     session_id = ""
+|     cwd: str | None = None
+|     for _, r in records:
+|         if not session_id and r.get("sessionId"):
+|             session_id = r["sessionId"]
+|         if cwd is None and r.get("cwd"):
+|             cwd = r["cwd"]
+|         if session_id and cwd:
+|             break
+|
+|     # Sequential grouping: a "real prompt" user record opens a turn; every record
+|     # that follows belongs to that turn until the next real prompt opens a new one.
+|     # Assistant records carry tool_use blocks but no promptId, so promptId-only grouping
+|     # would orphan every tool call.
+|     turn_groups: list[list[tuple[int, dict]]] = []
+|     cur_group: list[tuple[int, dict]] | None = None
+|     for idx, r in records:
+|         if _is_real_claude_prompt(r):
+|             cur_group = [(idx, r)]
+| {"type": "session_meta", "payload": {"id": "synthetic-codex"}}
+| {"type": "event_msg", "payload": {"type": "task_started", "turn_id": "turn-1"}}
+| {"type": "event_msg", "payload": {"type": "user_message", "message": "Read and update example.txt."}}
+| {"type": "response_item", "payload": {"type": "function_call", "name": "read_file", "arguments": "{\"path\": \"example.txt\"}", "call_id": "read"}}
+| {"type": "response_item", "payload": {"type": "function_call_output", "call_id": "read", "output": "old line\n"}}
+| {"type": "response_item", "payload": {"type": "function_call", "name": "apply_patch", "arguments": "{\"patch\": \"--- example.txt\\n+++ example.txt\\n-old line\\n+new line\"}", "call_id": "edit"}}
+| {"type": "response_item", "payload": {"type": "function_call_output", "call_id": "edit", "output": "Applied patch."}}
+| {"type": "response_item", "payload": {"type": "function_call", "name": "shell", "arguments": "{\"cmd\": \"check\"}", "call_id": "pending"}}
+| {"type": "event_msg", "timestamp": "2026-01-01T00:00:00Z", "payload": {"type": "task_complete", "last_agent_message": "Update prepared."}}
+| {"type": "user", "sessionId": "synthetic-claude", "message": {"content": "Read and update example.txt."}}
+| {"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "read", "name": "Read", "input": {"file_path": "example.txt"}}], "stop_reason": "tool_use"}}
+| {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "read", "content": "old line\n"}]}}
+| {"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "edit", "name": "Edit", "input": {"file_path": "example.txt", "old_string": "old line", "new_string": "new line"}}], "stop_reason": "tool_use"}}
+| {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "edit", "content": "Updated example.txt."}]}}
+| {"type": "assistant", "message": {"content": [{"type": "text", "text": "Update complete."}], "stop_reason": "end_turn"}}
+|
+END_output O003
+O004 C004 cmd inline input_ref=I004
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\".venv/bin/python -c 'import json,tempfile; from pathlib import Path; from trace_mechanism.agent_tools import AgentTools; from trace_mechan
+BEGIN_output O004
+output:
+| Script completed
+| Wall time 0.4 seconds
+| Output:
+|
+| Traceback (most recent call last):
+|   File "<string>", line 8, in <module>
+| AssertionError
+|
+END_output O004
+O005 C005 cmd inline input_ref=I005
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\".venv/bin/python - <<'PY'\\nimport json, tempfile\\nfrom pathlib import Path\\nfrom trace_mechanism.agent_tools import AgentTools\\nfrom t
+BEGIN_output O005
+output:
+| Script completed
+| Wall time 0.4 seconds
+| Output:
+|
+| Traceback (most recent call last):
+|   File "<stdin>", line 21, in <module>
+| AssertionError
+|
+END_output O005
+O006 C006 cmd inline input_ref=I006
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\".venv/bin/python - <<'PY'\\nimport json, tempfile\\nfrom pathlib import Path\\nfrom trace_mechanism.agent_tools import AgentTools\\nfrom t
+BEGIN_output O006
+output:
+| Script completed
+| Wall time 0.2 seconds
+| Output:
+|
+| codex 'USER: Run the check.\nSTATUS: incomplete\nTOOL shell (c1): {"cmd": "check"}\nRESULT: [omitted in compact view]\nPARTIAL: no task_complete; 1 function_call(s) without output'
+| detailed contains False False
+| stable True
+| claude 'USER: Run the check.\nSTATUS: incomplete\nTOOL Bash (c1): {"command": "check"}\nRESULT: [omitted in compact view]\nPARTIAL: 1 tool call(s) without results'
+| detailed contains False False
+| stable True
+|
+END_output O006
+O007 C007 srch inline input_ref=I007
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\"sed -n '1,220p' src/trace_mechanism/replay.py && cat examples/codex.detailed.txt && cat examples/claude.detailed.txt\",\"workdir\":\"<revi
+BEGIN_output O007
+output:
+| Script completed
+| Wall time 0.1 seconds
+| Output:
+|
+| """Append synthetic records to temporary files and explicitly refresh both parsers."""
+| import json
+| from pathlib import Path
+| from tempfile import TemporaryDirectory
+| from .parser import parse_codex_session, parse_claude_session
+| from .views import structured
+|
+|
+| def records(provider):
+|     if provider == 'codex':
+|         initial = [
+|             {'type': 'session_meta', 'payload': {'id': 'synthetic-live'}},
+|             {'type': 'event_msg', 'payload': {'type': 'task_started', 'turn_id': 't1'}},
+|             {'type': 'event_msg', 'payload': {'type': 'user_message', 'message': 'Run the check.'}},
+|             {'type': 'response_item', 'payload': {'type': 'function_call', 'name': 'shell', 'call_id': 'c1', 'arguments': '{"cmd":"check"}'}},
+|         ]
+|         later = [
+|             {'type': 'response_item', 'payload': {'type': 'function_call_output', 'call_id': 'c1', 'output': 'ok'}},
+|             {'type': 'event_msg', 'timestamp': '2026-01-01T00:00:00Z', 'payload': {'type': 'task_complete', 'last_agent_message': 'Done.'}},
+|         ]
+|         return initial, later, parse_codex_session
+|     if provider == 'claude':
+|         initial = [
+|             {'type': 'user', 'sessionId': 'synthetic-live', 'message': {'content': 'Run the check.'}},
+|             {'type': 'assistant', 'message': {'content': [{'type': 'tool_use', 'id': 'c1', 'name': 'Bash', 'input': {'command': 'check'}}], 'stop_reason': 'tool_use'}},
+|         ]
+|         later = [
+|             {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'tool_use_id': 'c1', 'content': 'ok'}]}},
+|             {'type': 'assistant', 'message': {'content': [{'type': 'text', 'text': 'Done.'}], 'stop_reason': 'end_turn'}},
+|         ]
+|         return initial, later, parse_claude_session
+|     raise ValueError('Unknown provider')
+|
+|
+| def replay(provider, path):
+|     initial, later, parse = records(provider)
+|     with path.open('w') as f:
+|         for item in initial:
+|             f.write(json.dumps(item) + '\n')
+|     before = structured(parse(path))
+|     with path.open('a') as f:
+|         for item in later:
+|             f.write(json.dumps(item) + '\n')
+|     after = structured(parse(path))
+|     return {'provider': provider, 'before': before, 'after': after}
+|
+|
+| def main():
+|     with TemporaryDirectory() as directory:
+|         for provider in ('codex', 'claude'):
+|             print(json.dumps(replay(provider, Path(directory) / (provider + '.jsonl')), indent=2))
+|
+|
+| if __name__ == '__main__':
+|     main()
+| USER: Read and update example.txt.
+| STATUS: incomplete
+| TOOL read_file (read): {"path": "example.txt"}
+| RESULT: old line
+|
+| TOOL apply_patch (edit): {"patch": "--- example.txt\n+++ example.txt\n-old line\n+new line"}
+| RESULT: Applied patch.
+| TOOL shell (pending): {"cmd": "check"}
+| RESULT: [no output recorded]
+| ASSISTANT: Update prepared.
+| PARTIAL: 1 function_call(s) without function_call_output
+| USER: Read and update example.txt.
+| STATUS: complete
+| TOOL Read (read): {"file_path": "example.txt"}
+| RESULT: old line
+|
+| TOOL Edit (edit): {"file_path": "example.txt", "new_string": "new line", "old_string": "old line"}
+| RESULT: Updated example.txt.
+| ASSISTANT: Update complete.
+|
+END_output O007
+O008 C008 cmd inline input_ref=I008
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\".venv/bin/python - <<'PY'\\nimport json, tempfile\\nfrom pathlib import Path\\nfrom trace_mechanism.agent_tools import AgentTools\\nfrom t
+BEGIN_output O008
+output:
+| Script completed
+| Wall time 0.2 seconds
+| Output:
+|
+| codex compact omits old/new bodies; detailed retains them; old snapshot page unchanged
+| claude compact omits old/new bodies; detailed retains them; old snapshot page unchanged
+|
+END_output O008
+O009 C009 srch inline input_ref=I009
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\"sed -n '1,220p' src/trace_mechanism/agent_tools.py && sed -n '1,100p' src/trace_mechanism/replay.py\",\"workdir\":\"<review-repository>\",
+BEGIN_output O009
+output:
+| Script completed
+| Wall time 0.1 seconds
+| Output:
+|
+| """Adapted in-memory tool boundary: explicit registry, no MCP transport or home scan."""
+| import hashlib
+| from .parser import parse_claude_session, parse_codex_session
+| from .views import render
+|
+|
+| class AgentTools:
+|     def __init__(self, entries):
+|         # Caller supplies provider, session_id, title and path; no discovery.
+|         self.entries = list(entries)
+|         self.snapshots = {}
+|
+|     def search_trace_threads(self, query):
+|         terms = query.casefold().split()
+|         return [{key: row[key] for key in ('provider', 'session_id', 'title')}
+|                 for row in self.entries if all(term in
+|                 f"{row['provider']} {row['session_id']} {row['title']}".casefold() for term in terms)]
+|
+|     def read_chat_context(self, provider, session_id, scope='full_thread_concise', limit=24000):
+|         rows = [r for r in self.entries if (r['provider'], r['session_id']) == (provider, session_id)]
+|         if len(rows) != 1 or provider not in ('codex', 'claude'):
+|             raise ValueError('Choose one registered provider and session ID.')
+|         if scope not in ('full_thread_concise', 'full_thread'):
+|             raise ValueError('This demo supports compact and detailed full-thread scopes only.')
+|         parser = parse_codex_session if provider == 'codex' else parse_claude_session
+|         text = render(parser(rows[0]['path']), detail=scope == 'full_thread')
+|         digest = hashlib.sha256(text.encode()).hexdigest()
+|         self.snapshots[digest] = text
+|         return {'provider': provider, 'session_id': session_id, 'scope': scope,
+|                 **self.read_trace_page(digest, 0, limit)}
+|
+|     def read_trace_page(self, sha256, offset=0, limit=24000):
+|         if sha256 not in self.snapshots or offset < 0 or limit < 1:
+|             raise ValueError('Unknown snapshot or invalid page.')
+|         text = self.snapshots[sha256]
+|         if offset > len(text):
+|             raise ValueError('Offset is beyond the snapshot.')
+|         end = min(offset + limit, len(text))
+|         return {'sha256': sha256, 'text': text[offset:end],
+|                 'next_offset': end if end < len(text) else None, 'total_chars': len(text)}
+| """Append synthetic records to temporary files and explicitly refresh both parsers."""
+| import json
+| from pathlib import Path
+| from tempfile import TemporaryDirectory
+| from .parser import parse_codex_session, parse_claude_session
+| from .views import structured
+|
+|
+| def records(provider):
+|     if provider == 'codex':
+|         initial = [
+|             {'type': 'session_meta', 'payload': {'id': 'synthetic-live'}},
+|             {'type': 'event_msg', 'payload': {'type': 'task_started', 'turn_id': 't1'}},
+|             {'type': 'event_msg', 'payload': {'type': 'user_message', 'message': 'Run the check.'}},
+|             {'type': 'response_item', 'payload': {'type': 'function_call', 'name': 'shell', 'call_id': 'c1', 'arguments': '{"cmd":"check"}'}},
+|         ]
+|         later = [
+|             {'type': 'response_item', 'payload': {'type': 'function_call_output', 'call_id': 'c1', 'output': 'ok'}},
+|             {'type': 'event_msg', 'timestamp': '2026-01-01T00:00:00Z', 'payload': {'type': 'task_complete', 'last_agent_message': 'Done.'}},
+|         ]
+|         return initial, later, parse_codex_session
+|     if provider == 'claude':
+|         initial = [
+|             {'type': 'user', 'sessionId': 'synthetic-live', 'message': {'content': 'Run the check.'}},
+|             {'type': 'assistant', 'message': {'content': [{'type': 'tool_use', 'id': 'c1', 'name': 'Bash', 'input': {'command': 'check'}}], 'stop_reason': 'tool_use'}},
+|         ]
+|         later = [
+|             {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'tool_use_id': 'c1', 'content': 'ok'}]}},
+|             {'type': 'assistant', 'message': {'content': [{'type': 'text', 'text': 'Done.'}], 'stop_reason': 'end_turn'}},
+|         ]
+|         return initial, later, parse_claude_session
+|     raise ValueError('Unknown provider')
+|
+|
+| def replay(provider, path):
+|     initial, later, parse = records(provider)
+|     with path.open('w') as f:
+|         for item in initial:
+|             f.write(json.dumps(item) + '\n')
+|     before = structured(parse(path))
+|     with path.open('a') as f:
+|         for item in later:
+|             f.write(json.dumps(item) + '\n')
+|     after = structured(parse(path))
+|     return {'provider': provider, 'before': before, 'after': after}
+|
+|
+| def main():
+|     with TemporaryDirectory() as directory:
+|         for provider in ('codex', 'claude'):
+|             print(json.dumps(replay(provider, Path(directory) / (provider + '.jsonl')), indent=2))
+|
+|
+| if __name__ == '__main__':
+|     main()
+|
+END_output O009
+O010 C010 cmd inline input_ref=I010
+$ {"_raw_arguments": "const r = await tools.exec_command({cmd:\".venv/bin/python - <<'PY'\\nimport json, tempfile\\nfrom pathlib import Path\\nfrom trace_mechanism.agent_tools import AgentTools\\nfrom t
+BEGIN_output O010
+output:
+| Script completed
+| Wall time 0.1 seconds
+| Output:
+|
+| codex digest differs: True chars: 354 -> 376 old second page stable
+| claude digest differs: True chars: 241 -> 305 old second page stable
+|
+END_output O010
+O011 C011 cmd no_output
+$ {"target": "/root", "message": "[encrypted payload omitted]"}
+output: none captured
+
+TOOL_INPUTS
+I001 C001 tool=exec source_record_indices=[2,3]
+BEGIN_input I001
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\"sed -n '1,240p' src/trace_mechanism/agent_tools.py && sed -n '1,260p' src/trace_mechanism/views.py && rg --files | rg 'fixture|invented'\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":7000}); text(r.output);\n"}
+END_input I001
+I002 C002 tool=exec source_record_indices=[4,5]
+BEGIN_input I002
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\"rg --files\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":3000}); text(r.output);\n"}
+END_input I002
+I003 C003 tool=exec source_record_indices=[6,7]
+BEGIN_input I003
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\"sed -n '1,260p' tests/test_mechanism.py && sed -n '1,240p' src/trace_mechanism/parser.py && sed -n '1,180p' examples/codex.jsonl && sed -n '1,160p' examples/claude.jsonl\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":6000}); text(r.output);\n"}
+END_input I003
+I004 C004 tool=exec source_record_indices=[8,9]
+BEGIN_input I004
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\".venv/bin/python -c 'import json,tempfile; from pathlib import Path; from trace_mechanism.agent_tools import AgentTools; from trace_mechanism.replay import records\\nwith tempfile.TemporaryDirectory() as d:\\n for provider in (\\\"codex\\\",\\\"claude\\\"):\\n  path=Path(d)/provider; initial,later,_=records(provider); path.write_text(\\\"\\\".join(json.dumps(x)+\\\"\\\\\\\\n\\\" for x in initial)); tools=AgentTools([{\\\"provider\\\":provider,\\\"session_id\\\":\\\"s\\\",\\\"title\\\":\\\"fixture\\\",\\\"path\\\":path}]); compact=tools.read_chat_context(provider,\\\"s\\\",limit=80); first=tools.read_trace_page(compact[\\\"sha256\\\"]); old=first[\\\"text\\\"]; snap=compact[\\\"sha256\\\"]\\n  with path.open(\\\"a\\\") as f:\\n   for row in later: f.write(json.dumps(row)+\\\"\\\\\\\\n\\\")\\n  detailed=tools.read_chat_context(provider,\\\"s\\\",scope=\\\"full_thread\\\"); body=tools.read_trace_page(detailed[\\\"sha256\\\"])[\\\"text\\\"]\\n  assert \\\"[omitted in compact view]\\\" in tools.read_trace_page(snap)[\\\"text\\\"] and \\\"old line\\\" not in tools.read_trace_page(snap)[\\\"text\\\"] and \\\"new line\\\" not in tools.read_trace_page(snap)[\\\"text\\\"]\\n  assert \\\"old line\\\" in body and \\\"new line\\\" in body\\n  assert \\\"old_string\\\" in body or provider==\\\"codex\\\"\\n  assert tools.read_trace_page(snap)[\\\"text\\\"]==old\\n  print(provider, \\\"compact omission; detailed bodies retained; prior page stable\\\", compact[\\\"sha256\\\"], detailed[\\\"sha256\\\"])'\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":1000}); text(r.output);\n"}
+END_input I004
+I005 C005 tool=exec source_record_indices=[10,11]
+BEGIN_input I005
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\".venv/bin/python - <<'PY'\\nimport json, tempfile\\nfrom pathlib import Path\\nfrom trace_mechanism.agent_tools import AgentTools\\nfrom trace_mechanism.replay import records\\nwith tempfile.TemporaryDirectory() as d:\\n    for provider in ('codex', 'claude'):\\n        path = Path(d) / provider\\n        initial, later, _ = records(provider)\\n        path.write_text(''.join(json.dumps(row) + '\\\\n' for row in initial))\\n        tools = AgentTools([{'provider': provider, 'session_id': 's', 'title': 'fixture', 'path': path}])\\n        compact = tools.read_chat_context(provider, 's', limit=80)\\n        old = tools.read_trace_page(compact['sha256'])['text']\\n        with path.open('a') as f:\\n            for row in later:\\n                f.write(json.dumps(row) + '\\\\n')\\n        detailed = tools.read_chat_context(provider, 's', scope='full_thread')\\n        body = tools.read_trace_page(detailed['sha256'])['text']\\n        compact_all = ''.join(tools.read_trace_page(compact['sha256'], offset, 80)['text'] for offset in range(0, tools.read_trace_page(compact['sha256'])['total_chars'], 80))\\n        assert '[omitted in compact view]' in compact_all\\n        assert 'old line' not in compact_all and 'new line' not in compact_all\\n        assert 'old line' in body and 'new line' in body\\n        assert tools.read_trace_page(compact['sha256'])['text'] == old\\n        print(provider, 'compact omission; detailed bodies retained; prior first page stable', compact['sha256'][:12], detailed['sha256'][:12])\\nPY\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":1000}); text(r.output);\n"}
+END_input I005
+I006 C006 tool=exec source_record_indices=[12,13]
+BEGIN_input I006
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\".venv/bin/python - <<'PY'\\nimport json, tempfile\\nfrom pathlib import Path\\nfrom trace_mechanism.agent_tools import AgentTools\\nfrom trace_mechanism.replay import records\\nwith tempfile.TemporaryDirectory() as d:\\n for provider in ('codex','claude'):\\n  path=Path(d)/provider; initial,later,_=records(provider); path.write_text(''.join(json.dumps(row)+'\\\\n' for row in initial)); tools=AgentTools([{'provider':provider,'session_id':'s','title':'fixture','path':path}]); compact=tools.read_chat_context(provider,'s',limit=80); old=tools.read_trace_page(compact['sha256'])['text']; before=tools.read_trace_page(compact['sha256'])['total_chars']; compact_all=''.join(tools.read_trace_page(compact['sha256'],offset,80)['text'] for offset in range(0,before,80)); print(provider,repr(compact_all));\\n  with path.open('a') as f:\\n   for row in later:f.write(json.dumps(row)+'\\\\n')\\n  detailed=tools.read_chat_context(provider,'s',scope='full_thread'); body=tools.read_trace_page(detailed['sha256'])['text']; print('detailed contains', 'old line' in body, 'new line' in body); print('stable',tools.read_trace_page(compact['sha256'])['text']==old)\\nPY\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":1000}); text(r.output);\n"}
+END_input I006
+I007 C007 tool=exec source_record_indices=[14,15]
+BEGIN_input I007
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\"sed -n '1,220p' src/trace_mechanism/replay.py && cat examples/codex.detailed.txt && cat examples/claude.detailed.txt\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":3000}); text(r.output);\n"}
+END_input I007
+I008 C008 tool=exec source_record_indices=[16,17]
+BEGIN_input I008
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\".venv/bin/python - <<'PY'\\nimport json, tempfile\\nfrom pathlib import Path\\nfrom trace_mechanism.agent_tools import AgentTools\\nfrom trace_mechanism.replay import records\\nwith tempfile.TemporaryDirectory() as d:\\n for provider in ('codex', 'claude'):\\n  src=Path('examples')/(provider+'.jsonl'); path=Path(d)/(provider+'.jsonl'); path.write_bytes(src.read_bytes())\\n  tools=AgentTools([{'provider':provider,'session_id':'synthetic-'+provider,'title':'invented fixture','path':path}])\\n  compact=tools.read_chat_context(provider,'synthetic-'+provider,limit=80)\\n  oldpage=tools.read_trace_page(compact['sha256'])['text']; total=tools.read_trace_page(compact['sha256'])['total_chars']\\n  compact_all=''.join(tools.read_trace_page(compact['sha256'],offset,80)['text'] for offset in range(0,total,80))\\n  with path.open('a') as f:\\n   for row in records(provider)[1]: f.write(json.dumps(row)+'\\\\n')\\n  detailed=tools.read_chat_context(provider,'synthetic-'+provider,scope='full_thread')\\n  body=tools.read_trace_page(detailed['sha256'])['text']\\n  assert '[omitted in compact view]' in compact_all and 'old line' not in compact_all and 'new line' not in compact_all\\n  assert 'old line' in body and 'new line' in body\\n  assert tools.read_trace_page(compact['sha256'])['text']==oldpage\\n  print(provider, 'compact omits old/new bodies; detailed retains them; old snapshot page unchanged')\\nPY\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":1000}); text(r.output);\n"}
+END_input I008
+I009 C009 tool=exec source_record_indices=[21,22]
+BEGIN_input I009
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\"sed -n '1,220p' src/trace_mechanism/agent_tools.py && sed -n '1,100p' src/trace_mechanism/replay.py\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":2000}); text(r.output);\n"}
+END_input I009
+I010 C010 tool=exec source_record_indices=[23,24]
+BEGIN_input I010
+input_json:
+| {"_raw_arguments":"const r = await tools.exec_command({cmd:\".venv/bin/python - <<'PY'\\nimport json, tempfile\\nfrom pathlib import Path\\nfrom trace_mechanism.agent_tools import AgentTools\\nfrom trace_mechanism.replay import records\\nwith tempfile.TemporaryDirectory() as d:\\n for p in ('codex','claude'):\\n  path=Path(d)/(p+'.jsonl'); path.write_bytes((Path('examples')/(p+'.jsonl')).read_bytes()); session='synthetic-'+p\\n  tools=AgentTools([{'provider':p,'session_id':session,'title':'fixture','path':path}]); before=tools.read_chat_context(p,session,limit=80); old_total=tools.read_trace_page(before['sha256'])['total_chars']; old_all=''.join(tools.read_trace_page(before['sha256'],o,80)['text'] for o in range(0,old_total,80)); old_second=tools.read_trace_page(before['sha256'],80)['text']\\n  with path.open('a') as f:\\n   for row in records(p)[1]: f.write(json.dumps(row)+'\\\\n')\\n  after=tools.read_chat_context(p,session,scope='full_thread',limit=80); new_total=tools.read_trace_page(after['sha256'])['total_chars']; new_all=''.join(tools.read_trace_page(after['sha256'],o,80)['text'] for o in range(0,new_total,80))\\n  assert before['sha256']!=after['sha256'] and len(new_all)!=len(old_all) and old_second==tools.read_trace_page(before['sha256'],80)['text']\\n  print(p, 'digest differs:',before['sha256']!=after['sha256'],'chars:',old_total,'->',new_total,'old second page stable')\\nPY\",\"workdir\":\"<review-repository>\",\"yield_time_ms\":10000,\"max_output_tokens\":500}); text(r.output);\n"}
+END_input I010
+I011 C011 tool=send_message source_record_indices=[25,26]
+BEGIN_input I011
+input_json:
+| {"target":"/root","message":"[encrypted payload omitted]"}
+END_input I011
+
+TOOL_SOURCE_RECORDS
+T001
+BEGIN_tool_source T001
+source_json:
+| {"index":1,"name":"exec","tool_call_id":"call_b891715fec914622839361af9807792a","started_at":"2026-11-02T19:46:02.042Z","completed_at":"2026-11-02T19:46:02.143Z","duration_ms":101,"is_error":false,"output_char_count":3618,"output_sha256_16":"91aeadfc40ce1c67","exit_code":null,"outcome_pending":false,"source_record_indices":[2,3],"original_input":{"representation":"canonical_json_ref","input_ref":"I001"},"original_output":{"representation":"canonical_string_ref","output_ref":"O001","body_sha16":"91aeadfc40ce1c67"}}
+END_tool_source T001
+T002
+BEGIN_tool_source T002
+source_json:
+| {"index":2,"name":"exec","tool_call_id":"call_a4aca4f95c4243b0a37a73b9a6a66f05","started_at":"2026-11-02T19:46:03.351Z","completed_at":"2026-11-02T19:46:03.419Z","duration_ms":68,"is_error":false,"output_char_count":834,"output_sha256_16":"a604e3da11893533","exit_code":null,"outcome_pending":false,"source_record_indices":[4,5],"original_input":{"representation":"canonical_json_ref","input_ref":"I002"},"original_output":{"representation":"canonical_string_ref","output_ref":"O002","body_sha16":"a604e3da11893533"}}
+END_tool_source T002
+T003
+BEGIN_tool_source T003
+source_json:
+| {"index":3,"name":"exec","tool_call_id":"call_7048e05f6c79402988efcf0fdc64c10a","started_at":"2026-11-02T19:46:05.397Z","completed_at":"2026-11-02T19:46:05.464Z","duration_ms":67,"is_error":false,"output_char_count":16257,"output_sha256_16":"ec73cffb3d1ed0fc","exit_code":null,"outcome_pending":false,"source_record_indices":[6,7],"original_input":{"representation":"canonical_json_ref","input_ref":"I003"},"original_output":{"representation":"canonical_string_ref","output_ref":"O003","body_sha16":"ec73cffb3d1ed0fc"}}
+END_tool_source T003
+T004
+BEGIN_tool_source T004
+source_json:
+| {"index":4,"name":"exec","tool_call_id":"call_311477dd887240eaa2034302694c6955","started_at":"2026-11-02T19:46:10.089Z","completed_at":"2026-11-02T19:46:10.458Z","duration_ms":369,"is_error":false,"output_char_count":137,"output_sha256_16":"04f59c17a7fedd14","exit_code":null,"outcome_pending":false,"source_record_indices":[8,9],"original_input":{"representation":"canonical_json_ref","input_ref":"I004"},"original_output":{"representation":"canonical_string_ref","output_ref":"O004","body_sha16":"04f59c17a7fedd14"}}
+END_tool_source T004
+T005
+BEGIN_tool_source T005
+source_json:
+| {"index":5,"name":"exec","tool_call_id":"call_6616cb7d147e47d5a82ee66e93e26c6a","started_at":"2026-11-02T19:46:13.934Z","completed_at":"2026-11-02T19:46:14.382Z","duration_ms":448,"is_error":false,"output_char_count":137,"output_sha256_16":"97df94c2bb503939","exit_code":null,"outcome_pending":false,"source_record_indices":[10,11],"original_input":{"representation":"canonical_json_ref","input_ref":"I005"},"original_output":{"representation":"canonical_string_ref","output_ref":"O005","body_sha16":"97df94c2bb503939"}}
+END_tool_source T005
+T006
+BEGIN_tool_source T006
+source_json:
+| {"index":6,"name":"exec","tool_call_id":"call_d20394cad639444384144650f027f83c","started_at":"2026-11-02T19:46:17.281Z","completed_at":"2026-11-02T19:46:17.468Z","duration_ms":187,"is_error":false,"output_char_count":477,"output_sha256_16":"487c365bb568048b","exit_code":null,"outcome_pending":false,"source_record_indices":[12,13],"original_input":{"representation":"canonical_json_ref","input_ref":"I006"},"original_output":{"representation":"canonical_string_ref","output_ref":"O006","body_sha16":"487c365bb568048b"}}
+END_tool_source T006
+T007
+BEGIN_tool_source T007
+source_json:
+| {"index":7,"name":"exec","tool_call_id":"call_4c1e587d5d244541aa6cf59eb98ce513","started_at":"2026-11-02T19:46:19.395Z","completed_at":"2026-11-02T19:46:19.455Z","duration_ms":60,"is_error":false,"output_char_count":3152,"output_sha256_16":"79cdd755e5f5e58f","exit_code":null,"outcome_pending":false,"source_record_indices":[14,15],"original_input":{"representation":"canonical_json_ref","input_ref":"I007"},"original_output":{"representation":"canonical_string_ref","output_ref":"O007","body_sha16":"79cdd755e5f5e58f"}}
+END_tool_source T007
+T008
+BEGIN_tool_source T008
+source_json:
+| {"index":8,"name":"exec","tool_call_id":"call_0aa56e6434e3450d90d671915524fd0c","started_at":"2026-11-02T19:46:23.797Z","completed_at":"2026-11-02T19:46:24.449Z","duration_ms":652,"is_error":false,"output_char_count":223,"output_sha256_16":"3965668af3dcc65d","exit_code":null,"outcome_pending":false,"source_record_indices":[16,17],"original_input":{"representation":"canonical_json_ref","input_ref":"I008"},"original_output":{"representation":"canonical_string_ref","output_ref":"O008","body_sha16":"3965668af3dcc65d"}}
+END_tool_source T008
+T009
+BEGIN_tool_source T009
+source_json:
+| {"index":9,"name":"exec","tool_call_id":"call_5f4f3304e9e24ca0ba17f5b73ec31005","started_at":"2026-11-02T19:46:35.108Z","completed_at":"2026-11-02T19:46:35.247Z","duration_ms":139,"is_error":false,"output_char_count":4632,"output_sha256_16":"e93720dbe52a6fb7","exit_code":null,"outcome_pending":false,"source_record_indices":[21,22],"original_input":{"representation":"canonical_json_ref","input_ref":"I009"},"original_output":{"representation":"canonical_string_ref","output_ref":"O009","body_sha16":"e93720dbe52a6fb7"}}
+END_tool_source T009
+T010
+BEGIN_tool_source T010
+source_json:
+| {"index":10,"name":"exec","tool_call_id":"call_5fa2db2d788d48039c7a4d9a34e5f231","started_at":"2026-11-02T19:46:39.499Z","completed_at":"2026-11-02T19:46:39.643Z","duration_ms":144,"is_error":false,"output_char_count":185,"output_sha256_16":"6f6647ef96c4fc7f","exit_code":null,"outcome_pending":false,"source_record_indices":[23,24],"original_input":{"representation":"canonical_json_ref","input_ref":"I010"},"original_output":{"representation":"canonical_string_ref","output_ref":"O010","body_sha16":"6f6647ef96c4fc7f"}}
+END_tool_source T010
+T011
+BEGIN_tool_source T011
+source_json:
+| {"index":11,"name":"send_message","tool_call_id":"call_75a58d9aac6a44cd87d1a76359f4c04e","started_at":"2026-11-02T19:46:43.919Z","completed_at":"2026-11-02T19:46:44.000Z","duration_ms":81,"is_error":false,"output_char_count":0,"output_sha256_16":"e3b0c44298fc1c14","exit_code":null,"outcome_pending":false,"source_record_indices":[25,26],"original_input":{"representation":"canonical_json_ref","input_ref":"I011"},"original_output":{"representation":"captured_text","text":""}}
+END_tool_source T011
+
+VISIBLE_PROGRESS
+N001 plan source_record=18 source_timestamp="2026-11-02T19:46:27.923Z"
+BEGIN_note N001
+note:
+| Verified with `.venv/bin/python` using the invented Codex and Claude fixtures copied to temporary files. For both providers, compact view omitted the recorded `old line` and `new line` bodies, detailed view retained them, and the first page of the original snapshot was unchanged after appending records and reading again.
+|
+| The first check used the replay fixture, whose tool output is only `ok`; it did not exercise edit bodies. The successful check used `examples/codex.jsonl` and `examples/claude.jsonl`, which contain the read and edit bodies. No repository files were modified.
+END_note N001
+N002 decision source_record=27 source_timestamp="2026-11-02T19:46:45.419Z"
+BEGIN_note N002
+note:
+| Sent the exact check and clarification to the parent: the original check covered only the first page; a follow-up verified the second page at offset 80 stayed unchanged for both providers. The appended records changed each new snapshot’s digest and length.
+END_note N002
+
+TIMELINE
+C001 pass srch input_ref=I001
+command_ref=O001 output_ref=O001 section=COMMAND_RETURNS
+
+C002 pass srch input_ref=I002
+command_ref=O002 output_ref=O002 section=COMMAND_RETURNS
+
+C003 pass srch input_ref=I003
+command_ref=O003 output_ref=O003 section=COMMAND_RETURNS
+
+C004 pass cmd input_ref=I004
+command_ref=O004 output_ref=O004 section=COMMAND_RETURNS
+
+C005 pass cmd input_ref=I005
+command_ref=O005 output_ref=O005 section=COMMAND_RETURNS
+
+C006 pass cmd input_ref=I006
+command_ref=O006 output_ref=O006 section=COMMAND_RETURNS
+
+C007 pass srch input_ref=I007
+command_ref=O007 output_ref=O007 section=COMMAND_RETURNS
+
+C008 pass cmd input_ref=I008
+command_ref=O008 output_ref=O008 section=COMMAND_RETURNS
+
+N001 plan note_ref=N001 section=VISIBLE_PROGRESS
+
+C009 pass srch input_ref=I009
+command_ref=O009 output_ref=O009 section=COMMAND_RETURNS
+
+C010 pass cmd input_ref=I010
+command_ref=O010 output_ref=O010 section=COMMAND_RETURNS
+
+C011 pass cmd input_ref=I011
+command_ref=O011 output_ref=O011 section=COMMAND_RETURNS
+
+N002 decision note_ref=N002 section=VISIBLE_PROGRESS
+
+K001 closeout note_ref=N002 section=VISIBLE_PROGRESS retention=full_captured_visible
+
+OMISSIONS
+Captured visible content is retained after secret redaction. Hidden reasoning and uncaptured provider data are unavailable. Generated audit tables are kept in the artifact receipt.
+not_captured_outputs: 1
+prompt_body: omitted_by_request
