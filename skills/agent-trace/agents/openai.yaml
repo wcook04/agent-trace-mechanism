@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Trace"
+  short_description: "Install Agent Trace and read selected local chat histories"
+  default_prompt: "Use $agent-trace to set up local history access or recover evidence from a selected Codex or Claude Code chat."

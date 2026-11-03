@@ -1,5 +1,6 @@
 """Inspect local histories and register only files the user explicitly selects."""
 import argparse
+import asyncio
 from collections import Counter
 import json
 import os
@@ -8,6 +9,52 @@ import sys
 
 from . import codex_native
 from .parser import parse_claude_session, parse_codex_session
+
+
+def history_root(provider):
+    if provider == 'codex':
+        return Path(os.environ.get('CODEX_HOME') or Path.home() / '.codex') / 'sessions'
+    return Path(os.environ.get('CLAUDE_CONFIG_DIR') or Path.home() / '.claude') / 'projects'
+
+
+def connection(manifest):
+    from .mcp_server import load_manifest
+    manifest = manifest.expanduser().resolve(strict=True)
+    load_manifest(manifest)
+    # Resolving a venv's Python symlink would select the base interpreter instead.
+    return {'command': os.path.abspath(sys.executable), 'args': [
+        '-m', 'trace_mechanism.mcp_server', '--manifest', str(manifest)]}
+
+
+async def verify(manifest):
+    """Exercise local stdio without a host, model call, or transcript output."""
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+    from .mcp_server import load_manifest
+    entries = load_manifest(manifest.expanduser())
+    if not entries:
+        raise ValueError('Select at least one history before verifying a read.')
+    config = connection(manifest)
+    async with stdio_client(StdioServerParameters(**config)) as (read, write):
+        async with ClientSession(read, write) as client:
+            await client.initialize()
+            listed = await client.list_tools()
+            found = await client.call_tool('search_trace_threads', {'query': ''})
+            if found.isError or found.structuredContent is None:
+                raise ValueError('MCP session listing failed.')
+            expected = {(e['provider'], e['session_id']) for e in entries}
+            actual = {(e['provider'], e['session_id']) for e in found.structuredContent['items']}
+            if actual != expected:
+                raise ValueError('MCP session listing differs from the selected manifest.')
+            for entry in entries:
+                result = await client.call_tool('read_chat_context', {
+                    'provider': entry['provider'], 'session_id': entry['session_id'],
+                    'scope': 'full_thread_concise', 'limit': 1})
+                if result.isError:
+                    raise ValueError('A selected history could not be read. Run setup check on each selected file.')
+    return {'ok': True, 'sessions_read': len(entries),
+            'tools': sorted(tool.name for tool in listed.tools),
+            'note': 'Local MCP handshake, listing and compact reads passed. No model was called. Host discovery still needs checking in a new chat.'}
 
 
 def metadata(path):
@@ -112,14 +159,16 @@ def main():
     registration = sub.add_parser('register', help='Create a new manifest for explicitly selected files')
     registration.add_argument('paths', type=Path, nargs='+')
     registration.add_argument('--manifest', type=Path, required=True)
+    for name, help_text in [('connection', 'Print absolute stdio command/args for this environment'),
+                            ('verify', 'Test local MCP listing and reads without printing transcript text')]:
+        command = sub.add_parser(name, help=help_text)
+        command.add_argument('--manifest', type=Path, required=True)
     args = parser.parse_args()
     try:
         if args.action == 'list':
             if not 1 <= args.limit <= 100:
                 raise ValueError('--limit must be between 1 and 100.')
-            default_root = (Path(os.environ.get('CODEX_HOME', Path.home() / '.codex')) / 'sessions'
-                            if args.provider == 'codex' else Path.home() / '.claude/projects')
-            root = (args.root or default_root).expanduser().resolve(strict=True)
+            root = (args.root or history_root(args.provider)).expanduser().resolve(strict=True)
             dated = []
             for path in root.rglob('*.jsonl'):
                 try:
@@ -137,10 +186,25 @@ def main():
                     result.append({'path': str(path), 'error': str(exc)})
         elif args.action == 'check':
             result = inspect(args.path)
+        elif args.action == 'connection':
+            result = connection(args.manifest)
+        elif args.action == 'verify':
+            try:
+                result = asyncio.run(asyncio.wait_for(verify(args.manifest), timeout=60))
+            except ImportError:
+                raise
+            except asyncio.TimeoutError:
+                raise ValueError('MCP verification timed out after 60 seconds. Check the interpreter and selected files.') from None
+            except Exception as exc:
+                # MCP transports may wrap failures in an exception group. Do not
+                # print its nested server output, which may include source text.
+                raise ValueError(f'MCP verification failed ({type(exc).__name__}). Run setup check on the selected files and check the configured interpreter.') from None
         else:
             result = register(args.paths, args.manifest)
         print(json.dumps(result, indent=2))
-    except (OSError, ValueError, TypeError, AttributeError) as exc:
+    except ImportError:
+        parser.exit(2, 'Agent Trace setup: install the MCP extra with python -m pip install ".[mcp]" from the checkout.\n')
+    except (OSError, ValueError, TypeError, AttributeError, asyncio.TimeoutError) as exc:
         parser.exit(2, f'Agent Trace setup: {exc}\n')
 
 

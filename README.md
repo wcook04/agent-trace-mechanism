@@ -71,6 +71,24 @@ These retrieve a real validation history, a Codex review with two subagents, and
 
 [Claude reads the Codex review, then Codex reads Claude’s findings →](docs/cross-provider.md)
 
+## Let your agent set it up
+
+Give Codex or Claude Code this request:
+
+> Install Agent Trace from https://github.com/wcook04/agent-trace-mechanism on this machine. Read `skills/agent-trace/SKILL.md` and follow its installation guide for my host and environment. Preserve my existing configuration, help me select which histories to register, and verify a real MCP read from my working project.
+
+The [portable skill](skills/agent-trace/SKILL.md) covers setup and using the tools.
+To keep it available in future chats, run one of these from the checkout:
+
+```sh
+python3 tools/install_skill.py --host codex
+python3 tools/install_skill.py --host claude
+```
+
+This installs instructions only; it doesn't connect MCP or grant access to any
+chat. The [installation guide](skills/agent-trace/references/install.md) covers
+project-scoped skills, custom folders, Windows commands and connection checks.
+
 ## How it works
 
 Each session file uses JSONL: one JSON record per line.

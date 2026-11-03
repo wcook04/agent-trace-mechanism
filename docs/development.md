@@ -16,6 +16,7 @@ The rest of the repository supports those files or the older text-processing pat
 
 | Location | Contents |
 |---|---|
+| [skills/](../skills/agent-trace/SKILL.md) | Portable setup and retrieval instructions, copied by `tools/install_skill.py` |
 | [tests/](../tests/) | Compatibility, identity, availability, paging and transport checks |
 | [tools/](../tools/) | Run checks, capture MCP responses and regenerate examples |
 | [examples/](../examples/README.md) | Current recordings, generated outputs and earlier compatibility records |
@@ -46,7 +47,7 @@ node --test tests/structurer.test.mjs
 
 `inspect_recorded_run.py` checks five commands from [a real validation investigation](investigation.md). The selected records and their provenance are in `examples/validation-history*`. `measure_retrieval.py` measures fresh and retained reads of a local history against literal search; [recorded measurements](../examples/retrieval-costs.json) are observations, not CI thresholds.
 
-`inspect_agent_tree.py` retrieves a coordinator and two workers from [a fresh public-code review](agent-tree.md), retained in `examples/launch-review/`. `trace_mechanism.setup` owns local metadata listing, compatibility checks and explicit manifest creation.
+`inspect_agent_tree.py` retrieves a coordinator and two workers from [a fresh public-code review](agent-tree.md), retained in `examples/launch-review/`. `trace_mechanism.setup` owns local metadata listing, compatibility checks, explicit manifest creation, absolute connection settings and the local stdio verification command.
 
 `inspect_cross_provider.py` reads [Claude's review of the Codex findings](cross-provider.md) and repeats its item reads. The selected records are in `examples/cross-provider/`. `NOTICE` retains Will Cook's attribution; `CITATION.cff` supplies citation metadata.
 

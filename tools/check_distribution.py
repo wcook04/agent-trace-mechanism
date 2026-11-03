@@ -54,6 +54,11 @@ def main() -> None:
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / name, destination)
         run(str(python), "-I", str(scratch / "tools/record_native_contract.py"), "--check", cwd=scratch)
+        manifest = scratch / "selected chats.json"
+        run(str(python), "-I", "-m", "trace_mechanism.setup", "register",
+            str(scratch / "examples/native-command.jsonl"), "--manifest", str(manifest), cwd=scratch)
+        run(str(python), "-I", "-m", "trace_mechanism.setup", "verify",
+            "--manifest", str(manifest), cwd=scratch)
         print("Distribution passed: sdist, wheel bytes, licence notices, installed resource, CLI and MCP retrieval.")
 
 

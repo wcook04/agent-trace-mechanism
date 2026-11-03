@@ -30,6 +30,10 @@
     },
     ".github": {
       "purpose": "Public CI verification"
+    },
+    "skills": {
+      "purpose": "Portable agent instructions and complete installable references",
+      "guide": "skills/agent-trace/SKILL.md"
     }
   },
   "required_files": [
@@ -51,14 +55,18 @@
     "tools/record_native_contract.py",
     "CONTRIBUTING.md",
     "examples/README.md",
-    "tools/check_distribution.py"
+    "tools/check_distribution.py",
+    "skills/agent-trace/SKILL.md",
+    "skills/agent-trace/references/install.md",
+    "tools/install_skill.py"
   ],
   "content_routes": {
     "README.md": [
       "docs/development.md",
       "docs/provenance.json",
       "CONTRIBUTING.md",
-      "examples/README.md"
+      "examples/README.md",
+      "skills/agent-trace/SKILL.md"
     ],
     "docs/development.md": [
       "tools/check_layout.py",
