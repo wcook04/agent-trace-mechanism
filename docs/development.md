@@ -49,6 +49,8 @@ node --test tests/structurer.test.mjs
 
 `inspect_cross_provider.py` reads [Claude's review of the Codex findings](cross-provider.md) and repeats its item reads. The selected records are in `examples/cross-provider/`. `NOTICE` retains Will Cook's attribution; `CITATION.cff` supplies citation metadata.
 
+The editable [history-flow diagram](images/history-flow.svg) describes file selection and MCP requests. [Compact versus detailed](images/compact-detailed.svg) shows selected fields from the final command in `examples/validation-history.jsonl`; it abbreviates command paths and omits some output lines. Their SVG comments record the source, omissions and diagram-template licence.
+
 When changing a tool, update [its reference](mcp.md) and test its actual stdio call, including the next operation that consumes the returned handle. These checks cover specific records and behavior; they are not retrieval-quality or performance benchmarks.
 
 ## Provenance and compatibility records

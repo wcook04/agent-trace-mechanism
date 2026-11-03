@@ -25,6 +25,19 @@ For **Codex and Claude Code histories**, an agent can find a chat from your sele
 
 Compact is a filtered transcript, not an AI-written summary. Long responses are split into pages that the agent can request as needed.
 
+<details>
+<summary>See the difference on a real recorded command</summary>
+
+<p align="center">
+  <img src="docs/images/compact-detailed.svg" width="480" alt="Two views of the same Codex test command. Compact includes its exit status; detailed adds the recorded output showing 124 tests passed and none failed. Selected fields are shown.">
+</p>
+
+Both views include the command. Detailed also includes its output. This command pipes the tests through `tail`, so the exit code alone does not establish that the tests passed; the recorded test summary does. The image shows excerpts from [the actual validation history](docs/investigation.md).
+
+An agent can also request just this command's output with `read_trace_item`, selecting the `/aggregated_output` field. It does not have to read the whole detailed conversation.
+
+</details>
+
 For **supported Codex event records**, an agent can also:
 
 - **Find a specific operation:** search commands, outputs, patches and other recorded items by text, type or failure status. Each match identifies the field and matching passage.
