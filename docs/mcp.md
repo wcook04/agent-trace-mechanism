@@ -6,7 +6,7 @@ Register local session files, then connect the MCP server to your agent. The age
 
 ## Setup
 
-First run the [README installation and supplied examples](../README.md#try-it). The steps below use macOS/Linux shell syntax; the Python modules themselves accept normal filesystem paths. The public package supplies a command-line reader and MCP server, not the desktop app in the screenshot.
+First run the [README installation and supplied examples](../README.md#try-it). The steps below use macOS/Linux shell syntax; the Python modules themselves accept normal filesystem paths. The public package supplies history readers and an MCP server, not the desktop app in the screenshot.
 
 ### Select one history
 
@@ -14,15 +14,16 @@ List the ten most recently modified local session files:
 
 ```sh
 .venv/bin/python -m trace_mechanism.setup list
+.venv/bin/python -m trace_mechanism.setup list --provider claude
 ```
 
-This reads session metadata locally and prints paths, IDs, timestamps and producer versions. It does not register anything or print conversation text. Use `--root /path/to/sessions` if your Codex history lives elsewhere. Pick a path by its date/ID, then inspect it:
+This reads session metadata locally and prints paths, IDs, timestamps and producer versions. It does not register anything or print conversation text. Codex discovery respects `CODEX_HOME` when set; Claude discovery starts in `~/.claude/projects`. Use `--root /path/to/sessions` for another location. Pick a path by its date/ID, then inspect it:
 
 ```sh
 .venv/bin/python -m trace_mechanism.setup check /absolute/path/to/rollout.jsonl
 ```
 
-`coverage: native` means native items were found; `item_kinds` shows which operations are present. `legacy_conversation` means conversation rendering is available but native command searches are not. `unsupported` means no supported records were found. Unreadable files produce an error. Inspect diagnostics for skipped or malformed records. A supported search returning zero matches is a different result from missing native coverage; producer version alone does not determine compatibility.
+`coverage: conversation` identifies a Claude history with compact/detailed conversation reads. `coverage: native` means native Codex items were found; `item_kinds` shows which operations are present. `legacy_conversation` means conversation rendering is available but native command searches are not. `unsupported` means no supported records were found. Unreadable files produce an error. Inspect diagnostics for skipped or malformed records. A supported search returning zero matches is a different result from missing native coverage; producer version alone does not determine compatibility.
 
 Create a manifest for that file:
 
@@ -30,7 +31,7 @@ Create a manifest for that file:
 .venv/bin/python -m trace_mechanism.setup register /absolute/path/to/rollout.jsonl --manifest "$PWD/agent-trace.local.json"
 ```
 
-The helper reads the recorded ID and writes absolute paths. It refuses to overwrite an existing manifest. It does not change Codex configuration. To include workers, pass their file paths after the parent path in the same command; relationships are copied only when both the recorded parent and child are selected. No other sessions are added. You can edit the generated `title` to a memorable name.
+The helper detects Codex or Claude from recorded metadata and writes absolute paths. You may register selected files from both providers in one command. It refuses to overwrite an existing manifest. It does not change Codex configuration. To include Codex workers, pass their file paths after the parent path in the same command; relationships are copied only when both the recorded parent and child are selected. No other sessions are added. You can edit the generated `title` to a memorable name.
 
 **Choose what the agent may read.** A registered file's supported contents become available through the tools, including old private output. The MCP host may send retrieved content to its model provider. There is no automatic redaction. [Data flow and retained captures](../SECURITY.md).
 
@@ -55,13 +56,30 @@ A successful read returns a native item ID, a capture hash and the requested fie
 .venv/bin/python -m trace_mechanism codex /absolute/path/to/rollout.jsonl --kind CommandExecution --limit 3
 ```
 
+### Connect Claude Code
+
+Use the same manifest, including whichever Codex and Claude files you selected:
+
+```sh
+claude mcp add --transport stdio agent-trace -- "$PWD/.venv/bin/python" -m trace_mechanism.mcp_server --manifest "$PWD/agent-trace.local.json"
+claude mcp get agent-trace
+```
+
+Start a new Claude session. For Codex native records, use the first retrieval prompt above. For a Claude history, try:
+
+> Use Agent Trace to find my registered Claude chat. Read its compact context, then retrieve detailed context if needed to check the tool results. Report what it established and identify the source session.
+
+A running chat can be read by either host while its local file grows. A fresh read sees new records; paging an existing hash continues the saved version. Claude histories support compact/detailed text and stable paging. Native item search, change queries and worker traversal currently require Codex records. Register Claude worker files separately as independent histories only when they have distinct recorded session IDs.
+
 ### Disconnect
 
 ```sh
 codex mcp remove agent-trace
+# Or, for the Claude connection:
+claude mcp remove agent-trace
 ```
 
-Close or restart any Codex host still running the connection so its server process exits. Removing configuration or editing the manifest alone does not erase captures held by an already running server. Once stopped, you can delete the local manifest and checkout/virtual environment. Original session files are not modified.
+Close or restart any Codex or Claude host still running the connection so its server process exits. Removing configuration or editing the manifest alone does not erase captures held by an already running server. Once stopped, you can delete the local manifest and checkout/virtual environment. Original session files are not modified.
 
 ### Manifest details
 
@@ -83,7 +101,7 @@ A child entry includes `parent_session_id`. The server verifies it against the c
 | `search_trace_items` | Root, optional children, literal query, optional kind/failure filter → paged item descriptors and matching field passages |
 | `read_trace_item` | Session, item, saved capture and optional JSON Pointer → one retained item or field, paged if necessary |
 | `read_trace_changes` | Earlier capture and the same child selection → paged added/updated/removed descriptors plus availability information |
-| `read_chat_context` | Root, optional children, compact or detailed full thread → first text page and native capture handle |
+| `read_chat_context` | Either provider’s compact/detailed conversation → first text page; native Codex captures also carry an item handle |
 | `read_trace_page` | Text hash and offset → another page of that same rendered text |
 
 <a id="instructions-for-a-consuming-agent"></a>
@@ -126,7 +144,7 @@ A **snapshot** here is a fixed assembled capture of the selected records. It is 
 
 Continue with `next_offset` and the same saved hash. For change pages, retain both `since_sha256` and the returned `snapshot_sha256` so the comparison's start and end remain fixed. Omitting the end hash requests a fresh capture. Keep `include_children` unchanged. `items` is the paged change stream; `changes` groups the same page by session for older clients. Do not count both as separate changes.
 
-MCP text bodies and field values are in `content` text blocks; metadata is in `structuredContent`. For an item or field, concatenate the text blocks from successive pages, then decode JSON once. String values include JSON quotes and escapes. A partial page need not be valid JSON on its own. The Python library returns a typed `payload` when the value fits in one page and `payload_json` fragments otherwise.
+MCP text bodies are in `structuredContent.text`; item and field pages are in `structuredContent.payload_json`. The same bounded page is also supplied as a `content` text block for clients that read that channel. Consume one representation, not both. This matters because some hosts present only structured results to the model. For an item or field, concatenate the text blocks from successive pages, then decode JSON once. String values include JSON quotes and escapes. A partial page need not be valid JSON on its own. The Python library returns a typed `payload` when the value fits in one page and `payload_json` fragments otherwise.
 
 The length of a string in a detailed preview is the decoded value's length. A field page's `total_chars` instead counts its serialized JSON. These are intentionally different measurements.
 

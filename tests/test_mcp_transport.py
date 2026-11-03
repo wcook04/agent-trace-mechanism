@@ -54,8 +54,7 @@ class MCPTransportTests(unittest.IsolatedAsyncioTestCase):
                         self.assertFalse(result.isError, result.content)
                         data = dict(result.structuredContent)
                         if name in ('read_chat_context', 'read_trace_page'):
-                            self.assertNotIn('text', data)
-                            data['text'] = result.content[0].text
+                            self.assertEqual(data['text'], result.content[0].text)
                         return data
 
                     for provider in ('codex', 'claude'):
@@ -139,7 +138,7 @@ class MCPTransportTests(unittest.IsolatedAsyncioTestCase):
                         offset = page.structuredContent['next_offset']
                     self.assertEqual(''.join(chunks), whole.content[0].text)
                     self.assertNotIn('payload', exact.structuredContent)
-                    self.assertNotIn('payload_json', exact.structuredContent)
+                    self.assertEqual(exact.content[0].text, exact.structuredContent['payload_json'])
 
     async def test_native_context_composes_with_frozen_delta_pages_and_manifest_reload(self):
         with tempfile.TemporaryDirectory() as directory:

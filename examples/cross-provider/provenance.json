@@ -1,0 +1,28 @@
+{
+  "source": "Claude Code JSONL from the actual public-package release review",
+  "source_sha256": "61d64e3d9ad85e2fdaf3552b830eaab01c8a58488673df12b57f4b23e8499f5f",
+  "source_lines": [
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    90
+  ],
+  "selected_sha256": "510051c5732b0716b69a31c3cc69dc604604c210d61239b5e15776c3f32f4575",
+  "session_id": "ebae1d5d-b2c0-451b-82b8-a002a6af401a",
+  "method": "Allowlisted record and message fields from the successful second review turn. Original prompt, five MCP calls and results, visible progress and final answer retained. No text or outcomes invented.",
+  "omitted": "First unsuccessful turn, source-file Read calls/results, thinking, injected instructions, attachments, hooks, request/usage/settings metadata and all other records. No raw source transcript is included.",
+  "codex_readback": {
+    "method": "Codex read the actual Claude session using installed Agent Trace read_chat_context and read_trace_page, offsets 0 and 24000.",
+    "text_sha256": "5e26f09391f0502ef2e8b60db393e5184a18d7b3bd15459de03a1f817f1fce1a"
+  },
+  "reviewed_source": "Public f99a917 plus the in-progress MCP body and setup fixes; the final answer predates the matching documentation updates."
+}

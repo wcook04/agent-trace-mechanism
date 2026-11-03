@@ -1,0 +1,28 @@
+[
+  {
+    "provider": "codex",
+    "session_id": "01a19ec9-fb45-7111-9148-1ff3a0fb9a66",
+    "title": "coordinator",
+    "path": "../launch-review/coordinator.jsonl"
+  },
+  {
+    "provider": "codex",
+    "session_id": "01a19eca-141a-71b3-9eab-3a9f8990095d",
+    "title": "access-review",
+    "path": "../launch-review/access-review.jsonl",
+    "parent_session_id": "01a19ec9-fb45-7111-9148-1ff3a0fb9a66"
+  },
+  {
+    "provider": "codex",
+    "session_id": "01a19eca-22ab-74f0-9dd6-894629b12126",
+    "title": "setup-review",
+    "path": "../launch-review/setup-review.jsonl",
+    "parent_session_id": "01a19ec9-fb45-7111-9148-1ff3a0fb9a66"
+  },
+  {
+    "provider": "claude",
+    "session_id": "ebae1d5d-b2c0-451b-82b8-a002a6af401a",
+    "title": "Claude review of the Codex findings",
+    "path": "claude-review.jsonl"
+  }
+]

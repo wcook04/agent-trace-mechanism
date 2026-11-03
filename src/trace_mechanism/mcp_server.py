@@ -110,13 +110,13 @@ def create_server(entries: list[dict], entry_loader=None) -> FastMCP:
                           include_children: bool = False) -> CallToolResult:
         """Read compact or detailed context and return the first page of a stable snapshot."""
         data = tools.read_chat_context(provider, session_id, scope, limit, include_children)
-        return CallToolResult(content=[TextContent(type='text', text=data.pop('text'))], structuredContent=data)
+        return CallToolResult(content=[TextContent(type='text', text=data['text'])], structuredContent=data)
 
     @server.tool()
     def read_trace_page(sha256: str, offset: int = 0, limit: int = 24000) -> CallToolResult:
         """Continue a snapshot returned by read_chat_context, even if the source grows."""
         data = tools.read_trace_page(sha256, offset, limit)
-        return CallToolResult(content=[TextContent(type='text', text=data.pop('text'))], structuredContent=data)
+        return CallToolResult(content=[TextContent(type='text', text=data['text'])], structuredContent=data)
 
     @server.tool(structured_output=True)
     def search_trace_items(provider: str, session_id: str, query: str = '', kind: str = '',
@@ -135,6 +135,9 @@ def create_server(entries: list[dict], entry_loader=None) -> FastMCP:
         if body is None:
             body = json.dumps(data.pop('payload'), ensure_ascii=False, sort_keys=True,
                               separators=(',', ':'), allow_nan=False)
+        # Some hosts present structuredContent alone to the model. Keep the bounded
+        # serialized page there as well as in the backwards-compatible text block.
+        data['payload_json'] = body
         return CallToolResult(content=[TextContent(type='text', text=body)], structuredContent=data)
 
     @server.tool(structured_output=True)

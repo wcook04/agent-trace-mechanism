@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use Agent Trace in your work, please cite it using this metadata."
+type: software
+title: Agent Trace
+authors:
+  - family-names: Cook
+    given-names: Will
+repository-code: "https://github.com/wcook04/agent-trace-mechanism"
+url: "https://github.com/wcook04/agent-trace-mechanism"
+license: Apache-2.0

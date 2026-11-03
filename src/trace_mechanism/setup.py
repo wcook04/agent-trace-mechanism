@@ -7,7 +7,7 @@ from pathlib import Path
 import sys
 
 from . import codex_native
-from .parser import parse_codex_session
+from .parser import parse_claude_session, parse_codex_session
 
 
 def metadata(path):
@@ -23,13 +23,27 @@ def metadata(path):
             except (ValueError, UnicodeDecodeError):
                 continue
             if isinstance(row, dict) and row.get('type') == 'session_meta':
-                return row.get('payload', {})
+                payload = row.get('payload')
+                if not isinstance(payload, dict):
+                    raise ValueError('Invalid Codex session metadata.')
+                return {**payload, 'provider': 'codex'}
+            if (isinstance(row, dict) and row.get('type') in ('user', 'assistant')
+                    and isinstance(row.get('sessionId'), str) and row['sessionId']):
+                return {'provider': 'claude', 'id': row['sessionId'],
+                        'timestamp': row.get('timestamp'), 'cli_version': row.get('version')}
     return {}
 
 
 def inspect(path):
     path = path.expanduser().resolve(strict=True)
     meta = metadata(path)
+    if meta.get('provider') == 'claude':
+        turns = parse_claude_session(path)
+        return {'path': str(path), 'provider': 'claude', 'session_id': meta['id'],
+                'cli_version': meta.get('cli_version'),
+                'coverage': 'conversation' if turns else 'unsupported',
+                'turns': len(turns), 'tool_calls': sum(len(t.tool_events) for t in turns),
+                'note': 'Compact/detailed conversation reads; native item queries are Codex-only.'}
     try:
         snapshot = codex_native.load_rollout(path)
     except ValueError as exc:
@@ -39,7 +53,7 @@ def inspect(path):
     kinds = Counter(item['kind'] for item in snapshot['items'])
     native = bool(kinds)
     legacy = not native and bool(parse_codex_session(path))
-    return {'path': str(path), 'session_id': meta.get('id'),
+    return {'path': str(path), 'provider': 'codex', 'session_id': meta.get('id'),
             'cli_version': meta.get('cli_version'),
             'coverage': 'native' if native else 'legacy_conversation' if legacy else 'unsupported',
             'native_items': len(snapshot['items']), 'item_kinds': dict(kinds),
@@ -48,9 +62,9 @@ def inspect(path):
 
 def register(paths, manifest):
     reports = [inspect(path) for path in paths]
-    ids = [report['session_id'] for report in reports]
-    if any(not isinstance(sid, str) or not sid for sid in ids):
-        raise ValueError('Each selected file needs a recorded session_meta.id.')
+    ids = [(report['provider'], report['session_id']) for report in reports]
+    if any(not isinstance(sid, str) or not sid for _, sid in ids):
+        raise ValueError('Each selected file needs a recorded session identity.')
     if len(ids) != len(set(ids)):
         raise ValueError('Select each session once.')
     if any(report['coverage'] == 'unsupported' for report in reports):
@@ -59,14 +73,16 @@ def register(paths, manifest):
     for report in reports:
         meta = metadata(Path(report['path']))
         source = meta.get('source', {})
-        parent = (source.get('subagent', {}).get('thread_spawn', {}).get('parent_thread_id')
-                  if isinstance(source, dict) else None) or meta.get('parent_thread_id')
-        entry = {'provider': 'codex', 'session_id': report['session_id'],
+        subagent = source.get('subagent') if isinstance(source, dict) else None
+        spawn = subagent.get('thread_spawn') if isinstance(subagent, dict) else None
+        parent = (spawn.get('parent_thread_id') if isinstance(spawn, dict) else None) or meta.get('parent_thread_id')
+        entry = {'provider': report['provider'], 'session_id': report['session_id'],
                  'title': Path(report['path']).stem, 'path': report['path']}
-        if parent in ids:
+        if entry['provider'] == 'codex' and ('codex', parent) in ids:
             entry['parent_session_id'] = parent
         entries.append(entry)
-    parents = {entry['session_id']: entry.get('parent_session_id') for entry in entries}
+    parents = {entry['session_id']: entry.get('parent_session_id')
+               for entry in entries if entry['provider'] == 'codex'}
     for sid in parents:
         seen, cursor = set(), sid
         while cursor:
@@ -88,7 +104,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='action', required=True)
     listing = sub.add_parser('list', help='List recent session metadata locally; does not register files')
-    listing.add_argument('--root', type=Path, default=Path.home() / '.codex/sessions')
+    listing.add_argument('--provider', choices=('codex', 'claude'), default='codex')
+    listing.add_argument('--root', type=Path)
     listing.add_argument('--limit', type=int, default=10)
     check = sub.add_parser('check', help='Report supported native items or legacy conversation coverage')
     check.add_argument('path', type=Path)
@@ -100,13 +117,21 @@ def main():
         if args.action == 'list':
             if not 1 <= args.limit <= 100:
                 raise ValueError('--limit must be between 1 and 100.')
-            root = args.root.expanduser().resolve(strict=True)
-            files = sorted(root.rglob('*.jsonl'), key=lambda p: p.stat().st_mtime, reverse=True)
+            default_root = (Path(os.environ.get('CODEX_HOME', Path.home() / '.codex')) / 'sessions'
+                            if args.provider == 'codex' else Path.home() / '.claude/projects')
+            root = (args.root or default_root).expanduser().resolve(strict=True)
+            dated = []
+            for path in root.rglob('*.jsonl'):
+                try:
+                    dated.append((path.stat().st_mtime, path))
+                except OSError:
+                    continue  # A removed/inaccessible file must not hide readable histories.
+            files = [path for _, path in sorted(dated, reverse=True)]
             result = []
             for path in files[:args.limit]:
                 try:
                     meta = metadata(path)
-                    result.append({'path': str(path), 'session_id': meta.get('id'),
+                    result.append({'path': str(path), 'provider': meta.get('provider'), 'session_id': meta.get('id'),
                                    'timestamp': meta.get('timestamp'), 'cli_version': meta.get('cli_version')})
                 except (OSError, ValueError) as exc:
                     result.append({'path': str(path), 'error': str(exc)})

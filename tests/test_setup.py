@@ -42,6 +42,42 @@ def test_registration_preserves_existing_file_and_uses_absolute_source(tmp_path)
     assert manifest.read_bytes() == original
 
 
+def test_registers_actual_provider_and_rejects_claude_identity_mismatch(tmp_path):
+    from trace_mechanism.agent_tools import AgentTools
+    source = ROOT / 'tests/fixtures/claude.jsonl'
+    report = inspect(source)
+    assert report['provider'] == 'claude' and report['coverage'] == 'conversation'
+    assert report['tool_calls'] > 0
+    manifest = tmp_path / 'mixed.json'
+    register([ROOT / 'examples/native-command.jsonl', source], manifest)
+    entries = load_manifest(manifest)
+    assert [r['provider'] for r in entries] == ['codex', 'claude']
+    api = AgentTools(entries)
+    assert 'TOOL_RESULTS: [omitted' in api.read_chat_context('claude', report['session_id'])['text']
+    entries[1]['session_id'] = 'wrong-id'
+    with pytest.raises(ValueError, match='identity'):
+        AgentTools(entries).read_chat_context('claude', 'wrong-id')
+
+
+def test_string_subagent_metadata_is_valid_without_a_parent_edge(tmp_path):
+    rows = [json.loads(line) for line in (ROOT / 'examples/native-command.jsonl').read_text().splitlines()]
+    rows[0]['payload']['source'] = {'subagent': 'review'}
+    source = tmp_path / 'review.jsonl'
+    source.write_text('\n'.join(json.dumps(row) for row in rows) + '\n')
+    manifest = tmp_path / 'manifest.json'
+    register([source], manifest)
+    assert 'parent_session_id' not in load_manifest(manifest)[0]
+
+
+def test_listing_tolerates_a_broken_link(tmp_path, monkeypatch, capsys):
+    from trace_mechanism.setup import main
+    (tmp_path / 'broken.jsonl').symlink_to(tmp_path / 'missing')
+    (tmp_path / 'valid.jsonl').write_bytes((ROOT / 'examples/native-command.jsonl').read_bytes())
+    monkeypatch.setattr('sys.argv', ['setup', 'list', '--root', str(tmp_path)])
+    main()
+    assert len(json.loads(capsys.readouterr().out)) == 1
+
+
 def test_only_selected_parent_links_are_registered(tmp_path):
     sources = []
     for sid, parent in [('root', None), ('child', 'root'), ('unselected-parent-child', 'elsewhere')]:
@@ -75,3 +111,20 @@ def test_selected_public_review_contains_no_other_record_families():
         for row in rows[1:]:
             assert row['type'] == 'event_msg' and row['payload']['type'] == 'item_completed'
             assert row['payload']['item']['type'] in ('CommandExecution', 'AgentMessage')
+
+
+def test_selected_claude_review_contains_only_declared_public_records():
+    directory = ROOT / 'examples/cross-provider'
+    entries = load_manifest(directory / 'manifest.json')
+    assert [r['provider'] for r in entries].count('claude') == 1
+    text = (directory / 'claude-review.jsonl').read_text()
+    for excluded in ('/Users/', '/Volumes/', '<system', '<developer', 'requestId',
+                     '"thinking"', '"signature"', '"toolUseResult"', '"mcpMeta"'):
+        assert excluded not in text
+    rows = [json.loads(line) for line in text.splitlines()]
+    for row in rows:
+        assert set(row) <= {'type', 'sessionId', 'uuid', 'timestamp', 'version', 'message'}
+        assert row['type'] in ('user', 'assistant')
+        assert set(row['message']) <= {'id', 'role', 'content', 'stop_reason'}
+    report = inspect(directory / 'claude-review.jsonl')
+    assert report['provider'] == 'claude' and report['tool_calls'] == 5 and report['turns'] == 1

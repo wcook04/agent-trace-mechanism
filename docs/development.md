@@ -20,7 +20,7 @@ The rest of the repository supports those files or the older text-processing pat
 | [tools/](../tools/) | Run checks, capture MCP responses and regenerate examples |
 | [examples/](../examples/) | Selected source records and generated outputs |
 | [docs/](./) | Usage, implementation details and source provenance |
-| [parser.py](../src/trace_mechanism/parser.py), [views.py](../src/trace_mechanism/views.py) | Older transcript formats and their views |
+| [parser.py](../src/trace_mechanism/parser.py), [views.py](../src/trace_mechanism/views.py) | Claude Code and older Codex transcript formats and their views |
 | [structurer.mjs](../src/trace_mechanism/structurer.mjs) | A separate index builder for rendered trace text |
 
 ## Run checks
@@ -34,6 +34,7 @@ python3 -m venv .venv
 .venv/bin/python tools/record_native_contract.py --check
 .venv/bin/python tools/inspect_recorded_run.py
 .venv/bin/python tools/inspect_agent_tree.py
+.venv/bin/python tools/inspect_cross_provider.py
 .venv/bin/python tools/demo_codex.py
 node --test tests/structurer.test.mjs
 .venv/bin/python tools/regenerate_examples.py --check
@@ -45,6 +46,8 @@ node --test tests/structurer.test.mjs
 `inspect_recorded_run.py` checks five commands from [a real validation investigation](investigation.md). The selected records and their provenance are in `examples/validation-history*`. `measure_retrieval.py` measures fresh and retained reads of a local history against literal search; [recorded measurements](../examples/retrieval-costs.json) are observations, not CI thresholds.
 
 `inspect_agent_tree.py` retrieves a coordinator and two workers from [a fresh public-code review](agent-tree.md), retained in `examples/launch-review/`. `trace_mechanism.setup` owns local metadata listing, compatibility checks and explicit manifest creation.
+
+`inspect_cross_provider.py` reads [Claude's review of the Codex findings](cross-provider.md) and repeats its item reads. The selected records are in `examples/cross-provider/`. `NOTICE` retains Will Cook's attribution; `CITATION.cff` supplies citation metadata.
 
 When changing a tool, update [its reference](mcp.md) and test its actual stdio call, including the next operation that consumes the returned handle. These checks cover specific records and behavior; they are not retrieval-quality or performance benchmarks.
 

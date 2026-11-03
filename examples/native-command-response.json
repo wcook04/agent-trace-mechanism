@@ -123,7 +123,8 @@
           "page_encoding": "canonical_json",
           "offset_unit": "unicode_characters",
           "snapshot_sha256": "29b0aa7c95bf9bb94a9541547eb53ad957161a34b48e39857dcbaaafaa007b9d",
-          "snapshot_kind": "native_bundle"
+          "snapshot_kind": "native_bundle",
+          "payload_json": "\"test_delayed_result_stays_after_intervening_message_and_other_result (test_chronology.ChronologyTests.test_delayed_result_stays_after_intervening_message_and_other_result) ... ok\\ntest_embedded_role_text_is_an_opaque_json_string (test_chronology.ChronologyTests.test_embedded_role_text_is_an_opaque_json_string) ... ok\\n\\n----------------------------------------------------------------------\\nRan 2 tests in 0.002s\\n\\nOK\\n\""
         }
       }
     }

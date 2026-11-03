@@ -23,6 +23,7 @@ jobs:
       - run: python tools/record_native_contract.py --check
       - run: python tools/inspect_recorded_run.py
       - run: python tools/inspect_agent_tree.py
+      - run: python tools/inspect_cross_provider.py
       - run: python tools/measure_retrieval.py examples/validation-history.jsonl --repeats 1
       - run: python tools/check_layout.py
       - run: node --test tests/structurer.test.mjs

@@ -262,6 +262,17 @@ class AgentTools:
                 raise ValueError('Registered child traversal currently requires Codex records.')
             self._refresh_entries()
             row = self._entry(provider, session_id)
+            observed = set()
+            with row['path'].open(encoding='utf-8') as stream:
+                for line in stream:
+                    try:
+                        record = json.loads(line)
+                    except ValueError:
+                        continue
+                    if isinstance(record, dict) and record.get('sessionId'):
+                        observed.add(record['sessionId'])
+            if observed != {session_id}:
+                raise ValueError('Claude source session identity does not match the registered session.')
             text = render(parse_claude_session(row['path']), detail=scope == 'full_thread')
         text_digest = hashlib.sha256(text.encode()).hexdigest()
         self.snapshots[text_digest] = text
