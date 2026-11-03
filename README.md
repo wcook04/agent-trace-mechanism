@@ -2,6 +2,8 @@
 
 [![Agent Trace desktop app showing a running Codex chat, its workers and copy controls](docs/images/agent-trace.png)](docs/images/agent-trace.png)
 
+*Desktop app preview. This release contains the Codex reader and MCP server. The desktop and in-Codex interfaces are not packaged yet. The image shows a whole-thread export; the MCP tools also retrieve individual commands and fields.*
+
 **Let an agent read another Codex chat's commands, outputs and patches without loading the whole transcript.**
 
 Choose a chat, search its recorded activity, and retrieve the output or field you need. Include its workers, keep a reference to what you read, and check what changed as the chats continue running.
@@ -25,17 +27,22 @@ Chat lookup searches registered titles and IDs. Content search runs within the c
 
 ## Try it
 
-With Python 3.10+, from this checkout:
+With Git and Python 3.10+ (macOS/Linux shell):
 
 ```sh
+git clone https://github.com/wcook04/agent-trace-mechanism.git
+cd agent-trace-mechanism
 python3 -m venv .venv
 .venv/bin/python -m pip install '.[mcp]'
-.venv/bin/python tools/record_native_contract.py --check --show
+.venv/bin/python tools/inspect_recorded_run.py
+.venv/bin/python tools/inspect_agent_tree.py
 ```
 
-This searches a recorded development command through the MCP server and prints its retrieved output. [Connect an agent and register your own chats →](docs/mcp.md#setup)
+These retrieve a real validation history and a fresh review with two subagents through MCP. They print the results without running the recorded commands. No API key, private app or Node installation is needed. [Use your own chats in Codex →](docs/mcp.md#setup)
 
 [A real investigation: checking a worker's failed tests, correction and retry →](docs/investigation.md)
+
+[A fresh coordinator and two subagents reviewing this repository →](docs/agent-tree.md)
 
 ## How it works
 
@@ -53,5 +60,11 @@ Start with [the reader](src/trace_mechanism/codex_native.py) and [the retrieval 
 The desktop app's plugin lets you select a chat and attach, copy or preview its context inside Codex. Agents can also retrieve context directly through its tools. This repository contains the reader and standalone MCP server used to inspect the mechanism.
 
 </details>
+
+## Why I built it
+
+I built this while using AI for maths research and making interfaces to help people inspect the results. I'm releasing the core first. I'm working on several projects on a small budget, so I'd like to know whether people would use the desktop app before spending the time packaging it. If you'd use it, [let me know what you'd want to do with it](https://github.com/wcook04/agent-trace-mechanism/issues). I'd be happy to make it available if there's interest.
+
+[Introduction to my other projects (video)](https://www.youtube.com/watch?v=MBmVMMogXTA) · [Read mathematics beside its Lean proof](https://wcook04.github.io/lean-exposition-site/)
 
 [Apache-2.0](LICENSE) · Will Cook · [Source provenance](docs/provenance.json) · [Security](SECURITY.md)

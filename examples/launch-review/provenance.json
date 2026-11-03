@@ -1,0 +1,56 @@
+{
+  "reviewed_commit": "c0eec3d8951104855facce0fb77368ea9d6d1f47",
+  "purpose": "Actual read-only review of the public repository by a fresh coordinator and two subagents, 3 November 2026. No inherited conversation history was supplied.",
+  "selection": "One recorded command and final answer per session. Metadata reduced to identity, timestamp, producer version and recorded parent links within this selection. Local checkout path replaced with <public-checkout>. Native item IDs, commands, output and timestamps otherwise retained.",
+  "omissions": "All other records, including prompts, injected instructions, reasoning, settings, hooks, collaboration messages and unselected tool output, are absent. This is not a raw session export or an automatic redactor.",
+  "records": [
+    {
+      "file": "coordinator.jsonl",
+      "original_source_sha256": "2ea405c9a27322da3796f7014261d0a0ea9c0c715849907c8ed1a71f35ffdfcc",
+      "selected_sha256": "09d55815ea9dd6ff540db896b7eee05237a3a28a0022b4439ebddf1232b478d7",
+      "original_records": 77,
+      "selected_items": [
+        {
+          "line": 35,
+          "item_id": "exec-9814eb6d-718d-448b-a621-15d150beaff2"
+        },
+        {
+          "line": 73,
+          "item_id": "msg_0afaee8130c7079f016ae929a174dc81919e834f15f8a2e194"
+        }
+      ]
+    },
+    {
+      "file": "access-review.jsonl",
+      "original_source_sha256": "6b4e6da951662a87d88a790852a3697072cef8f9b67312c8b474a79ab0060d88",
+      "selected_sha256": "50ec1a0cebe72c96554c3da89bebdc6e7f36385628ef40a0bdf8136cb87ba570",
+      "original_records": 33,
+      "selected_items": [
+        {
+          "line": 26,
+          "item_id": "exec-74d2dee1-5319-43a8-a73c-6535a87099b9"
+        },
+        {
+          "line": 29,
+          "item_id": "msg_083b040814a229be016ae92989bccc8191a9cf1d720da070be"
+        }
+      ]
+    },
+    {
+      "file": "setup-review.jsonl",
+      "original_source_sha256": "f7a1c2610342e38113cbbe3d54b10ca39c8a8a173b5dcbbe2e32a90e375b2ed5",
+      "selected_sha256": "d3f3e0defd69c710ee4017515434f588b1428b936cc7e7828d6d675ff979eb95",
+      "original_records": 51,
+      "selected_items": [
+        {
+          "line": 21,
+          "item_id": "exec-f84f2255-4d81-4324-baae-49426329d8f1"
+        },
+        {
+          "line": 47,
+          "item_id": "msg_0a509f27b24ceeb5016ae9299ac87c8191a3f92ae1e52bc086"
+        }
+      ]
+    }
+  ]
+}

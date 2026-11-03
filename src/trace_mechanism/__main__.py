@@ -21,6 +21,10 @@ def main():
     parser.add_argument('--field', default='', help='JSON Pointer within the selected native item')
     parser.add_argument('--since', type=Path, help='Compare with an earlier native JSONL source snapshot')
     args = parser.parse_args()
+    operations = [bool(args.item), bool(args.since),
+                  args.query is not None or bool(args.kind) or args.failures]
+    if sum(operations) > 1:
+        parser.error('Choose one operation: item read, comparison, or search.')
     if args.field and not args.item:
         parser.error('--field requires --item')
     snapshot = native.load_rollout(args.file) if args.provider == 'codex' else None

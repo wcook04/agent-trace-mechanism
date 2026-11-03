@@ -33,6 +33,7 @@ python3 -m venv .venv
 .venv/bin/python -m pytest tests -q
 .venv/bin/python tools/record_native_contract.py --check
 .venv/bin/python tools/inspect_recorded_run.py
+.venv/bin/python tools/inspect_agent_tree.py
 .venv/bin/python tools/demo_codex.py
 node --test tests/structurer.test.mjs
 .venv/bin/python tools/regenerate_examples.py --check
@@ -42,6 +43,8 @@ node --test tests/structurer.test.mjs
 `record_native_contract.py` searches an actual recorded command and retrieves its output through a separate MCP server process. `--show` prints the retrieved evidence. Without `--check`, it updates [the saved responses](../examples/native-command-response.json). `demo_codex.py` checks the legacy transcript path. Neither executes commands from a recording.
 
 `inspect_recorded_run.py` checks five commands from [a real validation investigation](investigation.md). The selected records and their provenance are in `examples/validation-history*`. `measure_retrieval.py` measures fresh and retained reads of a local history against literal search; [recorded measurements](../examples/retrieval-costs.json) are observations, not CI thresholds.
+
+`inspect_agent_tree.py` retrieves a coordinator and two workers from [a fresh public-code review](agent-tree.md), retained in `examples/launch-review/`. `trace_mechanism.setup` owns local metadata listing, compatibility checks and explicit manifest creation.
 
 When changing a tool, update [its reference](mcp.md) and test its actual stdio call, including the next operation that consumes the returned handle. These checks cover specific records and behavior; they are not retrieval-quality or performance benchmarks.
 

@@ -9,7 +9,7 @@
   ],
   "directories": {
     "src": {
-      "purpose": "Native Codex item engine, legacy parsers, views, MCP adapter and production index builder"
+      "purpose": "Native Codex reader, local setup helper, legacy parsers, views, MCP adapter and production index builder"
     },
     "tests": {
       "purpose": "Regression and provenance tests"
