@@ -2,26 +2,37 @@
 
 [![Agent Trace desktop app showing a running Codex chat, its workers and copy controls](docs/images/agent-trace.png)](docs/images/agent-trace.png)
 
-*Desktop app preview. This release contains the history readers and MCP server. The desktop app and its in-Codex interface aren't packaged yet; both would also be free and open source. The image shows a whole-thread export; the MCP tools also retrieve individual commands and fields.*
+*Desktop app preview. You can install the history reader and agent tools today. The desktop app and its in-Codex interface aren't packaged yet; both would also be free and open source.*
 
-**Let agents in Codex and Claude Code read each other's work.**
+**Let an agent read your earlier Codex and Claude Code conversations.**
 
-Read a selected chat in a compact or detailed view. For Codex histories, search commands, outputs and patches individually, include registered workers, and retrieve changes as the work continues.
+Agent Trace reads the session files that Codex and Claude Code save on your computer. An agent in either app can retrieve messages and recorded tool activity from the chats you select, including a chat that is still running.
 
-This repository contains a Python library and an MCP server for local Codex and Claude Code session files. You register the files it can read. The desktop app shown above uses the same reader and adds automatic discovery, file watching and copy controls.
+It runs locally as an **MCP (Model Context Protocol) server**: a program that gives your agent tools for finding and reading those histories. This repository contains that server and its Python library. The desktop app shown above uses the same reader and adds automatic chat discovery, file watching and copy controls.
 
 <a id="what-agent-trace-adds"></a>
-<a id="compact-and-detailed"></a>
 
 ## What it does
 
-- **Search Codex activity:** search a selected chat and its registered workers by text, item type or recorded failure. Text matches identify the field and passage.
-- **Read a Codex item or field:** retrieve one command, output, patch or field. Large values arrive in pages.
-- **Keep a stable reference:** repeat a read from the same saved capture, even after the source changes.
-- **Follow Codex progress:** retrieve added, updated and removed items since an earlier capture. An unreadable worker is reported as unavailable.
-- **Read either conversation format:** compact keeps messages and tool-call previews; detailed adds recorded tool inputs and results. Codex views also retain visible thinking summaries, outcomes and changed paths, with large bodies available through references.
+For **Codex and Claude Code histories**, an agent can find a chat from your selected files by title or ID, then read its conversation in either view:
 
-Chat lookup searches registered titles and IDs across both providers. Native item search, worker traversal and change queries currently read Codex records. Both hosts can call all these tools; the source format determines which operations are available.
+<a id="compact-and-detailed"></a>
+
+| View | What it returns |
+|---|---|
+| **Compact** | Messages and tool-call previews, including commands and file paths where recorded. Tool results are omitted. Codex event records also provide visible reasoning summaries, command outcomes and changed paths. |
+| **Detailed** | The conversation plus recorded tool inputs and results. For Codex event records, large outputs and patches have previews with references for retrieving the full value; repeated large text blocks are stored once in the view. |
+
+Compact is a filtered transcript, not an AI-written summary. Long responses are split into pages that the agent can request as needed.
+
+For **supported Codex event records**, an agent can also:
+
+- **Find a specific operation:** search commands, outputs, patches and other recorded items by text, type or failure status. Each match identifies the field and matching passage.
+- **Read just the relevant evidence:** retrieve one item, such as a command execution, or one field, such as its output. Results include session and item IDs so the agent can identify its source.
+- **Include subagents:** search a parent chat and the child chats whose files you have also selected. Parent-child links are checked against the session records.
+- **Check what changed:** compare two reads of a running chat to find added, updated or removed items. An unreadable child chat is reported as unavailable.
+
+These extra queries use Codex's structured event records, called *native items* in the code. They are not yet available for Claude histories or older Codex files that contain only conversation records. An agent in either app can query a supported Codex file.
 
 <a id="run-or-inspect"></a>
 
@@ -49,7 +60,17 @@ These retrieve a real validation history, a Codex review with two subagents, and
 
 ## How it works
 
-The Codex reader turns item events into records keyed by session, turn and item ID. The Claude parser pairs recorded tool calls with their results and groups them into conversation turns. The server selects a chat and its workers, saves a capture, then serves searches, fields and comparisons from it. Captures stay available until the server exits; a fresh capture rereads the files.
+Each session file uses JSONL: one JSON record per line.
+
+<p align="center">
+  <img src="docs/images/history-flow.svg" width="480" alt="Agent Trace reads selected Codex and Claude Code session files. An agent in either app sends MCP requests and receives selected text with source references.">
+</p>
+
+1. **You choose the source files.** A local JSON configuration file, called the manifest, lists the session files the server may read. The server does not automatically add other chats.
+2. **Agent Trace parses the records.** For Codex events, it combines updates to the same item ID into that item's latest recorded state. For Claude conversations, it pairs tool calls with their results and groups messages into turns.
+3. **The agent requests what it needs.** MCP tools return conversation text, search matches or selected Codex items. The server retains the result of a read in memory as a *snapshot*, so later pages refer to the same version even if the source file grows. A fresh read picks up new records; snapshots last until the server exits.
+
+The public server reads files when asked. It does not continuously watch them. It does not modify the session files or run the commands they contain. Retrieved text is returned to the requesting agent, whose host may send it to its model provider. [Data access and privacy](SECURITY.md).
 
 Start with [the Codex reader](src/trace_mechanism/codex_native.py), [the conversation parsers](src/trace_mechanism/parser.py) and [the retrieval adapter](src/trace_mechanism/agent_tools.py). [The MCP server](src/trace_mechanism/mcp_server.py) defines the callable tools.
 

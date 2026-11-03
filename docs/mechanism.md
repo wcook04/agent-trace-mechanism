@@ -2,9 +2,15 @@
 
 [Usage](mcp.md) · [Development](development.md) · [README](../README.md)
 
-The retrieval path is **JSONL files → recorded items → saved capture → search, read or compare**. The reader handles recorded Codex events; the adapter chooses sessions and stores captures; the MCP server makes those operations callable by an agent.
+Agent Trace reads local session files and returns selected parts to an agent through MCP. You list the permitted files in a manifest. Both Codex and Claude Code histories can be read as conversations; supported Codex event records also allow queries for individual commands, outputs, patches and changes between reads.
 
-## Inputs and coverage
+A *native item* is one structured Codex record, such as a command execution. A *snapshot* (also called a capture below) is the parsed data or rendered conversation retained from a read. It lets the agent request more pages of the same version while the original file continues to grow.
+
+The source files use JSONL: one JSON record per line. [The README diagram](../README.md#how-it-works) shows how those files reach the requesting agent.
+
+<a id="inputs-and-coverage"></a>
+
+## Codex event records
 
 The native reader processes `event_msg` records containing supported `item_started`, `item_updated` and `item_completed` items. It retains session, turn and item IDs and source record positions. A later event updates the same item while preserving its source references.
 
@@ -14,7 +20,15 @@ Reads return decoded, normalized values, rather than original JSONL bytes. Encry
 
 If a session has no supported native items, conversation views use the legacy transcript parser. Native item search still searches only native items. The separate JavaScript builder indexes rendered trace text; it is not part of this native retrieval path.
 
-## Normalized records and views
+## Claude conversation records
+
+The Claude parser groups user messages, assistant messages and tool activity into turns. It matches each tool result to its call ID and marks missing calls or results. The server checks that the file's recorded session ID matches its manifest entry. Compact views omit tool results and keep selected call arguments; detailed views include recorded inputs and results. Both views can be read in pages from a retained text snapshot.
+
+Claude histories do not currently support native item queries, snapshot comparisons or automatic child traversal. Register a Claude worker as a separate history when it has its own recorded session ID.
+
+<a id="normalized-records-and-views"></a>
+
+## Codex compact and detailed views
 
 Compact includes messages, visible reasoning summaries, command previews and outcomes, changed paths and settings. Detailed adds retained inputs, outputs and patches. Long values have previews and field references; the full retained values remain searchable and retrievable.
 

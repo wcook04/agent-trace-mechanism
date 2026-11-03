@@ -19,7 +19,7 @@ The rest of the repository supports those files or the older text-processing pat
 | [tests/](../tests/) | Compatibility, identity, availability, paging and transport checks |
 | [tools/](../tools/) | Run checks, capture MCP responses and regenerate examples |
 | [examples/](../examples/) | Selected source records and generated outputs |
-| [docs/](./) | Usage, implementation details and source provenance |
+| [docs/](./) | Usage, implementation details, source provenance and [screenshots and diagram](images/) |
 | [parser.py](../src/trace_mechanism/parser.py), [views.py](../src/trace_mechanism/views.py) | Claude Code and older Codex transcript formats and their views |
 | [structurer.mjs](../src/trace_mechanism/structurer.mjs) | A separate index builder for rendered trace text |
 

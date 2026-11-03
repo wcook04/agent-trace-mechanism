@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 532" role="img" aria-labelledby="history-title history-desc">
+  <title id="history-title">From local session files to an agent's context</title>
+  <desc id="history-desc">Agent Trace reads the Codex and Claude Code session files you register. An agent in either app sends an MCP request to Agent Trace and receives selected conversation text or supported Codex items with source references. The diagram shows data flow, not a recorded execution.</desc>
+  <!--
+  Adapted from the node masks, orthogonal connectors, focal-node treatment and
+  request/response paths in Cathryn Lavery's example-architecture.html:
+  https://github.com/cathrynlavery/diagram-design/blob/f4547ee95f88e5b28a52517feff6b6c11cc657f9/skills/diagram-design/assets/example-architecture.html
+  Changed to a vertical four-node data-flow diagram for 480px README display.
+  Source categories stay separate; either host is one shared consumer. Parser
+  internals, child-session traversal and model-provider transport are omitted
+  here and explained in the README and mechanism guide.
+
+  MIT License
+  Copyright (c) 2025 Cathryn Lavery
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+  -->
+  <defs>
+    <marker id="read-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#576574"/>
+    </marker>
+    <marker id="result-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2563a6"/>
+    </marker>
+  </defs>
+  <rect width="480" height="532" rx="8" fill="#f6f8fa"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fill="#202c39">
+    <text x="240" y="32" text-anchor="middle" font-size="20" font-weight="600">Session files on your computer</text>
+    <text x="240" y="56" text-anchor="middle" font-size="16" fill="#465568">Only the files you register</text>
+
+    <!-- Connections behind the opaque nodes; separate request and response. -->
+    <path d="M 126,152 V 176 Q 126,184 134,184 H 180 Q 188,184 188,192 V 224" fill="none" stroke="#576574" stroke-width="1.6" marker-end="url(#read-arrow)"/>
+    <path d="M 354,152 V 176 Q 354,184 346,184 H 300 Q 292,184 292,192 V 224" fill="none" stroke="#576574" stroke-width="1.6" marker-end="url(#read-arrow)"/>
+    <text x="240" y="205" text-anchor="middle" font-size="16" fill="#465568">read-only</text>
+    <path d="M 156,436 V 328" fill="none" stroke="#576574" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#read-arrow)"/>
+    <path d="M 324,328 V 436" fill="none" stroke="#2563a6" stroke-width="2" marker-end="url(#result-arrow)"/>
+    <text x="142" y="386" text-anchor="end" font-size="16" fill="#465568">MCP request</text>
+    <text x="338" y="374" font-size="16" fill="#205a98">Selected text</text>
+    <text x="338" y="396" font-size="16" fill="#205a98">and source IDs</text>
+
+    <rect x="24" y="80" width="204" height="72" rx="6" fill="#ffffff" stroke="#9aa7b5"/>
+    <text x="126" y="110" text-anchor="middle" font-size="21" font-weight="600">Codex</text>
+    <text x="126" y="135" text-anchor="middle" font-size="16" fill="#465568">JSONL history</text>
+
+    <rect x="252" y="80" width="204" height="72" rx="6" fill="#ffffff" stroke="#9aa7b5"/>
+    <text x="354" y="110" text-anchor="middle" font-size="21" font-weight="600">Claude Code</text>
+    <text x="354" y="135" text-anchor="middle" font-size="16" fill="#465568">JSONL history</text>
+
+    <rect x="24" y="224" width="432" height="104" rx="6" fill="#f6f8fa"/>
+    <rect x="24" y="224" width="432" height="104" rx="6" fill="#eaf2fc" stroke="#2563a6" stroke-width="1.5"/>
+    <text x="240" y="258" text-anchor="middle" font-size="24" font-weight="600">Agent Trace</text>
+    <text x="240" y="284" text-anchor="middle" font-size="18">Parses the selected files</text>
+    <text x="240" y="309" text-anchor="middle" font-size="16" fill="#465568">Retains each read as a snapshot</text>
+
+    <rect x="24" y="436" width="432" height="72" rx="6" fill="#ffffff" stroke="#9aa7b5"/>
+    <text x="240" y="466" text-anchor="middle" font-size="21" font-weight="600">Agent in Codex or Claude Code</text>
+    <text x="240" y="491" text-anchor="middle" font-size="16" fill="#465568">Uses the returned history as context</text>
+  </g>
+</svg>

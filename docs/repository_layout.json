@@ -23,7 +23,7 @@
       "purpose": "Native MCP checks, retrieval measurements, compatibility replay, example regeneration and layout checks"
     },
     "docs": {
-      "purpose": "Mechanism, production excerpts, provenance, layout policy and supplied app screenshots"
+      "purpose": "Mechanism, production excerpts, provenance, layout policy, app screenshots and explanatory diagrams"
     },
     ".github": {
       "purpose": "Public CI verification"
