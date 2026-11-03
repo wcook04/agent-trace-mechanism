@@ -7,17 +7,20 @@
     "CITATION.cff",
     "pyproject.toml",
     ".gitignore",
-    "SECURITY.md"
+    "SECURITY.md",
+    "CONTRIBUTING.md"
   ],
   "directories": {
     "src": {
-      "purpose": "Native Codex reader, local setup helper, provider conversation parsers, views, MCP adapter and production index builder"
+      "purpose": "Native Codex reader, local setup helper, provider conversation parsers, views, MCP adapter and production index builder",
+      "guide": "docs/development.md"
     },
     "tests": {
       "purpose": "Regression and provenance tests"
     },
     "examples": {
-      "purpose": "Selected native records, current MCP responses, retrieval measurements and retained legacy parser regressions"
+      "purpose": "Selected native records, current MCP responses, retrieval measurements and retained legacy parser regressions",
+      "guide": "examples/README.md"
     },
     "tools": {
       "purpose": "Native MCP checks, retrieval measurements, compatibility replay, example regeneration and layout checks"
@@ -45,15 +48,21 @@
     "docs/mcp.md",
     "examples/native-command.jsonl",
     "examples/native-command-response.json",
-    "tools/record_native_contract.py"
+    "tools/record_native_contract.py",
+    "CONTRIBUTING.md",
+    "examples/README.md",
+    "tools/check_distribution.py"
   ],
   "content_routes": {
     "README.md": [
       "docs/development.md",
-      "docs/provenance.json"
+      "docs/provenance.json",
+      "CONTRIBUTING.md",
+      "examples/README.md"
     ],
     "docs/development.md": [
-      "tools/check_layout.py"
+      "tools/check_layout.py",
+      "tools/check_distribution.py"
     ]
   },
   "exceptions": {}

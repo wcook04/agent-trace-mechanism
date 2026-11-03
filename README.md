@@ -98,6 +98,10 @@ The desktop app's plugin lets you select a chat and attach, copy or preview its 
 
 </details>
 
+## Contributing
+
+[Bug reports and pull requests](CONTRIBUTING.md) are welcome. The [development guide](docs/development.md) covers tests and package checks; the [example index](examples/README.md) explains the recordings and generated files. Keep private transcripts out of issues and pull requests.
+
 ## Why I built it
 
 I built this while using AI for maths research and making videos and interfaces to help people understand the results.

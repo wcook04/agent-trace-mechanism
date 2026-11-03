@@ -10,6 +10,6 @@ The manifest is file selection, not an OS sandbox: registered paths may be absol
 
 Public examples are deliberately selected records, with provenance describing omissions. They are not complete raw sessions or a general redaction recipe. Do not attach real conversation records, credentials or private file contents to a public issue; use a minimal reproduction with invented non-sensitive data.
 
-For a security-sensitive report, use the repository's private vulnerability reporting channel. Provide a minimal synthetic input and the resulting behavior. Ordinary bugs that can be described without sensitive content may be reported publicly.
+For a security-sensitive report, use [private vulnerability reporting](https://github.com/wcook04/agent-trace-mechanism/security/advisories/new). Provide a minimal synthetic input and the resulting behavior. Ordinary bugs that can be described without sensitive content may be reported publicly.
 
 Only the current published inspection version is covered. The complete Agent Trace app is a separate, unpublished implementation.

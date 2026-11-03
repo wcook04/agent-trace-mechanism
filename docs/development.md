@@ -4,7 +4,7 @@
 
 ## Source map
 
-The current MCP retrieval path is three files:
+The MCP server loads an explicit manifest, then passes requests to the retrieval adapter. The adapter uses the native Codex reader or the conversation parsers according to the source format. None of these modules depends on the desktop app.
 
 | Source | Responsibility |
 |---|---|
@@ -18,7 +18,7 @@ The rest of the repository supports those files or the older text-processing pat
 |---|---|
 | [tests/](../tests/) | Compatibility, identity, availability, paging and transport checks |
 | [tools/](../tools/) | Run checks, capture MCP responses and regenerate examples |
-| [examples/](../examples/) | Selected source records and generated outputs |
+| [examples/](../examples/README.md) | Current recordings, generated outputs and earlier compatibility records |
 | [docs/](./) | Usage, implementation details, source provenance and [screenshots and diagram](images/) |
 | [parser.py](../src/trace_mechanism/parser.py), [views.py](../src/trace_mechanism/views.py) | Claude Code and older Codex transcript formats and their views |
 | [structurer.mjs](../src/trace_mechanism/structurer.mjs) | A separate index builder for rendered trace text |
@@ -26,6 +26,7 @@ The rest of the repository supports those files or the older text-processing pat
 ## Run checks
 
 Python 3.10+ runs the reader and server; Node.js 22+ runs the text index builder.
+Run these commands from the repository root after cloning it.
 
 ```sh
 python3 -m venv .venv
@@ -52,6 +53,20 @@ node --test tests/structurer.test.mjs
 The editable [history-flow diagram](images/history-flow.svg) describes file selection and MCP requests. [Compact versus detailed](images/compact-detailed.svg) shows selected fields from the final command in `examples/validation-history.jsonl`; it abbreviates command paths and omits some output lines. Their SVG comments record the source, omissions and diagram-template licence.
 
 When changing a tool, update [its reference](mcp.md) and test its actual stdio call, including the next operation that consumes the returned handle. These checks cover specific records and behavior; they are not retrieval-quality or performance benchmarks.
+
+## Check the distributable package
+
+```sh
+.venv/bin/python -m pip install '.[mcp,test,build]'
+.venv/bin/python tools/check_distribution.py
+```
+
+This builds a source distribution and a wheel from it, checks the package files
+and licence notices, and installs the wheel into a temporary environment outside
+the checkout. It then checks the installed JavaScript resource and Python entry
+points and runs the real MCP search-and-read contract through stdio. It needs
+network access to install build and runtime dependencies. It does not publish a
+package or register a server with your apps.
 
 ## Provenance and compatibility records
 

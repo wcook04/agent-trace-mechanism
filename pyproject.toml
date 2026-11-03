@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,12 +7,20 @@ name = "agent-trace-mechanism"
 version = "0.2.0"
 authors = [{name = "Will Cook"}]
 description = "Read Codex and Claude histories; query native Codex commands, outputs and patches"
+readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+
+[project.urls]
+Homepage = "https://github.com/wcook04/agent-trace-mechanism"
+Documentation = "https://github.com/wcook04/agent-trace-mechanism/blob/main/docs/mcp.md"
+Issues = "https://github.com/wcook04/agent-trace-mechanism/issues"
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.30,<2"]
 test = ["pytest>=8,<10"]
+build = ["build>=1.2,<2"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
