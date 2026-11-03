@@ -2,7 +2,7 @@
 
 [![Agent Trace desktop app showing a running Codex chat, its workers and copy controls](docs/images/agent-trace.png)](docs/images/agent-trace.png)
 
-*Desktop app preview. This release contains the history readers and MCP server. The desktop and in-Codex interfaces are not packaged yet. The image shows a whole-thread export; the MCP tools also retrieve individual commands and fields.*
+*Desktop app preview. This release contains the history readers and MCP server. The desktop app and its in-Codex interface aren't packaged yet; both would also be free and open source. The image shows a whole-thread export; the MCP tools also retrieve individual commands and fields.*
 
 **Let agents in Codex and Claude Code read each other's work.**
 
@@ -66,9 +66,11 @@ The desktop app's plugin lets you select a chat and attach, copy or preview its 
 
 ## Why I built it
 
-I built this while using AI for maths research and making interfaces to help people inspect the results. I'm releasing the core first. I'm working on several projects on a small budget, so I'd like to know whether people would use the desktop app before spending the time packaging it. If you'd use it, [let me know what you'd want to do with it](https://github.com/wcook04/agent-trace-mechanism/issues). I'd be happy to make it available if there's interest.
+I built this while using AI for maths research and making videos and interfaces to help people understand the results.
 
-[Introduction to my other projects (video)](https://www.youtube.com/watch?v=MBmVMMogXTA) · [Read mathematics beside its Lean proof](https://wcook04.github.io/lean-exposition-site/)
+The core is free and open source, and the full desktop app would be too, under the same Apache-2.0 licence. I won't charge for it. I've just got a lot on my plate, so I'd like to know if people would use it before I spend the time packaging it. If you would, [let me know what you'd use it for](https://github.com/wcook04/agent-trace-mechanism/issues). I'd be happy to make it available.
+
+I'm also sharing this because I'd like more people to see my main projects. [Here's my introduction video](https://www.youtube.com/watch?v=MBmVMMogXTA), and [here's the maths reader](https://wcook04.github.io/lean-exposition-site/) if you'd like to have a look.
 
 Apache-2.0; copyright 2026 Will Cook. Redistributed copies must retain the applicable notices under the licence. If you use Agent Trace in published work, please [cite it](CITATION.cff).
 

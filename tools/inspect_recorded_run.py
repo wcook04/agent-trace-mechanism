@@ -68,12 +68,25 @@ async def inspect():
     assert 'JSON.stringify' in applied['aggregated_output']
     assert retry['exit_code'] == 0 and '| tail -10' in retry['command'][-1]
     assert 'ℹ pass 124' in retry['aggregated_output'] and 'ℹ fail 0' in retry['aggregated_output']
-    print('Retrieved five original commands and outputs through MCP; all match the selected records.')
-    for label, entry in zip(('Earlier run: 60 passed', 'Combined run: 123 passed, 1 failed',
-                             'Fixture correction: dry run only', 'Fixture correction: applied',
-                             'Combined retry: 124 passed, 0 failed'), entries):
-        print(f"{label}\n  {entry['item_id']}")
-    print('\nThe retry output reports success; its pipeline exit code alone would not prove it.')
+    hit = data['items'][0]
+    print('Question: did the worker correct the fixture and rerun the failing tests?')
+    print(f'Session: {session_id}\nCapture: {snapshot}')
+    print('\nSearch: AssertionError | kind=CommandExecution | failures_only=true')
+    print(f"Match: {hit['item_id']} | field={hit['match']['field']}")
+    print(hit['excerpt'])
+    print('\nRelated commands: search parser.test.mjs in the same capture')
+    for label, entry in zip(('Earlier run', 'Failing run', 'Dry run', 'Applied correction', 'Retry'), entries):
+        item = entry['item']
+        print(f"\n{label} | {entry['item_id']} | exit={item['exit_code']}")
+        seen = set()
+        for line in item['aggregated_output'].splitlines():
+            if any(marker in line for marker in ('ℹ pass', 'ℹ fail', 'OK [', 'JSON.stringify')):
+                if line not in seen:
+                    print('  ' + line)
+                    seen.add(line)
+    print('\nThe records show an applied fixture correction followed by 124 passing tests.')
+    print('The dry run alone did not apply it. The retry uses a pipeline, so its exit code alone would not prove success.')
+    print('All five retrieved commands and outputs match the selected source records.')
     print('This checks recorded evidence. It does not run the historical commands or verify current app code.')
 
 

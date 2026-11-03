@@ -1,4 +1,7 @@
 {
+  "status": "historical",
+  "first_published_commit": "c0eec3d8951104855facce0fb77368ea9d6d1f47",
+  "implementation_note": "Recorded before 2796470 added text/payload_json bodies to structuredContent. These response sizes do not describe the current server.",
   "source_bytes": 5571196,
   "source_sha256": "28f9f762ca3ed78d6e887d2b6f389c89b18d2c74c7be349d09f3c4d47724df04",
   "query": "AssertionError",

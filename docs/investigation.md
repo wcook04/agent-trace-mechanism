@@ -34,6 +34,8 @@ The script prints the sequence and verifies retrieved commands and outputs again
 
 ## Retrieval costs
 
+These are historical measurements, first published at [c0eec3d](https://github.com/wcook04/agent-trace-mechanism/commit/c0eec3d8951104855facce0fb77368ea9d6d1f47). They predate the [MCP compatibility fix](https://github.com/wcook04/agent-trace-mechanism/commit/279647080a10632a0b6d9b174c9b439721dd97ed), which added retrieved bodies to `structuredContent`. The response sizes below do not describe the current server.
+
 A separate measurement used a frozen copy of that worker's full 5.57 MB history, not the five-record selection. Both MCP and `rg` read identical bytes. Three sequential measurements on macOS arm64, Python 3.12.7; medians below. Server initialization is excluded and filesystem caches were not cleared.
 
 | Operation | Median | Returned bytes |

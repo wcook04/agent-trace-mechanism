@@ -61,11 +61,13 @@ A successful read returns a native item ID, a capture hash and the requested fie
 Use the same manifest, including whichever Codex and Claude files you selected:
 
 ```sh
-claude mcp add --transport stdio agent-trace -- "$PWD/.venv/bin/python" -m trace_mechanism.mcp_server --manifest "$PWD/agent-trace.local.json"
+claude mcp add --scope user --transport stdio agent-trace -- "$PWD/.venv/bin/python" -m trace_mechanism.mcp_server --manifest "$PWD/agent-trace.local.json"
 claude mcp get agent-trace
 ```
 
-Start a new Claude session. For Codex native records, use the first retrieval prompt above. For a Claude history, try:
+`--scope user` makes this connection available in your other projects. Return to your normal working directory and start a new Claude session there. The server still reads only the files in your manifest. To restrict the connection to one project, run the command from that project with `--scope local` and absolute interpreter and manifest paths. [Claude's scope documentation](https://code.claude.com/docs/en/mcp#user-scope).
+
+For Codex native records, use the first retrieval prompt above. For a Claude history, try:
 
 > Use Agent Trace to find my registered Claude chat. Read its compact context, then retrieve detailed context if needed to check the tool results. Report what it established and identify the source session.
 
@@ -76,8 +78,10 @@ A running chat can be read by either host while its local file grows. A fresh re
 ```sh
 codex mcp remove agent-trace
 # Or, for the Claude connection:
-claude mcp remove agent-trace
+claude mcp remove --scope user agent-trace
 ```
+
+If you chose local scope, remove it with `--scope local` from that project.
 
 Close or restart any Codex or Claude host still running the connection so its server process exits. Removing configuration or editing the manifest alone does not erase captures held by an already running server. Once stopped, you can delete the local manifest and checkout/virtual environment. Original session files are not modified.
 
