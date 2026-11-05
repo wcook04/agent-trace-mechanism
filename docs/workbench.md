@@ -17,7 +17,23 @@ include discovered linked children. Latest and last-N limit the selected session
 Copy Closeout requires a recorded assistant answer in that scope. Progress
 and completion come from available records, so incomplete or old histories
 can have unknown status. An empty provider folder is a normal first launch.
-Click Refresh after editing shelf files outside the app.
+The first-run panel shows the provider folders actually searched. For a custom
+installation, quit the app, then launch its executable from Terminal with the
+provider roots you use (each setting is optional):
+
+```sh
+CODEX_HOME="/path/to/codex" CLAUDE_CONFIG_DIR="/path/to/claude" \
+  "/Applications/Agent Trace Structurer.app/Contents/MacOS/Agent Trace Structurer"
+```
+
+| What you want to do | Where to do it | What it changes |
+| --- | --- | --- |
+| Find a conversation | Missions: provider, status, search and sort | Filters the local list. Pin, snooze and archive change local preferences only. |
+| Understand activity | Parent activity, Earlier/Latest, worker cards and Open thread | Reads recorded events. A quiet worker does not establish completion. |
+| Transfer context | Scope → Preview copy → Copy this text | Copies exactly the preview. Save + Reveal writes a file on Mac; browser mode downloads it. |
+| Keep a personal prompt | Manage prompts → edit Markdown, preview, save → click the shelf button | Stores a user file independently of the application. Refresh after edits outside the app. |
+| Keep the app nearby | Compact / capsule and Float | Changes the native Mac window only. |
+| Give an agent access | Register specific source files using the setup guide | Changes the separate MCP manifest. Browsing and copying never register a file. |
 
 The [workbench package](../src/trace_mechanism/workbench/) contains the interface,
 host bridge, local transport and generic starter prompts. The public MCP adapter
@@ -46,6 +62,16 @@ field handles. Mixed Codex recordings also include the transcript projection,
 which can repeat a message recorded in both formats. Incomplete records can
 produce warnings. A duplicate session identity needs resolving on disk.
 
+**Choose sessions…** starts with just the selected conversation. Add individual
+workers to assemble a subset. The preview identifies included sources, their
+recorded links and modification times. Known missing or conflicting workers
+block an automatic tree copy; an explicit selection can still be copied.
+When history files cannot be identified their relationships are unknown.
+Each transfer accepts at most 64 sessions and 256 MiB of source data in total.
+For a larger file, use **Recent activity** in the chooser for a bounded excerpt
+from its last 128 KiB. Files are read sequentially; if a selected file changes
+during capture, retry. A preview already on screen remains unchanged.
+
 Local browsing requires no upload. Copying to the clipboard leaves the text
 there until it is replaced. Pasting it into a model, or explicitly registering
 a source for an agent to retrieve, can send content to that provider. The setup
@@ -68,7 +94,7 @@ from a Python environment with Playwright and Chromium. An optional
 `--chrome PATH` selects a local Chromium executable. The check uses public
 recordings, a temporary home and an isolated browser clipboard. Add `--claude` or `--codex`
 to exercise a signed-in host and compare its actual MCP read to the clipboard
-hash. Both flags may be combined. These checks call the selected providers and
+hash. Combining both flags checks all four host/source combinations. These checks call the selected providers and
 allow the read tool only for their temporary fixture configuration.
 `tools/check_workbench_replay.py ORIGINAL_CHECKOUT` is a maintainer comparison
 against the original Swift activity reader and native tree renderer. It covers
@@ -82,3 +108,6 @@ in isolated homes. It reads each window's rendered fixture labels for no
 provider, Codex, Claude Code and both. Use `--deny-read PATH` to exclude another
 checkout and `--screenshots DIRECTORY` to retain the four windows. A successful
 direct launch tests the application separately from Finder's first-open policy.
+Add `--interactions` on an Accessibility-enabled test host to operate the
+extracted app, copy fixture data to the system clipboard, exercise the capsule
+and float controls, and verify a personal prompt across relaunches.

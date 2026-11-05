@@ -10836,6 +10836,7 @@ function renderAgentTraceDropdownBody(reason = 'render') {
   if (rowsOnlyRender) return;
   // Detail line + action button state (v3 vocabulary + KB sizes per variant).
   const sel = findMissionByKey(selectedMissionKey);
+  for (const id of ["choose-sources", "preview-scope"]) document.getElementById(id).disabled = !sel;
   if (sel) {
     const lct = traceDisplayTurn(sel);
     const displayTurn = activityDisplayTurn(sel);

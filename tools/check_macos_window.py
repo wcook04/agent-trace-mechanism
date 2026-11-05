@@ -23,7 +23,7 @@ def wait_for(condition, description):
 
 
 def check_download(archive, receipt, screenshots, denied, interactions):
-    """Observe the extracted application's fixture rows without sending native input."""
+    """Observe the extracted application's fixture rows and optionally exercise controls through process-scoped Accessibility actions."""
     from Quartz import (
         CGWindowListCopyWindowInfo,
         kCGWindowListOptionOnScreenOnly,
@@ -161,6 +161,7 @@ def check_download(archive, receipt, screenshots, denied, interactions):
             env.update(
                 HOME=str(home),
                 CFFIXED_USER_HOME=str(home),
+                AGENT_TRACE_PROMPTS=str(home / "prompts"),
                 PATH="/usr/bin:/bin",
                 CODEX_HOME=str(home / "codex-root"),
                 CLAUDE_CONFIG_DIR=str(home / "claude-root"),
@@ -234,6 +235,20 @@ def check_download(archive, receipt, screenshots, denied, interactions):
                     control("press", "choose-sources")
                     control("press", "source-preview")
                     control("present", "preview-copy")
+                    arrival = "Live review completed after preview."
+                    with parent.open("a") as log:
+                        log.write(
+                            json.dumps(
+                                {
+                                    "type": "event_msg",
+                                    "payload": {
+                                        "type": "task_complete",
+                                        "last_agent_message": arrival,
+                                    },
+                                }
+                            )
+                            + "\n"
+                        )
                     control("press", "preview-copy")
                     wait_for(
                         lambda: (
@@ -241,6 +256,16 @@ def check_download(archive, receipt, screenshots, denied, interactions):
                             in subprocess.check_output(["pbpaste"], text=True)
                         ),
                         "Captured parent missing from native pasteboard",
+                    )
+                    assert arrival not in subprocess.check_output(
+                        ["pbpaste"], text=True
+                    )
+                    control("press", "mission-pane-copy-capsule")
+                    wait_for(
+                        lambda: (
+                            arrival in subprocess.check_output(["pbpaste"], text=True)
+                        ),
+                        "Refresh did not copy the live arrival",
                     )
                     control("press", "manage-prompts")
                     control("set", "prompt-name", "review")

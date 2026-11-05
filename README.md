@@ -1,14 +1,14 @@
 # Agent Trace
 
-[![Agent Trace desktop app showing a running Codex chat, its workers and copy controls](docs/images/agent-trace.png)](docs/images/agent-trace.png)
+[![Packaged Agent Trace Structurer on macOS showing a synthetic onboarding review, its two workers, copy scopes and the Prompt Shelf](docs/images/agent-trace.png)](docs/images/agent-trace.png)
 
 *The Agent Trace Structurer Mac app is a local technical preview. [Install the app or set up your prompt shelf →](docs/workbench.md)*
 
-**Let an agent read your earlier Codex and Claude Code conversations.**
+**Find a local Codex or Claude Code conversation, follow its workers, and copy the context you want to take into your next chat.**
 
-Agent Trace reads the session files that Codex and Claude Code save on your computer. An agent in either app can read chats from both sources, including messages and recorded tool activity from a chat that is still running. You choose which session files it can access.
+Open Agent Trace Structurer to browse the conversations already on your computer. Either provider works on its own. Select a conversation, inspect its recorded activity, then preview the parent, individual workers, or the discovered thread before copying. No agent connection is required.
 
-The **MCP (Model Context Protocol) server** runs locally and gives your agent tools for finding and reading those histories. The package also includes the underlying Python library. The desktop app shown above uses the same reader and adds automatic chat discovery, file watching and copy controls.
+To let an agent retrieve context itself, connect the local **MCP (Model Context Protocol) server** and register the specific files it may read. An agent in either host can then retrieve histories from either provider. Opening a conversation in the workbench never registers it.
 
 <a id="what-agent-trace-adds"></a>
 

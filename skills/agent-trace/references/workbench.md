@@ -45,4 +45,4 @@ copy the body. An agent can do the same job on disk:
 3. Create a new file without overwriting an existing prompt. For requested edits
    read the current file first and preserve unrelated metadata. Never write
    inside the app bundle. Press **Refresh** on the shelf and verify the title
-   and body using **Preview prompt text**. Removing a user override makes the bundled starter visible again.
+   and body using **Preview prompt text**. In Manage prompts, **Restore starter** removes a user override and **Delete prompt** removes a personal prompt. Both ask first. If you switch prompts or close the editor with unsaved edits, choose whether to keep editing or discard them.

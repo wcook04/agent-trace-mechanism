@@ -572,6 +572,14 @@ class Library:
                 "A capture supports 64 sessions and 256 MiB of input in total. Use Choose sessions or preview recent activity."
             )
         texts, snapshots, paths, sources, warnings = [], [], {}, [], []
+        if not (turns or closeout or tail_only):
+            report = self.discovery.get(
+                "claude" if e["provider"] == "claude_code" else "codex", {}
+            )
+            if report.get("unreadable") or report.get("unsupported"):
+                warnings.append(
+                    "Some recordings could not be identified; their relationships are unknown."
+                )
         stats = {}
         for item in group:
             self.check_path(item)

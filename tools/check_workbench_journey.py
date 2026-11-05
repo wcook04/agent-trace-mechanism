@@ -171,7 +171,13 @@ def run(args, home):
             page.on("pageerror", lambda exc: errors.append(str(exc)))
             page.goto(url)
             page.locator("#agent-trace-rows .title-text").filter(has_text=title).click()
-            expect(page.locator("#mission-team-workers button")).to_have_count(2)
+            workers = page.locator("#mission-team-workers button")
+            expect(workers).to_have_count(2)
+            workers.first.click()
+            page.locator("#mission-team-open").click()
+            expect(page.locator("#mission-team-workers button")).to_have_count(0)
+            page.locator("#agent-trace-rows .title-text").filter(has_text=title).click()
+            expect(workers).to_have_count(2)
             page.get_by_text("Full thread detailed", exact=True).filter(
                 visible=True
             ).first.click()

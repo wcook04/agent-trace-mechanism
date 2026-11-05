@@ -11,8 +11,8 @@ func value(_ node: AXUIElement, _ key: String) -> AnyObject? {
 }
 func search(_ node: AXUIElement, _ id: String, depth: Int = 0) -> AXUIElement? {
     if value(node, "AXDOMIdentifier") as? String == id { return node }
-    if id.hasPrefix("button:"), let title = value(node, "AXTitle") as? String,
-       title.hasPrefix(String(id.dropFirst(7))),
+    let label = [value(node, "AXTitle"), value(node, "AXDescription")].compactMap { $0 as? String }.joined(separator: " ")
+    if id.hasPrefix("button:"), label.contains(String(id.dropFirst(7))),
        ["AXButton", "AXCheckBox", "AXRadioButton", "AXRow"].contains(value(node, "AXRole") as? String ?? "") { return node }
     guard depth < 35 else { return nil }
     for child in value(node, "AXChildren") as? [AXUIElement] ?? [] {
@@ -39,8 +39,26 @@ do {
     case "press": try press(CommandLine.arguments[3])
     case "set":
         let node = try element(CommandLine.arguments[3])
-        guard AXUIElementSetAttributeValue(node, kAXValueAttribute as CFString,
-            CommandLine.arguments[4] as CFString) == .success else { throw CheckError(message: "Text field refused edit") }
+        let target = CommandLine.arguments[4]
+        _ = AXUIElementSetAttributeValue(node, kAXFocusedAttribute as CFString, kCFBooleanTrue)
+        _ = AXUIElementSetAttributeValue(node, kAXSelectedTextAttribute as CFString, target as CFString)
+        if value(node, "AXValue") as? String != target {
+            // WebKit may acknowledge AXValue writes without updating the DOM.
+            // Deliver text to this fixture PID only, then verify the DOM-backed value.
+            let pid = pid_t(Int32(CommandLine.arguments[1])!)
+            for scalar in target {
+                let newline = scalar == "\n"
+                let chars = Array(String(scalar).utf16)
+                for down in [true, false] {
+                    let event = CGEvent(keyboardEventSource: nil, virtualKey: newline ? 36 : 0, keyDown: down)!
+                    if !newline { event.keyboardSetUnicodeString(stringLength: chars.count, unicodeString: chars) }
+                    event.postToPid(pid)
+                }
+            }
+        }
+        let deadline = Date().addingTimeInterval(2)
+        while value(node, "AXValue") as? String != target && Date() < deadline { Thread.sleep(forTimeInterval: 0.04) }
+        guard value(node, "AXValue") as? String == target else { throw CheckError(message: "Text field did not accept the requested edit: " + CommandLine.arguments[3]) }
     case "value": print(value(try element(CommandLine.arguments[3]), "AXValue") ?? "")
     case "present": _ = try element(CommandLine.arguments[3])
     default: throw CheckError(message: "Unknown test operation")
