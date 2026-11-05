@@ -1,4 +1,5 @@
 """Explicit-file access to captured records, immutable views and bounded changes."""
+from contextlib import contextmanager
 import copy
 import hashlib
 import io
@@ -23,30 +24,50 @@ class TranscriptInput:
     """A checked capture for the original parsers, with physical line numbers preserved."""
     def __init__(self, path, raw, stat, session_id, provider):
         self.path, self.file_stat = path, stat
-        self.lines, self.warnings = [], {}
+        self.raw, self.session_id, self.provider = raw, session_id, provider
+        self.warnings, self.finals = {}, {}
+
+    def iter_lines(self):
         observed = set()
-        for line in io.BytesIO(raw):
+        for index, line in enumerate(io.BytesIO(self.raw)):
+            issue = None
             try:
+                if len(line) > native.MAX_RECORD_BYTES:
+                    issue = 'oversized records'
+                    raise ValueError('Record exceeds the source limit')
                 record = json.loads(line)
                 if not isinstance(record, dict) or any(
                     not isinstance(record.get(key) or {}, dict) for key in ('payload', 'message')
                 ):
                     raise ValueError('Invalid record shape')
-                if provider == 'claude' and record.get('sessionId') is not None:
+                payload = record.get('payload') or {}
+                message = record.get('message') or {}
+                if self.provider == 'claude' and record.get('sessionId') is not None:
                     observed.add(record['sessionId'])
-                self.lines.append(line.decode('utf-8').rstrip('\r\n'))
+                final = None
+                if record.get('type') == 'event_msg' and payload.get('type') == 'task_complete':
+                    final = payload.get('last_agent_message')
+                if record.get('type') == 'assistant' and message.get('stop_reason') in ('end_turn', 'stop_sequence'):
+                    content = message.get('content')
+                    final = content if isinstance(content, str) else '\n'.join(
+                        block['text'] for block in content or [] if isinstance(block, dict)
+                        and block.get('type') == 'text' and isinstance(block.get('text'), str))
+                if isinstance(final, str) and final.strip():
+                    self.finals[index] = final
             except (ValueError, RecursionError, TypeError):
-                key = 'malformed records' if line.endswith(b'\n') else 'pending records'
-                self.warnings[key] = self.warnings.get(key, 0) + 1
-                self.lines.append('')
-        if provider == 'claude' and observed != {session_id}:
+                issue = issue or ('malformed records' if line.endswith(b'\n') else 'pending records')
+                self.warnings[issue] = self.warnings.get(issue, 0) + 1
+                line = b'\n'
+            yield line
+        if self.provider == 'claude' and observed != {self.session_id}:
             raise ValueError('Claude source session identity does not match the registered session.')
 
     def stat(self):
         return self.file_stat
 
+    @contextmanager
     def open(self):
-        return io.StringIO('\n'.join(self.lines))
+        yield self.iter_lines()
 
     def __str__(self):
         return str(self.path)
@@ -62,10 +83,10 @@ def captured_turns(path, session_id, provider, snapshot=None):
         if hashlib.sha256(raw).hexdigest() != snapshot['source']['sha256']:
             raise ValueError('The conversation changed during capture. Try again.')
         if b'task_started' not in raw:
-            return [], {}
+            return [], {}, {}
     source = TranscriptInput(path, raw, stat, session_id, provider)
     parse = parse_codex_session if provider == 'codex' else parse_claude_session
-    return parse(source), source.warnings
+    return parse(source), source.warnings, source.finals
 
 
 def render_codex_context(snapshots, paths, *, detail, turns=0, closeout=False, require_readable=False):
@@ -74,7 +95,7 @@ def render_codex_context(snapshots, paths, *, detail, turns=0, closeout=False, r
     for snapshot in snapshots:
         sid = snapshot['session_id']
         items = snapshot['items']
-        parsed, _ = captured_turns(paths[sid], sid, 'codex', snapshot)
+        parsed, _, recorded_finals = captured_turns(paths[sid], sid, 'codex', snapshot)
         legacy = parsed
         if turns:
             # Both readers expose physical record positions. Group by turn ID,
@@ -97,8 +118,8 @@ def render_codex_context(snapshots, paths, *, detail, turns=0, closeout=False, r
             finals = [(i['first_record'], native._message_text(i['item'])) for i in items
                       if i['kind'] == 'AgentMessage' and i['item'].get('phase') == 'final_answer'
                       and i['source_refs'][-1]['event_type'] == 'item_completed']
-            finals.extend((max(t.source_record_indices) + 1, t.assistant_text) for t in legacy
-                          if t.turn_ended and t.assistant_text)
+            finals.extend((index + 1, recorded_finals[index]) for t in legacy
+                          for index in t.source_record_indices if index in recorded_finals)
             if not finals:
                 raise ValueError('No completed assistant answer recorded in this scope.')
             return max(finals)[1], 'closeout'
@@ -348,7 +369,7 @@ class AgentTools:
                 raise ValueError('Registered child traversal currently requires Codex records.')
             self._refresh_entries()
             row = self._entry(provider, session_id)
-            parsed, warnings = captured_turns(row['path'], session_id, provider)
+            parsed, warnings, _ = captured_turns(row['path'], session_id, provider)
             text = render(parsed, detail=scope == 'full_thread')
             if warnings:
                 metadata['record_warnings'] = warnings

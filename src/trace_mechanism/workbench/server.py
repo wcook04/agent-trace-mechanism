@@ -159,7 +159,7 @@ class Handler(BaseHTTPRequestHandler):
                 hits = [
                     {"session_id": e["session_id"]}
                     for e in rows
-                    if q in e["source_title"].casefold()
+                    if q in (e["source_title"] or e["prompt_derived_title"]).casefold()
                 ]
                 result = dict(
                     ok=True,

@@ -242,3 +242,47 @@ def test_ambiguous_children_and_untrusted_writes(isolated):
         (folder / "coordinator.jsonl").symlink_to(outside)
         with pytest.raises(HTTPError):
             api("/activity", {"ref": parent["ref"]})
+
+
+def test_large_tool_output_preserves_exact_terminal_message(isolated):
+    from trace_mechanism.workbench.library import Library
+
+    folder = isolated / ".claude/projects/large"
+    folder.mkdir(parents=True)
+    path = folder / "session.jsonl"
+    rows = [
+        {"sessionId": "large", "type": "user", "message": {"content": "First prompt"}},
+        {
+            "type": "assistant",
+            "message": {"content": [{"type": "text", "text": "Checking the output"}]},
+        },
+        {
+            "type": "user",
+            "message": {
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": "large-tool",
+                        "content": "x" * 2_000_000,
+                    }
+                ]
+            },
+        },
+        {
+            "type": "assistant",
+            "message": {
+                "content": [{"type": "text", "text": "Recorded final answer."}],
+                "stop_reason": "end_turn",
+            },
+        },
+        {"type": "user", "message": {"content": "A new open turn"}},
+    ]
+    path.write_text("\n".join(map(json.dumps, rows)) + "\n")
+    lib = Library()
+    (row,) = lib.discover()
+    assert row["history_before"] > 0 and row["worker_state"] == "working"
+    identity = {"ref": row["ref"]}
+    assert lib.trace({**identity, "closeout": True})["text"] == "Recorded final answer."
+    with pytest.raises(ValueError):
+        lib.trace({**identity, "turns": 1, "closeout": True})
+    assert "First prompt" not in lib.trace({**identity, "turns": 1})["text"]

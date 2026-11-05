@@ -121,7 +121,15 @@ def summary(rows):
             )
             status = (
                 "failed"
-                if bit.get("is_error") or bit.get("status") == "failed"
+                if bit.get("is_error")
+                or codex_native._failed(
+                    {
+                        "item": {
+                            **bit,
+                            "exit_code": bit.get("exit_code", bit.get("exitCode")),
+                        }
+                    }
+                )
                 else "completed"
                 if result or bit.get("native_status") == "item_completed"
                 else "started"
@@ -232,8 +240,24 @@ class Library:
                             continue
                         rows, start = records(path)
                         events, prompt, state, turns = summary(rows)
-                        first = (
-                            summary(records(path, head=True)[0])[1] if start else prompt
+                        head_turns = (
+                            summary(records(path, head=True)[0])[3] if start else turns
+                        )
+                        first = next(
+                            (
+                                t["prompt_preview"]
+                                for t in head_turns.values()
+                                if t["prompt_preview"]
+                            ),
+                            "",
+                        )
+                        last_record_at = next(
+                            (
+                                r["timestamp"]
+                                for _, r in reversed(rows)
+                                if isinstance(r.get("timestamp"), str)
+                            ),
+                            None,
                         )
                         source = meta.get("source") or {}
                         sub = (
@@ -263,9 +287,10 @@ class Library:
                             session_id=sid,
                             recorded_id=recorded_id,
                             ref=hashlib.sha256(str(path).encode()).hexdigest(),
-                            source_title=first[:90] or path.stem,
+                            source_title=path.stem if not first else "",
+                            prompt_derived_title=first[:90],
                             prompt_preview=prompt,
-                            last_activity_at=iso(st.st_mtime),
+                            last_activity_at=last_record_at or iso(st.st_mtime),
                             mtime_utc=iso(st.st_mtime),
                             size_bytes=st.st_size,
                             thread_parent=parent,
@@ -294,9 +319,9 @@ class Library:
                                 entry["latest_completed_turn"] = completed[-1]
                             if state in ("working", "tool"):
                                 entry["active_turn"] = turn
+                    fresh[path] = stamp, entry
                     if provider == "codex" and entry["session_id"] in names:
                         entry = dict(entry, source_title=names[entry["session_id"]])
-                    fresh[path] = stamp, entry
                     entries[entry["ref"]] = entry
                 except (OSError, ValueError, TypeError):
                     continue
@@ -374,7 +399,9 @@ class Library:
                 dict(
                     id=c["session_id"],
                     mission_key=f"{c['provider']}:{c['session_id']}",
-                    label=c["agent_name"] or c["source_title"],
+                    label=c["agent_name"]
+                    or c["source_title"]
+                    or c["prompt_derived_title"],
                     state=c["worker_state"],
                     events=c["events"][-6:],
                     source_mtime_ms=c["source_mtime_ms"],
@@ -401,8 +428,8 @@ class Library:
 
     def trace(self, data):
         e = self.select(data)
-        turns = int(data.get("turns", 0))
-        if not 0 <= turns <= 10000:
+        turns = data.get("turns", 0)
+        if type(turns) is not int or not 0 <= turns <= 10000:
             raise ValueError("Invalid turn count.")
         detail = data.get("depth") != "summary"
         closeout = data.get("closeout") is True
@@ -411,13 +438,16 @@ class Library:
             seen = {e["ref"]}
             for parent in group:
                 for c in self.children(parent):
-                    if c["ref"] not in seen:
-                        seen.add(c["ref"])
-                        group.append(c)
-                        if len(group) > 64:
-                            raise ValueError(
-                                "More than 64 linked sessions. Choose a recent-turn scope."
-                            )
+                    if c["ref"] in seen:
+                        raise ValueError(
+                            "The selected history has a cyclic parent relationship."
+                        )
+                    seen.add(c["ref"])
+                    group.append(c)
+                    if len(group) > 64:
+                        raise ValueError(
+                            "More than 64 linked sessions. Choose a recent-turn scope."
+                        )
         texts, snapshots, paths, sources, warnings = [], [], {}, [], []
         for item in group:
             if not turns and not closeout:
@@ -439,7 +469,7 @@ class Library:
             sources.append(
                 dict(
                     session_id=sid,
-                    title=item["source_title"],
+                    title=item["source_title"] or item["prompt_derived_title"],
                     parent=item["thread_parent"],
                     relationship=item["parent_evidence"],
                 )
@@ -458,7 +488,9 @@ class Library:
                     if count:
                         warnings.append(f"{sid}: {count} {key.replace('_', ' ')}")
             else:
-                parsed, issues = captured_turns(path, item["recorded_id"], "claude")
+                parsed, issues, finals = captured_turns(
+                    path, item["recorded_id"], "claude"
+                )
                 warnings.extend(
                     f"{sid}: {count} {issue}" for issue, count in issues.items()
                 )
@@ -466,10 +498,10 @@ class Library:
                 if closeout:
                     answer = next(
                         (
-                            t.assistant_text
+                            finals[index]
                             for t in reversed(selected)
-                            if t.last_stop_reason in ("end_turn", "stop_sequence")
-                            and t.assistant_text
+                            for index in reversed(t.source_record_indices)
+                            if index in finals
                         ),
                         "",
                     )

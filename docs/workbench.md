@@ -72,3 +72,12 @@ to the clipboard hash. This optional step calls the provider.
 `tools/check_workbench_replay.py ORIGINAL_CHECKOUT` is a maintainer comparison
 against the original Swift activity reader and native tree renderer. It covers
 the supported fixture intersection. The app needs neither that checkout nor Swift.
+
+To repeat the packaged-window check on a Mac test host with Swift and screen
+capture available, run `python tools/check_macos_window.py --archive ZIP
+--receipt BUILD_RECEIPT`. This checks the downloaded bytes and embedded
+revision, reports the actual Gatekeeper decision, then directly runs the binary
+in isolated homes. It reads each window's rendered fixture labels for no
+provider, Codex, Claude Code and both. Use `--deny-read PATH` to exclude another
+checkout and `--screenshots DIRECTORY` to retain the four windows. A successful
+direct launch tests the application separately from Finder's first-open policy.

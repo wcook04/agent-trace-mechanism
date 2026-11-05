@@ -3875,7 +3875,7 @@ function paintMissionActivity(row) {
   el.dataset.live = String(live);
   const events = missionActivity.history.length ? missionActivity.history : (Array.isArray(data?.events) ? data.events.slice(-12) : []);
   const state = dropdownEls.missionActivityState;
-  if (state) state.textContent = ({ working: 'Live', waiting: 'Awaiting output', finished: 'Finished', quiet: 'Quiet', interrupted: 'Interrupted', unavailable: 'Unavailable', unknown: data ? 'Not checked' : 'Reading…' })[parentState];
+  if (state) state.textContent = ({ working: 'Live', waiting: 'Awaiting output', finished: 'Finished', quiet: 'Quiet', interrupted: 'Interrupted', unavailable: 'Unavailable', unknown: data ? 'Unknown' : 'Reading…' })[parentState];
   const signature = JSON.stringify([missionActivity.key, events]);
   const eventById = new Map(events.map((event) => [String(event.id), event]));
   if (signature !== missionActivity.signature) {
