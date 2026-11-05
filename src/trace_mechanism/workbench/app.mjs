@@ -14,7 +14,6 @@ import {
   deriveMissionLifecycle,
   missionDisplayTitle as reducerMissionDisplayTitle,
   missionPromptPreview as reducerMissionPromptPreview,
-  titleHasOldRetirePrefix as reducerTitleHasOldRetirePrefix,
 } from './lifecycle_reducer.mjs';
 import { buildAttachmentClip, classifyClipboardText, defaultTraceFilename, parseAgentTrace } from './parser.mjs';
 
@@ -693,29 +692,15 @@ function missionKeyFromParts(provider, sessionId) {
 }
 
 function missionKey(row) {
+  if (row?.ambiguous) return `file:${row.ref}`;
   const fallbackId = row?.session_id || row?.source_path || row?.path || row?.title || row?.short_label || '';
   return missionKeyFromParts(row?.provider, fallbackId);
 }
 
 function missionRowStableIdentityKey(row) {
+  if (row?.ambiguous) return `file:${row.ref}`;
   const fallbackId = row?.session_id || row?.session_file || row?.source_path || row?.path || '';
   return fallbackId ? missionKeyFromParts(row?.provider, fallbackId) : '';
-}
-
-function titleHasOldRetirePrefix(value) {
-  return reducerTitleHasOldRetirePrefix(value);
-}
-
-function rowHasOldRetirePrefix(row) {
-  return titleHasOldRetirePrefix(row?.source_title)
-    || titleHasOldRetirePrefix(row?.display_title)
-    || titleHasOldRetirePrefix(row?.title)
-    || titleHasOldRetirePrefix(row?.short_label);
-}
-
-function rowIsOldPrefixRetired(row) {
-  const view = missionViewStateForRow(row);
-  return Boolean(view?.retired);
 }
 
 function missionDisplayTitle(row, displayTurn = null) {
@@ -2214,14 +2199,9 @@ function traceThreadTotality(sourceWindow) {
   return 'latest_response_bundle_only';
 }
 
-function missionRuntimeState(row, displayTurn, view) {
+function missionRuntimeState(row) {
   if (!row) return 'none';
-  const activeTrace = rowHasActiveTrace(row);
-  if (activeTrace && !rowHasStaleActiveTurn(row)) return 'running_active_turn';
-  if (view?.activity === 'checking') return 'checking_stale_active_cache';
-  if (view?.activity === 'retired') return 'retired';
-  if (displayTurn?.turn_index == null) return 'no_turn';
-  return 'finished_selected_turn';
+  return row.worker_state || 'unknown';
 }
 
 function missionArtifactState(row, sourceWindow, view) {
@@ -2323,7 +2303,7 @@ function missionDiffState(row, sourceWindow) {
 
 function missionRowVisibilityState(row) {
   if (!row) return 'unknown';
-  if (rowIsOldPrefixRetired(row) || row?.inactive_reason === 'archived' || row?.retirement?.retired_cause) return 'archived';
+  if (row?.inactive_reason === 'archived' || row?.retirement?.retired_cause) return 'archived';
   if (inactiveMissionRows().some((item) => missionKey(item) === missionKey(row))) return showInactiveMissions ? 'old' : 'hidden_by_filter';
   return 'recent';
 }
@@ -3305,7 +3285,7 @@ function selectedMissionOperatorSentence(row, sourceWindow = selectedTraceSource
   const sourceAction = stateModel.source_freshness_action ? `copy action ${stateModel.source_freshness_action.replace(/_/g, ' ')}` : '';
   const turnText = displayTurn.turn_index != null
     ? `${activeTrace ? 'active' : 'latest'} turn #${displayTurn.turn_index}`
-    : 'no turn';
+    : observedTurnLabel(row);
   const title = missionDisplayTitle(row, displayTurn);
   const large = scope.large ? ' · large/slow' : '';
   const errors = scope.errorCount ? `, ${scope.errorCount} errors` : '';
@@ -3342,7 +3322,7 @@ function selectedMissionOperatorChip(row, sourceWindow = selectedTraceSourceWind
   const stateModel = missionStateModel(row, sourceWindow);
   const turnText = displayTurn.turn_index != null
     ? `${activeTrace ? 'active' : 'latest'} turn #${displayTurn.turn_index}`
-    : 'no turn';
+    : observedTurnLabel(row);
   return [
     missionDisplayTitle(row, displayTurn),
     providerLabel(row.provider),
@@ -3642,8 +3622,8 @@ function paintMissionEventSignal(node, signal, now = Date.now()) {
 
 function missionWorkerState(worker, now = Date.now(), sampledAt = now) {
   if (['finished', 'interrupted', 'unavailable', 'unknown'].includes(worker?.state)) return worker.state;
-  const modified = Number(worker?.source_mtime_ms || 0);
-  if (!modified || now - sampledAt > 120_000) return 'unknown';
+  const modified = timestampMs(worker?.last_activity_at);
+  if (!modified || modified > now || now - sampledAt > 120_000) return 'quiet';
   const age = Math.max(0, now - modified);
   if (age > 25 * 60_000) return 'quiet';
   if (worker.state === 'tool') return age < 120_000 ? 'working' : 'waiting';
@@ -3699,13 +3679,13 @@ function paintMissionTeam(row) {
   const root = document.getElementById('mission-team');
   if (!root) return;
   const team = missionTeamSummary(row);
-  root.hidden = !team.total && team.available;
+  root.hidden = !team.total && team.available && !team.discoveryLimited;
   if (root.hidden) return;
   root.dataset.live = String(team.active > 0);
   document.getElementById('mission-team-count').textContent = team.total;
   document.getElementById('mission-team-state').textContent = team.active ? `${team.active} active` : '';
   const note = document.getElementById('mission-team-note');
-  note.textContent = !team.available ? 'Some agents could not be checked' : team.omitted ? `${team.omitted} more in trace` : team.discoveryLimited ? 'Recent agents only' : '';
+  note.textContent = !team.available ? 'Some agents could not be checked' : team.omitted ? `${team.omitted} more in trace` : team.discoveryLimited ? 'Worker list incomplete · see Choose sessions' : '';
   note.hidden = !note.textContent;
   const list = document.getElementById('mission-team-workers');
   const previous = new Map([...list.children].map(node => [node.dataset.workerId, node]));
@@ -3776,7 +3756,7 @@ function loadEarlierMissionActivity() {
   if (missionActivity.pendingId) { missionActivity.historyQueued = true; paintMissionActivity(row); return; }
   const requestId = ++missionActivity.requestId;
   missionActivity.historyPendingId = requestId;
-  if (!postNative('requestMissionActivity', {mission_key:selectedMissionKey,provider:row.provider,session_id:row.session_id,request_id:requestId,history_before:missionActivity.historyBefore})) missionActivity.historyPendingId = 0;
+  if (!postNative('requestMissionActivity', {mission_key:selectedMissionKey,provider:row.provider,session_id:row.session_id,ref:row.ref,request_id:requestId,history_before:missionActivity.historyBefore})) missionActivity.historyPendingId = 0;
   paintMissionActivity(row);
 }
 
@@ -3872,7 +3852,7 @@ function paintMissionActivity(row) {
   paintMissionTeam(row);
   const data = missionActivity.data;
   paintMissionEventSignal(el, missionActivityFleet.get(missionKey(row))?.arrivals?.parent);
-  const parentState = data?.ok === false ? 'unavailable' : missionWorkerState({ state: data?.worker_state, source_mtime_ms: data?.source_mtime_ms }, Date.now(), Number(data?.sampled_at_ms || missionActivity.lastRequestAt || 0));
+  const parentState = data?.ok === false ? 'unavailable' : missionWorkerState({ state: data?.worker_state, last_activity_at: data?.last_activity_at }, Date.now(), Number(data?.sampled_at_ms || missionActivity.lastRequestAt || 0));
   const live = parentState === 'working';
   el.dataset.live = String(live);
   const events = missionActivity.history.length ? missionActivity.history : (Array.isArray(data?.events) ? data.events.slice(-12) : []);
@@ -3972,7 +3952,7 @@ function requestMissionActivityUpdates(row) {
     const requestId = ++missionActivity.requestId;
     missionActivity.pendingId = requestId;
     missionActivity.lastRequestAt = now;
-    if (!postNative('requestMissionActivity', { mission_key: key, provider: row.provider, session_id: row.session_id, request_id: requestId })) {
+    if (!postNative('requestMissionActivity', { mission_key: key, provider: row.provider, session_id: row.session_id, ref: row.ref, request_id: requestId })) {
       missionActivity.pendingId = 0;
       missionActivity.data = { ok: false, error: 'native_bridge_unavailable' };
       paintMissionActivity(row);
@@ -3985,7 +3965,7 @@ function requestMissionActivityUpdates(row) {
     const requestId = ++missionActivity.requestId;
     missionActivity.fleetPendingId = requestId;
     missionActivity.lastFleetRequestAt = now;
-    if (!postNative('requestMissionActivityFleet', { mission_key: key, provider: row.provider, session_id: row.session_id, request_id: requestId, mission_keys: missionActivityBatchKeys(key) })) missionActivity.fleetPendingId = 0;
+    if (!postNative('requestMissionActivityFleet', { mission_key: key, provider: row.provider, session_id: row.session_id, ref: row.ref, request_id: requestId, mission_keys: missionActivityBatchKeys(key) })) missionActivity.fleetPendingId = 0;
   }
   if (missionActivity.timer) return;
   missionActivity.timer = window.setTimeout(() => {
@@ -5016,7 +4996,7 @@ function observeMissionIndexUpdate(rows) {
     const completedAdvanced = completedTurn != null
       && previousCompletedTurn != null
       && completedTurn > previousCompletedTurn;
-    if (!rowIsOldPrefixRetired(row) && initialized && ((wasActive && !activeNow) || (wasActive && completedAdvanced))) {
+    if (initialized && ((wasActive && !activeNow) || (wasActive && completedAdvanced))) {
       noteMissionCompletionTransition(row, wasActive && !activeNow ? 'active_turn_finished' : 'completed_turn_advanced', now);
     }
     if (!missionViewState.seenAtByKey.has(key)) {
@@ -5040,50 +5020,8 @@ function observeMissionIndexUpdate(rows) {
 
 function missionViewStateForRow(row, now = Date.now()) {
   const key = missionKey(row);
-  const activeTrace = rowHasActiveTrace(row);
-  const activeGoal = rowHasActiveGoal(row);
-  const activeNow = activeTrace || activeGoal;
-  const staleActive = !activeGoal && rowHasStaleActiveTurn(row);
-  const wasActive = missionViewState.activeSeenByKey.get(key) === true;
-  const lastActMs = _missionLastActivityMs(row);
-  const completedAtMs = _missionLastCompletedAtMs(row);
-  const finishedAt = missionViewState.finishedAtByKey.get(key);
-  const transitionedToFinished = (wasActive && !activeNow) || (finishedAt != null && (now - finishedAt) < MISSION_JUST_FINISHED_MS);
-  const displayTurn = activeTrace ? activityDisplayTurn(row) : traceDisplayTurn(row);
   const c = missionViewState.copyByKey.get(key);
-  const lifecycle = deriveMissionLifecycle({
-    row,
-    key,
-    now,
-    activeNow: activeTrace,
-    activeGoal,
-    staleActive,
-    wasActive,
-    lastActivityMs: lastActMs,
-    liveSourceMs: missionLiveSourceMs(row),
-    completedAtMs,
-    activeStartedAtMs: timestampMs(row?.active_turn?.started_at || displayTurn?.started_at),
-    transitionedToFinished,
-    displayTurn,
-    hasTurn: displayTurn?.turn_index != null,
-    copyEntry: c,
-    copyAckMs: MISSION_COPY_ACK_MS,
-    pendingCopyTtlMs: MISSION_PENDING_COPY_TTL_MS,
-    justFinishedMs: MISSION_JUST_FINISHED_MS,
-    recentActivityMs: MISSION_RECENT_ACTIVITY_MS,
-    liveActivityMs: MISSION_LIVE_ACTIVITY_MS,
-    idleThresholdMs: MISSION_IDLE_THRESHOLD_MS,
-  });
-
-  const team = missionTeamSummary(row, now);
-  if (team.active && !lifecycle.retired) {
-    lifecycle.activity = 'live';
-    lifecycle.reason = `${team.active} subagent${team.active === 1 ? '' : 's'} working or awaiting tool output`;
-    if (!['copying', 'copy_failed', 'just_copied'].includes(lifecycle.copy)) {
-      lifecycle.pill = { text: 'RUNNING', cls: 'running', title: lifecycle.reason };
-      lifecycle.glyph = { glyph: '●', title: lifecycle.reason };
-    }
-  }
+  const lifecycle = deriveMissionLifecycle({row, now, copyEntry: c, copyAckMs: MISSION_COPY_ACK_MS});
 
   // Novelty layer.
   const seenAt = missionViewState.seenAtByKey.get(key);
@@ -5098,91 +5036,29 @@ function missionViewStateForRow(row, now = Date.now()) {
     copy: lifecycle.copy,
     key,
     copyEntry: c || null,
-    retired: lifecycle.retired,
     lifecycle,
   };
 }
 
 function missionViewStateGlyph(view) {
-  // One glyph per row — picked by priority so the row never overcrowds.
-  if (view.lifecycle?.glyph) {
-    const baseTitle = view.lifecycle.glyph.title || '';
-    const title = view.lifecycle.revival?.by === 'refresh_copy_capture'
-        && view.copy === 'just_copied'
-        && !baseTitle.toLowerCase().includes('revived by copy')
-      ? `revived by copy · ${view.lifecycle.glyph.title}`
-      : view.lifecycle.glyph.title;
-    return { glyph: view.lifecycle.glyph.glyph, title };
-  }
-  if (view.activity === 'retired') return { glyph: '×', title: 'retired by old-prefix title' };
-  if (view.copy === 'copy_failed') {
-    const reason = String(view.copyEntry?.error || '').trim();
-    return { glyph: '✗', title: reason ? `copy failed — ${reason}` : 'copy failed — see receipt' };
-  }
-  if (view.copy === 'pending_after_copy') return { glyph: '⧖', title: 'waiting for follow-up response; clears after 25m idle' };
-  if (view.copy === 'just_copied') {
-    const summary = missionCopySummary(view.copyEntry, Date.now(), { includeBytes: false });
-    return { glyph: '✓', title: `copied${summary ? ` · ${summary}` : ''}` };
-  }
-  if (view.copy === 'copying') return { glyph: '⋯', title: 'copying…' };
-  if (view.activity === 'live') return { glyph: '●', title: 'running — active response in flight' };
-  if (view.activity === 'just_finished') return { glyph: '✓', title: 'finished — ready to copy' };
-  if (view.activity === 'checking') return { glyph: '⋯', title: 'checking stale/open turn state' };
-  if (view.activity === 'recent') return { glyph: '◆', title: 'recent activity' };
-  if (view.activity === 'idle') return { glyph: '·', title: 'idle >25m' };
-  return { glyph: '', title: '' };
+  return view.lifecycle.glyph;
 }
 
-function missionWorkflowPill(row, view, artifactLabel = null) {
-  const artifact = artifactLabel?.text ? `Artifact ${String(artifactLabel.text).toLowerCase()}. ` : '';
-  const cache = rowHasSoftStaleTraceSummary(row) && !rowHasActiveGoal(row)
-    ? 'Stale active cache cannot prove running; checking source. '
-    : '';
-  if (view.lifecycle?.pill) {
-    const baseTitle = view.lifecycle.pill.title || '';
-    const revival = view.lifecycle.revival?.by === 'refresh_copy_capture'
-        && view.copy === 'just_copied'
-        && !baseTitle.toLowerCase().includes('revived by copy')
-      ? 'Revived by copy. '
-      : '';
-    return {
-      text: view.lifecycle.pill.text,
-      cls: view.lifecycle.pill.cls,
-      title: `${artifact}${cache}${revival}${view.lifecycle.pill.title}.`,
-    };
-  }
-  const turn = activityDisplayTurn(row);
-  const hasTurn = turn.turn_index != null;
-  if (view.activity === 'retired' || rowIsOldPrefixRetired(row)) {
-    return { text: 'RETIRED', cls: 'retired', title: `${artifact}${cache}Title starts with "old"; retired from active mission flow.` };
-  }
-  if (view.copy === 'copy_failed') {
-    return { text: 'COPY FAILED', cls: 'copy_failed', title: `${artifact}${cache}Copy failed; see receipt.` };
-  }
-  if (view.copy === 'copying') {
-    return { text: 'COPYING', cls: 'copying', title: `${artifact}${cache}Writing the selected bundle to clipboard.` };
-  }
-  if (view.copy === 'just_copied') {
-    const summary = missionCopySummary(view.copyEntry, Date.now());
-    return { text: 'COPIED', cls: 'copied', title: `${artifact}${cache}Copied${summary ? ` · ${summary}` : ''}.` };
-  }
-  if (view.copy === 'pending_after_copy') {
-    const summary = missionCopySummary(view.copyEntry, Date.now(), { includeBytes: false });
-    return { text: 'TYPE B WAIT', cls: 'waiting', title: `${artifact}${cache}waiting_kind=type_b_response_expected. Copied${summary ? ` · ${summary}` : ''}; waiting for a follow-up response. Clears after 25 minutes with no new source activity.` };
-  }
-  if (view.activity === 'live') {
-    return { text: 'RUNNING', cls: 'running', title: `${artifact}${cache}Active response in flight.` };
-  }
-  if (view.activity === 'checking') {
-    return { text: 'CHECKING', cls: 'checking', title: `${artifact}${cache}Checking the changed source before deciding running or finished.` };
-  }
-  if (!hasTurn) {
-    return { text: 'NO TURN', cls: 'partial', title: `${artifact}${cache}No trace turn is available yet.` };
-  }
-  if (view.activity === 'idle') {
-    return { text: 'INACTIVE', cls: 'inactive', title: `${artifact}${cache}No source activity for 25 minutes.` };
-  }
-  return { text: 'FINISHED', cls: 'finished', title: `${artifact}${cache}Response finished; copy it to start the waiting-for-response window.` };
+function missionWorkflowPill(row, view) {
+  return view.lifecycle.pill;
+}
+
+function observedTurnLabel(row) {
+  if (row?.turn_observation !== 'bounded') return 'no recorded turn';
+  const turn = row.preferred_trace_turn;
+  if (turn?.turn_id) return 'turn ' + turn.turn_id + ' · recent records';
+  if (turn?.prompt_offset != null) return 'prompt at byte ' + turn.prompt_offset + ' · recent records';
+  return 'turn unknown in last 128 KiB';
+}
+
+function sourceLocationLabel(row) {
+  return [row.provider_archived && 'Archived in Codex', row.ambiguous && row.source_file,
+    row.unlinked && 'Worker link uncertain'].filter(Boolean).join(' · ');
 }
 
 function markMissionRowsUserScrolling(scrollTop = null, now = Date.now()) {
@@ -5451,7 +5327,6 @@ function scheduleMissionTitleAuthoritySync(reason = 'title_authority_watch') {
 
 function sortedMissionRows(rows, mode = dropdownSortMode) {
   const list = Array.isArray(rows) ? rows.slice() : [];
-  const retiredDelta = (a, b) => Number(rowIsOldPrefixRetired(a)) - Number(rowIsOldPrefixRetired(b));
   // Some callers (including the compact rail) run outside the workbench memo.
   // Evaluate once per row and use one clock snapshot for the whole sort.
   const sortAttention = new Map();
@@ -5472,8 +5347,6 @@ function sortedMissionRows(rows, mode = dropdownSortMode) {
     // Explicit operator priorities, then confirmed running work, then newest
     // activity. Attention lanes belong to the separate Review queue.
     return list.sort((a, b) => {
-      const retired = retiredDelta(a, b);
-      if (retired) return retired;
       const tierDelta = missionDynamicTier(attention(b)) - missionDynamicTier(attention(a));
       if (tierDelta) return tierDelta;
       const changed = timeDelta(a, b);
@@ -5485,8 +5358,6 @@ function sortedMissionRows(rows, mode = dropdownSortMode) {
   }
   if (mode === 'review_first') {
     return list.sort((a, b) => {
-      const retired = retiredDelta(a, b);
-      if (retired) return retired;
       const markerDelta = Number(Boolean(attention(b).operator_marker?.pinned)) - Number(Boolean(attention(a).operator_marker?.pinned));
       if (markerDelta) return markerDelta;
       const reviewDelta = attentionDelta(a, b);
@@ -5500,8 +5371,6 @@ function sortedMissionRows(rows, mode = dropdownSortMode) {
   }
   if (mode === 'running_monitor' || mode === 'active_first') {
     return list.sort((a, b) => {
-      const retired = retiredDelta(a, b);
-      if (retired) return retired;
       const rogueDelta = Number(attention(b).lane === 'rogue_active') - Number(attention(a).lane === 'rogue_active');
       if (rogueDelta) return rogueDelta;
       const activeDelta = Number(rowIsLiveMission(b)) - Number(rowIsLiveMission(a));
@@ -5515,8 +5384,6 @@ function sortedMissionRows(rows, mode = dropdownSortMode) {
   }
   if (mode === 'changed_desc' || mode === 'finished_at_desc') {
     return list.sort((a, b) => {
-      const retired = retiredDelta(a, b);
-      if (retired) return retired;
       const changed = timeDelta(a, b);
       if (changed) return changed;
       const goal = goalDelta(a, b);
@@ -5526,8 +5393,6 @@ function sortedMissionRows(rows, mode = dropdownSortMode) {
   }
   if (mode === 'needs_copy') {
     return list.sort((a, b) => {
-      const retired = retiredDelta(a, b);
-      if (retired) return retired;
       const readyDelta = Number(attention(b).lane === 'ready_to_copy' || attention(b).attention_state === 'copy_ready') - Number(attention(a).lane === 'ready_to_copy' || attention(a).attention_state === 'copy_ready');
       if (readyDelta) return readyDelta;
       const reviewDelta = attentionDelta(a, b);
@@ -5537,8 +5402,6 @@ function sortedMissionRows(rows, mode = dropdownSortMode) {
   }
   if (mode === 'stale_risky') {
     return list.sort((a, b) => {
-      const retired = retiredDelta(a, b);
-      if (retired) return retired;
       const riskWeight = (item) => ({ red: 3, amber: 2, green: 1 }[attention(item).risk_state] || 0);
       const riskDelta = riskWeight(b) - riskWeight(a);
       if (riskDelta) return riskDelta;
@@ -5551,15 +5414,11 @@ function sortedMissionRows(rows, mode = dropdownSortMode) {
     return list.sort((a, b) => {
       const inactiveDelta = Number(missionRowVisibilityState(b) !== 'recent') - Number(missionRowVisibilityState(a) !== 'recent');
       if (inactiveDelta) return inactiveDelta;
-      const retired = retiredDelta(a, b);
-      if (retired) return retired;
       return timeDelta(a, b);
     });
   }
   if (mode === 'ordinal_desc') {
     return list.sort((a, b) => {
-      const retired = retiredDelta(a, b);
-      if (retired) return retired;
       const ordinalDelta = (b.mission_ordinal_key || 0) - (a.mission_ordinal_key || 0);
       if (ordinalDelta) return ordinalDelta;
       const activeDelta = Number(rowIsLiveMission(b)) - Number(rowIsLiveMission(a));
@@ -5716,7 +5575,7 @@ function paintMissionSelection(key, { paintDetails = true } = {}) {
   const displayTurn = activityDisplayTurn(row);
   const turn = displayTurn?.turn_index != null
     ? `${rowHasActiveTrace(row) ? 'active' : 'latest'} turn #${displayTurn.turn_index}`
-    : 'no trace turn';
+    : observedTurnLabel(row);
   const preview = `${missionDisplayTitle(row, displayTurn)} · ${providerLabel(row.provider)} · ${turn}`;
   if (dropdownEls?.agentTraceDetail) dropdownEls.agentTraceDetail.textContent = preview;
   if (selectedMissionEl) selectedMissionEl.textContent = preview;
@@ -6980,17 +6839,17 @@ async function fetchMissionIndexHttpFallback(reason = 'request', opts = {}) {
     const note = document.getElementById('conflict-note');
     const roots = Object.entries(payload?.index?.discovery || {});
     const skipped = roots.reduce((n,[,r]) => n + r.unsupported + r.unreadable, 0);
-    const notices = [payload?.index?.marker_notice, conflicts && `Duplicate history files claim ${conflicts} session ID(s). Resolve the duplicates to include them.`,
+    const notices = [payload?.index?.marker_notice, conflicts && `${conflicts} session ID(s) appear in multiple recordings. Select a file to inspect its contents.`,
       skipped && `${skipped} file(s) or folders could not be identified or read. Their session relationships are unknown.`].filter(Boolean);
     note.hidden = notices.length === 0;
     note.textContent = notices.join(' ');
     const help = document.getElementById('history-help');
     help.hidden = !payload?.ok || Boolean(payload.index.active_rows.length);
-    if (!help.hidden) document.getElementById('history-roots').replaceChildren(...roots.map(([provider, r]) => {
+    if (!help.hidden) document.getElementById('history-roots').replaceChildren(...roots.flatMap(([provider, r]) => r.roots.map(path => {
       const li = document.createElement('li');
-      li.textContent = (provider === 'codex' ? 'Codex' : 'Claude Code') + ' · ' + r.root + (r.exists ? '' : ' (folder absent)');
+      li.textContent = (provider === 'codex' ? 'Codex' : 'Claude Code') + ' · ' + path;
       return li;
-    }));
+    })));
     return Boolean(payload?.ok);
   } catch (error) {
     window.agentTraceStructurerMissionIndex({
@@ -10199,13 +10058,13 @@ function missionStatusText(row, renderStart = Date.now()) {
 function missionMatchesQuickFilter(row, filter = missionQuickFilter, now = Date.now()) {
   const marker = missionOperatorMarker(row);
   if (marker.deleted_at_ms) return false;
-  if (filter === 'archived') return Boolean(marker.archived_at_ms);
+  if (filter === 'archived') return Boolean(marker.archived_at_ms || row.provider_archived);
   if (marker.archived_at_ms) return false;
   if (filter === 'all') return true;
   if (filter === 'pinned') return Boolean(marker.pinned);
   const status = missionStatusText(row, now);
-  if (filter === 'running') return status.includes('RUNNING');
-  if (filter === 'waiting') return status.includes('WAIT');
+  if (filter === 'running') return status.includes('ACTIVE');
+  if (filter === 'waiting') return status === 'OPEN';
   return true;
 }
 
@@ -10250,11 +10109,12 @@ function updateMissionQuickFilters(rows, now = Date.now()) {
   for (const row of rows) {
     const marker = missionOperatorMarker(row);
     if (marker.deleted_at_ms) continue;
-    if (marker.archived_at_ms) { counts.archived += 1; continue; }
+    if (marker.archived_at_ms || row.provider_archived) counts.archived += 1;
+    if (marker.archived_at_ms) continue;
     counts.all += 1;
     const status = missionStatusText(row, now);
-    if (status.includes('RUNNING')) counts.running += 1;
-    if (status.includes('WAIT')) counts.waiting += 1;
+    if (status.includes('ACTIVE')) counts.running += 1;
+    if (status === 'OPEN') counts.waiting += 1;
     if (marker.pinned) counts.pinned += 1;
   }
   for (const button of dropdownEls?.missionQuickFilters?.querySelectorAll('[data-mission-filter]') || []) {
@@ -10290,8 +10150,8 @@ function updateMissionPaneHeader(rows, renderStart = Date.now()) {
     const laneCounts = {};
     list.forEach((row) => {
       const text = missionStatusText(row, renderStart);
-      if (text.includes('RUNNING')) counts.running += 1;
-      else if (text.includes('WAITING') || text.includes('WAIT')) counts.waiting += 1;
+      if (text.includes('ACTIVE')) counts.running += 1;
+      else if (text === 'OPEN') counts.waiting += 1;
       else if (text.includes('FINISHED')) counts.finished += 1;
       else counts.other += 1;
       const lane = missionAttentionForRow(row, renderStart).lane;
@@ -10323,8 +10183,8 @@ function updateMissionPaneHeader(rows, renderStart = Date.now()) {
       goalSummary ? _escHtml(goalSummary) : '',
     ].filter(Boolean).join(sep);
     const lifecycleCluster = [
-      numTerm('running', counts.running),
-      numTerm('waiting', counts.waiting),
+      numTerm('active', counts.running),
+      numTerm('open', counts.waiting),
       numTerm('finished', counts.finished),
     ].join(sep);
     const queueCluster = [
@@ -10344,7 +10204,7 @@ function updateMissionPaneHeader(rows, renderStart = Date.now()) {
       freshnessCluster,
     ].filter(Boolean).join(groupSep);
     const activeWorkers = list.reduce((sum, row) => sum + missionTeamSummary(row, renderStart).active, 0);
-    dropdownEls.agentTraceMissionCounts.textContent = `${list.length} missions · ${counts.running} running${activeWorkers ? ` · ${activeWorkers} active subagent${activeWorkers === 1 ? '' : 's'}` : ''}${counts.waiting ? ` · ${counts.waiting} waiting` : ''}`;
+    dropdownEls.agentTraceMissionCounts.textContent = `${list.length} missions · ${counts.running} active${activeWorkers ? ` · ${activeWorkers} active subagent${activeWorkers === 1 ? '' : 's'}` : ''}${counts.waiting ? ` · ${counts.waiting} open` : ''}`;
     if (dropdownEls.missionPaneDiagnostics) dropdownEls.missionPaneDiagnostics.innerHTML = detailsHtml;
   }
   if (dropdownEls?.missionPaneToggleInactive) {
@@ -10363,20 +10223,11 @@ function updateMissionPaneHeader(rows, renderStart = Date.now()) {
     return;
   }
   const displayTurn = activityDisplayTurn(sel);
-  const turn = displayTurn.turn_index != null ? `${rowHasActiveTrace(sel) ? 'active' : 'turn'} #${displayTurn.turn_index}` : 'no turn';
-  const scope = traceCapsuleCopySize(sel, selectedTraceSourceWindow(), displayTurn);
-  const stateModel = missionStateModel(sel, selectedTraceSourceWindow(), renderStart);
+  const turn = displayTurn.turn_index != null ? `${rowHasActiveTrace(sel) ? 'active' : 'turn'} #${displayTurn.turn_index}` : observedTurnLabel(sel);
   dropdownEls.agentTraceSelectedBrief.textContent = [
-    providerShortBadge(sel.provider),
-    missionDisplayTitle(sel, displayTurn),
-    stateModel.mission_attention?.lane_label || '',
-    `runtime ${stateModel.runtime_state.replace(/_/g, ' ')}`,
-    stateModel.goal_state !== 'none' ? `goal ${stateModel.goal_state.replace(/_/g, ' ')}` : '',
-    `artifact ${stateModel.artifact_state.replace(/_/g, ' ')}`,
-    `diff ${stateModel.diff_state.replace(/_/g, ' ')}`,
-    turn,
-    scope?.label || '',
+    providerShortBadge(sel.provider), missionDisplayTitle(sel, displayTurn), turn, sourceLocationLabel(sel),
   ].filter(Boolean).join(' · ');
+
 }
 
 function missionIndexEnvelopeProvenanceText() {
@@ -10535,7 +10386,7 @@ function missionAgeFields(row, displayTurn, activeTrace) {
 function missionQueuePreview(row, displayTurn, preview, scope, flabel, activeTrace) {
   const turnText = displayTurn?.turn_index != null
     ? `${activeTrace ? 'active' : 'turn'} #${displayTurn.turn_index}`
-    : 'no turn';
+    : observedTurnLabel(row);
   const bits = [];
   if (preview) bits.push(preview);
   bits.push(turnText);
@@ -10777,7 +10628,7 @@ function renderAgentTraceDropdownBody(reason = 'render') {
           div.innerHTML = `
             <span class="col-fresh ${statusPill.cls}" title="${_escHtml(statusPill.title)}">${_escHtml(statusPill.text)}</span>
             <span class="col-title">
-              <span class="mission-row-titleline"><span class="life-glyph" aria-hidden="true" title="${_escHtml(glyph.title)}">${_escHtml(glyph.glyph)}</span><span class="title-text">${_escHtml(missionDisplayTitle(row, displayTurn))}</span>${goalChip}${teamChip}${subagentChip}</span>
+              <span class="mission-row-titleline"><span class="life-glyph" aria-hidden="true" title="${_escHtml(glyph.title)}">${_escHtml(glyph.glyph)}</span><span class="title-text">${_escHtml([missionDisplayTitle(row, displayTurn), sourceLocationLabel(row)].filter(Boolean).join(' · '))}</span>${goalChip}${teamChip}${subagentChip}</span>
               <span class="mission-row-secondary">${missionProviderBadge(row.provider)}<span class="mission-row-preview">${_escHtml(queuePreview)}</span><span class="mission-row-activity" hidden></span></span>
             </span>
             <span class="col-meta col-trace" title="${_escHtml(copySize.label)}${scope.large ? ' · large/slow' : ''}">${_escHtml(traceText)}</span>
@@ -10854,13 +10705,12 @@ function renderAgentTraceDropdownBody(reason = 'render') {
     const scope = traceScopeMetrics(sel, selectedSourceWindow, displayTurn);
     const stateModel = missionStateModel(sel, selectedSourceWindow);
     const copyReadiness = stateModel.copy_readiness || {};
-    const sourceLatestFallback = traceCopyCanUseSourceLatestFallback(sel, selectedSourceWindow, activeTrace, stateModel);
-    const visibleIndexRefresh = traceCopyRequiresVisibleIndexRefresh(sel, selectedSourceWindow, activeTrace, stateModel);
     dropdownEls.agentTraceDetail.textContent = missionDisplayTitle(sel, displayTurn);
     dropdownEls.agentTraceDetail.title = selectedMissionOperatorChip(sel, selectedSourceWindow);
     if (dropdownEls.agentTraceDetailMeta) dropdownEls.agentTraceDetailMeta.textContent = [
       missionStatusText(sel).toLowerCase(),
-      displayTurn.turn_index != null ? `turn ${displayTurn.turn_index}` : '',
+      displayTurn.turn_index != null ? `turn ${displayTurn.turn_index}` : observedTurnLabel(sel),
+      sourceLocationLabel(sel),
       shortSessionId(sel.session_id),
     ].filter(Boolean).join(' · ');
     if (dropdownEls.missionDetailDiagnostics) dropdownEls.missionDetailDiagnostics.textContent = selectedMissionOperatorSentence(sel, selectedSourceWindow);
@@ -10873,22 +10723,7 @@ function renderAgentTraceDropdownBody(reason = 'render') {
     // (skip_capture_if_current=true). Buttons should not be gated on
     // pre-existing artifact_refs — that was the v6 defect.
     const hasTraceTurn = Boolean(sel?.ref) || displayTurn.turn_index != null;
-    const warningCopyText = primaryVariant === 'closeout_report' ? 'Copy Compact With Warnings' : 'Copy With Warnings';
-    const copyActionText = !hasTraceTurn
-      ? 'No Trace Turn'
-      : sourceLatestFallback
-        ? (primaryVariant === 'closeout_report' ? 'Copy Source Closeout' : 'Copy Source Latest')
-      : visibleIndexRefresh
-        ? (primaryVariant === 'closeout_report' ? 'Refresh + Copy Compact' : 'Refresh + Copy Capsule')
-      : copyReadiness.state === 'red'
-        ? warningCopyText
-      : capsuleCurrentness.ready
-        ? (primaryVariant === 'closeout_report' ? 'Copy Thread Compact' : 'Copy Trace Capsule')
-        : (capsuleCurrentness?.source_freshness?.action === 'block_copy')
-          ? warningCopyText
-        : (capsuleArtifact?.path || fresh === 'stale' || capsuleCurrentness?.source_freshness?.action === 'refresh_before_copy')
-          ? (primaryVariant === 'closeout_report' ? 'Refresh + Copy Compact' : 'Refresh + Copy Capsule')
-          : (primaryVariant === 'closeout_report' ? 'Prepare + Copy Compact' : 'Prepare + Copy Capsule');
+    const copyActionText = 'Refresh + Copy';
     const closeoutActionText = 'Copy Closeout';
     const copyBlocked = !hasTraceTurn;
     if (dropdownEls.missionCaptureCopy) {
@@ -12154,13 +11989,17 @@ async function portableTrace(action, sourceWindow, closeout, selection = null) {
     const result = await post('/trace', {ref:row.ref, ...scope, ...(selection?.tail ? {activity_only:true} : selection ? {selected_refs:selection.refs} : {}), closeout, preview:action === 'preview', deliver:desktop ? action : null});
     const scopeLabel = selection?.tail ? 'Recent recorded activity' : selection ? 'Selected conversations · detailed' : closeout ? 'Closeout' : scope.turns ? `Last ${scope.turns} turn(s), selected conversation only` :
       scope.depth === 'summary' ? 'Full thread compact' : 'Full thread detailed';
-    const summary = [title, scopeLabel, result.sessions + ' session(s)', _formatKB(result.bytes), ...result.warnings].join(' · ');
+    const coverage = result.coverage;
+    const coverageLabel = coverage.scope === 'source' ? 'Selected recording only' :
+      [coverage.excluded ? `${coverage.selected} of ${coverage.discovered} discovered recordings selected` : 'All discovered recordings selected',
+       coverage.relationships === 'unknown' && 'Discovery incomplete', Object.keys(result.unavailable).length > 0 && 'Known worker gaps'].filter(Boolean).join(' · ');
+    const summary = [title, scopeLabel, coverageLabel, result.sessions + ' session(s)', _formatKB(result.bytes), ...result.warnings].join(' · ');
     if (action === 'preview') {
       previewCapture = {result, summary};
       document.getElementById('preview-scope-name').textContent = summary;
       document.getElementById('preview-sources').replaceChildren(...result.sources.map(source => {
         const item = document.createElement('li');
-        item.textContent = source.title + ' · ' + source.session_id + ' · source modified ' + new Date(source.modified).toLocaleString() + (source.parent ? ' · child of ' + source.parent : '');
+        item.textContent = source.title + ' · ' + source.source_file + (source.provider_archived ? ' (Codex archive)' : '') + ' · ' + source.session_id + ' · source modified ' + new Date(source.modified).toLocaleString() + (source.parent ? ' · child of ' + source.parent : '');
         return item;
       }));
       document.getElementById('preview-warnings').textContent = 'Read sequentially at ' + new Date(result.captured_at).toLocaleTimeString() + '. Large native outputs use excerpts and field references.';
@@ -12199,7 +12038,7 @@ document.getElementById('choose-sources').onclick = async () => {
       const box = document.createElement('input');
       box.type = 'checkbox'; box.value = source.ref; box.disabled = !source.readable;
       box.checked = source.ref === row.ref && source.readable;
-      label.append(box, document.createTextNode(source.title + ' · ' + source.session_id +
+      label.append(box, document.createTextNode(source.title + ' · ' + source.source_file + (source.provider_archived ? ' (Codex archive)' : '') + ' · ' + source.session_id +
         (source.parent ? ' · child of ' + source.parent : '') + (box.disabled ? ' · exceeds 256 MiB' : '')));
       return label;
     }));

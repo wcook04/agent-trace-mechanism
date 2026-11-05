@@ -260,6 +260,52 @@ def run(args, home):
                 "async text => (await navigator.clipboard.readText()) === text",
                 arg=body,
             )
+            # Two physical files claim one recorded ID. Pick each by location,
+            # including the archive through its filter, and compare the actual preview.
+            fixture = (ROOT / "examples/codex.jsonl").read_text()
+            archive = folder.parent / "archived_sessions"
+            archive.mkdir()
+            title_index = folder.parent / "session_index.jsonl"
+            with title_index.open("a") as index:
+                index.write(
+                    "\n"
+                    + json.dumps(
+                        {"id": "synthetic-codex", "thread_name": "Old incident notes"}
+                    )
+                )
+            for target, answer in (
+                (archive, "Archived answer"),
+                (folder, "Active answer"),
+            ):
+                lines = fixture.replace("Update prepared.", answer).splitlines()
+                lines.insert(1, json.dumps({"padding": "x" * 200000}))
+                (target / "incident.jsonl").write_text("\n".join(lines) + "\n")
+            page.reload()
+            for archived, answer in (
+                (True, "Archived answer"),
+                (False, "Active answer"),
+            ):
+                page.locator(
+                    '[data-mission-filter="archived" i]'
+                    if archived
+                    else '[data-mission-filter="all"]'
+                ).click()
+                candidates = page.locator("#agent-trace-rows .dropdown-row").filter(
+                    has_text="Old incident notes"
+                )
+                candidate = (
+                    candidates.filter(has_text="Archived in Codex")
+                    if archived
+                    else candidates.filter(has_not_text="Archived in Codex")
+                )
+                candidate.click()
+                expect(candidate.locator(".col-fresh")).to_have_text("FINISHED")
+                expect(page.locator("#agent-trace-detail-meta")).to_contain_text(
+                    "turn-1"
+                )
+                page.locator("#preview-scope").click()
+                expect(page.locator("#preview-text")).to_contain_text(answer)
+                page.keyboard.press("Escape")
             page.set_viewport_size({"width": 760, "height": 620})
             page.locator("#agent-trace-rows .title-text").filter(has_text=title).click()
             page.locator("#preview-scope").focus()

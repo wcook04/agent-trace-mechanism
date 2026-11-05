@@ -91,6 +91,8 @@ def check_download(archive, receipt, screenshots, denied, interactions):
                 folder = home / (
                     "codex-root/sessions" if codex else "claude-root/projects"
                 )
+                if providers == ("codex",):
+                    folder = folder.with_name("archived_sessions")
                 folder.mkdir(parents=True)
                 source = root / (
                     "examples/codex.jsonl" if codex else "tests/fixtures/claude.jsonl"
@@ -101,7 +103,7 @@ def check_download(archive, receipt, screenshots, denied, interactions):
                         json.dumps(
                             {
                                 "id": "synthetic-codex",
-                                "thread_name": "Codex release fixture",
+                                "thread_name": "Old release notes",
                             }
                         )
                     )
@@ -146,6 +148,9 @@ def check_download(archive, receipt, screenshots, denied, interactions):
                         },
                     }
                 )
+                latest = json.loads(lines[-1])
+                latest["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                lines[-1] = json.dumps(latest)
                 parent.write_text("\n".join(lines) + "\n")
             env = {
                 k: os.environ[k]
@@ -206,13 +211,21 @@ def check_download(archive, receipt, screenshots, denied, interactions):
                             (
                                 "review the onboarding guide"
                                 if len(providers) == 2
-                                else "codex release fixture"
+                                else "old release notes"
                             )
                             in text
                         )
                         == ("codex" in providers)
                         and ("read and update example.txt" in text)
                         == ("claude" in providers)
+                        and (
+                            providers != ("codex",)
+                            or (
+                                "archived in codex" in text
+                                and "finished" in text
+                                and "retired" not in text
+                            )
+                        )
                         and (bool(providers) or "no sessions" in text)
                     )
 

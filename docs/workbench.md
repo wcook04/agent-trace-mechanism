@@ -11,6 +11,10 @@ a text file in Downloads and reveal it in Finder. Browser mode downloads a text
 file instead. The private window launcher, clipboard watcher, global hotkeys,
 reinstall control and in-Codex attachment plugin are not included.
 
+Missions are locally recorded conversations and agent runs. The list includes both
+active and archived Codex histories. **Archived in Codex** describes the source
+folder. The Archive button changes a workbench preference.
+
 The list refreshes about every five seconds; the selected activity strip reads a
 bounded tail. Earlier pages back through the selected file. Full-thread copies
 include discovered linked children. Latest and last-N limit the selected session.
@@ -60,7 +64,13 @@ scopes traverse the currently discovered tree. Latest and last-N cover only
 the selected conversation. Large native tool outputs use excerpts and exact
 field handles. Mixed Codex recordings also include the transcript projection,
 which can repeat a message recorded in both formats. Incomplete records can
-produce warnings. A duplicate session identity needs resolving on disk.
+produce warnings. When several files claim one identity, each file remains
+selectable. The source path distinguishes them. Automatic tree capture follows
+resolved worker links, including nested Claude workers under the session’s
+subagents directory. Ambiguous links require selecting the intended files
+individually. A bounded activity read can show a recorded turn ID or prompt
+offset even when its ordinal is unknown. An open turn with no recent timestamped
+activity is labelled **Open**.
 
 **Choose sessions…** starts with just the selected conversation. Add individual
 workers to assemble a subset. The preview identifies included sources, their

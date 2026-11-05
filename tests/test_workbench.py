@@ -214,7 +214,12 @@ def test_ambiguous_children_and_untrusted_writes(isolated):
     with app() as api:
         index = api("/mission-index")["index"]
         assert index["ambiguous_sessions"] == 1
-        parent = next(row for row in index["active_rows"] if not row["thread_parent"])
+        assert len(index["active_rows"]) == 4
+        parent = next(
+            row
+            for row in index["active_rows"]
+            if row["source_file"] == "coordinator.jsonl"
+        )
         with pytest.raises(HTTPError):
             api("/trace", {"ref": parent["ref"]})
         for headers in (
@@ -302,7 +307,11 @@ def test_damaged_preferences_preserved_without_hiding_sessions(isolated, damaged
         (backup,) = marker.parent.glob("mission-markers.damaged-*.json")
         assert backup.read_bytes() == damaged and str(backup) in index["marker_notice"]
         api("/marker", {"mission_key": "codex:a", "pinned": True})
-        assert api("/mission-index")["index"]["operator_markers"]["codex:a"]["pinned"]
+        refreshed = api("/mission-index")["index"]
+        assert (
+            refreshed["operator_markers"]["codex:a"]["pinned"]
+            and not refreshed["marker_notice"]
+        )
         assert backup.read_bytes() == damaged
 
 
@@ -363,3 +372,108 @@ def test_prompt_removal_respects_starter_and_revision(isolated):
         )["restored"]
         with pytest.raises(HTTPError):
             api("/prompt-shelf/mine")
+
+
+def test_archive_move_duplicate_and_exact_file_capture(isolated):
+    from trace_mechanism.workbench.library import Library
+
+    active = isolated / ".codex/sessions/a.jsonl"
+    archived = isolated / ".codex/archived_sessions/a.jsonl"
+    archived.parent.mkdir(parents=True)
+    shutil.copyfile(ROOT / "examples/codex.jsonl", archived)
+    lib = Library()
+    (first,) = lib.discover()
+    assert first["provider_archived"]
+    original = lib.trace({"ref": first["ref"]})
+    active.parent.mkdir()
+    archived.rename(active)
+    (moved,) = lib.discover()
+    assert moved["session_id"] == first["session_id"] and not moved["provider_archived"]
+    assert lib.trace({"ref": moved["ref"]})["text_sha256"] == original["text_sha256"]
+    archived.write_text(
+        active.read_text().replace("Update prepared.", "Archived answer.")
+    )
+    rows = lib.discover()
+    assert len(rows) == 2 and all(r["ambiguous"] for r in rows)
+    with pytest.raises(ValueError, match="ambiguous"):
+        lib.select({"provider": "codex", "session_id": first["session_id"]})
+    for row in rows:
+        capture = lib.trace({"ref": row["ref"], "closeout": True})
+        assert capture["text"] == (
+            "Archived answer." if row["provider_archived"] else "Update prepared."
+        )
+        assert capture["sources"][0]["ref"] == row["ref"]
+
+
+def test_nested_claude_workers_and_unresolved_links(isolated):
+    from trace_mechanism.workbench.library import Library
+
+    fixture = (ROOT / "tests/fixtures/claude.jsonl").read_text()
+    sid = json.loads(fixture.splitlines()[0])["sessionId"]
+    project = isolated / ".claude/projects/demo"
+    workers = project / sid / "subagents"
+    (workers / "nested").mkdir(parents=True)
+    (project / (sid + ".jsonl")).write_text(fixture)
+    for folder in (workers, workers / "nested"):
+        (folder / "agent-worker.jsonl").write_text(fixture)
+    lib = Library()
+    rows = lib.discover()
+    parent = next(r for r in rows if r["session_id"] == sid)
+    key = {"ref": parent["ref"]}
+    assert len(lib.activity(key)["team"]["workers"]) == 2
+    assert len({r["ref"] for r in rows}) == 3
+    full = lib.trace(key)
+    assert full["sessions"] == 3 and full["coverage"]["relationships"] == "discovered"
+    dangling = project / "different-session/subagents/unknown.jsonl"
+    dangling.parent.mkdir(parents=True)
+    dangling.write_text(fixture)
+    rows = lib.discover()
+    assert len(rows) == 4
+    assert next(r for r in rows if r["source_file"].endswith("unknown.jsonl"))[
+        "unlinked"
+    ]
+    selected = lib.trace({**key, "selected_refs": [key["ref"]]})
+    assert selected["coverage"] == dict(
+        scope="tree", selected=1, discovered=3, excluded=2, relationships="unknown"
+    )
+
+
+def test_bounded_turn_evidence_with_and_without_a_boundary(isolated):
+    from trace_mechanism.workbench.library import Library
+
+    path = isolated / ".codex/sessions/large.jsonl"
+    path.parent.mkdir(parents=True)
+    fixture = (ROOT / "examples/codex.jsonl").read_text()
+    path.write_text(fixture + json.dumps({"padding": "x" * 200000}) + "\n")
+    lib = Library()
+    (row,) = lib.discover()
+    assert row["turn_observation"] == "bounded" and "preferred_trace_turn" not in row
+    with path.open("a") as stream:
+        stream.write(fixture.split("\n", 1)[1].replace("turn-1", "turn-last"))
+    (row,) = lib.discover()
+    observed = row["preferred_trace_turn"]
+    assert observed["turn_id"] == "turn-last" and observed["turn_index"] is None
+    assert row["worker_state"] == "finished"
+
+
+def test_worker_append_while_parent_is_being_captured(isolated, monkeypatch):
+    from trace_mechanism.workbench import library
+
+    folder = isolated / ".codex/sessions"
+    folder.mkdir(parents=True)
+    for source in (ROOT / "examples/launch-review").glob("*.jsonl"):
+        shutil.copyfile(source, folder / source.name)
+    lib = library.Library()
+    parent = next(r for r in lib.discover() if not r["thread_parent"])
+    load = library.codex_native.load_rollout
+
+    def append_after_parent(path, **kwargs):
+        result = load(path, **kwargs)
+        if path.name == "coordinator.jsonl":
+            with (folder / "access-review.jsonl").open("a") as worker:
+                worker.write("{}\n")
+        return result
+
+    monkeypatch.setattr(library.codex_native, "load_rollout", append_after_parent)
+    with pytest.raises(ValueError, match="changed during capture"):
+        lib.trace({"ref": parent["ref"]})

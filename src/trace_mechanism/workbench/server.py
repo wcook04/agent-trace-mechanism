@@ -120,7 +120,9 @@ class Handler(BaseHTTPRequestHandler):
                         key = body.get("mission_key")
                         if (
                             not isinstance(key, str)
-                            or not key.startswith(("codex:", "claude_code:", "claude:"))
+                            or not key.startswith(
+                                ("codex:", "claude_code:", "claude:", "file:")
+                            )
                             or len(key) > 1024
                         ):
                             raise ValueError("Invalid mission key.")
@@ -149,15 +151,17 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/mission-index":
                 with s.refresh:
                     rows = lib.discover()
+                    discovery, conflicts = lib.discovery, len(lib.conflicts)
                 with s.shelf_lock:
                     markers = read_markers(s)
+                    notice = s.marker_notice
                 result = dict(
                     ok=True,
                     index=dict(
-                        marker_notice=s.marker_notice,
-                        discovery=lib.discovery,
+                        marker_notice=notice,
+                        discovery=discovery,
                         active_rows=rows,
-                        ambiguous_sessions=len(lib.conflicts),
+                        ambiguous_sessions=conflicts,
                         inactive_rows=[],
                         generated_at=iso(time.time()),
                         operator_markers=markers,
@@ -211,6 +215,7 @@ def marker_path():
 
 def read_markers(server, writing=False):
     path = marker_path()
+    server.marker_notice = ""
     try:
         if path.is_symlink() or path.parent.is_symlink():
             raise OSError("The preferences location is a symbolic link.")

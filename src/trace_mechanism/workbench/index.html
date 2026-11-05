@@ -4166,7 +4166,7 @@
                   </div>
                   <button id="mission-pane-refresh" class="btn" type="button" title="Refresh missions">Refresh</button>
                 </div>
-                <div id="history-help" hidden><strong>Find your conversations</strong><p>Start a local Codex or Claude Code conversation, then refresh. Agent Trace looks in these folders.</p><ul id="history-roots"></ul><details><summary>Using a different folder?</summary><p>Launch with CODEX_HOME or CLAUDE_CONFIG_DIR set to your provider’s configuration directory. Agent Trace looks for sessions or projects inside it. Browsing here does not grant an agent access.</p></details></div>
+                <div id="history-help" hidden><strong>Find your conversations</strong><p>Missions are recorded conversations and agent runs. Start a local Codex or Claude Code conversation, then refresh. Agent Trace looks in these folders.</p><ul id="history-roots"></ul><details><summary>Using a different folder?</summary><p>Launch with CODEX_HOME or CLAUDE_CONFIG_DIR set to your provider’s configuration directory. Agent Trace looks for sessions, archived_sessions or projects inside it. Browsing here does not grant an agent access.</p></details></div>
                 <p id="conflict-note" role="status" hidden></p>
                 <div id="mission-index-receipt" class="mission-index-receipt" role="status" aria-live="polite" aria-atomic="true"></div>
                 <div id="mission-provider-filters" class="mission-quick-filters mission-provider-filters" role="group" aria-label="Filter by agent">
@@ -4177,8 +4177,8 @@
                 </div>
                 <div id="mission-quick-filters" class="mission-quick-filters" role="group" aria-label="Filter missions">
                   <button type="button" data-mission-filter="all" aria-pressed="true">All <span class="filter-count">0</span></button>
-                  <button type="button" data-mission-filter="running" aria-pressed="false">Running <span class="filter-count">0</span></button>
-                  <button type="button" data-mission-filter="waiting" aria-pressed="false">Waiting <span class="filter-count">0</span></button>
+                  <button type="button" data-mission-filter="running" aria-pressed="false">Active <span class="filter-count">0</span></button>
+                  <button type="button" data-mission-filter="waiting" aria-pressed="false">Open <span class="filter-count">0</span></button>
                   <button type="button" data-mission-filter="pinned" aria-pressed="false">Pinned <span class="filter-count">0</span></button>
                   <button type="button" data-mission-filter="archived" aria-pressed="false">Archived <span class="filter-count">0</span></button>
                 </div>

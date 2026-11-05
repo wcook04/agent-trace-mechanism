@@ -17,6 +17,11 @@ def history_root(provider):
     return Path(os.environ.get('CLAUDE_CONFIG_DIR') or Path.home() / '.claude') / 'projects'
 
 
+def history_roots(provider):
+    active = history_root(provider)
+    return (active, active.with_name('archived_sessions')) if provider == 'codex' else (active,)
+
+
 def connection(manifest):
     from .mcp_server import load_manifest
     manifest = manifest.expanduser().resolve(strict=True)
@@ -168,9 +173,9 @@ def main():
         if args.action == 'list':
             if not 1 <= args.limit <= 100:
                 raise ValueError('--limit must be between 1 and 100.')
-            root = (args.root or history_root(args.provider)).expanduser().resolve(strict=args.root is not None)
+            roots = (args.root.expanduser().resolve(strict=True),) if args.root else history_roots(args.provider)
             dated = []
-            for path in root.rglob('*.jsonl'):
+            for path in (file for root in roots for file in root.rglob('*.jsonl')):
                 try:
                     dated.append((path.stat().st_mtime, path))
                 except OSError:

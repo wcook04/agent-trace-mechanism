@@ -2380,3 +2380,14 @@ test('native excerpt references and shared text parts retain expansion handles w
   assert.equal(restoreSingleJsonClip(clip), source);
   assert.ok(!JSON.stringify(clip).includes(original));
 });
+
+test('workbench lifecycle follows recorded events independently of titles and file times', async () => {
+  const {deriveMissionLifecycle} = await import('../src/trace_mechanism/workbench/lifecycle_reducer.mjs');
+  const now = Date.now();
+  for (const title of ['Old release notes', 'Old incident report', 'Review notes']) {
+    const row = {source_title: title, worker_state: 'finished'};
+    assert.equal(deriveMissionLifecycle({row, now}).pill.text, 'FINISHED');
+    assert.equal(deriveMissionLifecycle({row: {...row, worker_state: 'working', source_mtime_ms: now}, now}).pill.text, 'OPEN');
+    assert.equal(deriveMissionLifecycle({row, now, copyEntry: {successAt: now - 30000}}).pill.text, 'FINISHED');
+  }
+});
