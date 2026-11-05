@@ -1,7 +1,9 @@
 """Explicit-file access to captured records, immutable views and bounded changes."""
 import copy
 import hashlib
+import io
 import json
+import os
 from . import codex_native as native
 from .parser import parse_claude_session, parse_codex_session
 from .views import render
@@ -15,6 +17,102 @@ def _integer(value, name, low, high):
 def _digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
                                     separators=(',', ':'), allow_nan=False).encode()).hexdigest()
+
+
+class TranscriptInput:
+    """A checked capture for the original parsers, with physical line numbers preserved."""
+    def __init__(self, path, raw, stat, session_id, provider):
+        self.path, self.file_stat = path, stat
+        self.lines, self.warnings = [], {}
+        observed = set()
+        for line in io.BytesIO(raw):
+            try:
+                record = json.loads(line)
+                if not isinstance(record, dict) or any(
+                    not isinstance(record.get(key) or {}, dict) for key in ('payload', 'message')
+                ):
+                    raise ValueError('Invalid record shape')
+                if provider == 'claude' and record.get('sessionId') is not None:
+                    observed.add(record['sessionId'])
+                self.lines.append(line.decode('utf-8').rstrip('\r\n'))
+            except (ValueError, RecursionError, TypeError):
+                key = 'malformed records' if line.endswith(b'\n') else 'pending records'
+                self.warnings[key] = self.warnings.get(key, 0) + 1
+                self.lines.append('')
+        if provider == 'claude' and observed != {session_id}:
+            raise ValueError('Claude source session identity does not match the registered session.')
+
+    def stat(self):
+        return self.file_stat
+
+    def open(self):
+        return io.StringIO('\n'.join(self.lines))
+
+    def __str__(self):
+        return str(self.path)
+
+
+def captured_turns(path, session_id, provider, snapshot=None):
+    with path.open('rb') as stream:
+        raw = stream.read(native.MAX_SOURCE_BYTES + 1)
+        if len(raw) > native.MAX_SOURCE_BYTES:
+            raise ValueError('Session exceeds the bounded source size.')
+        stat = os.fstat(stream.fileno())
+    if snapshot:
+        if hashlib.sha256(raw).hexdigest() != snapshot['source']['sha256']:
+            raise ValueError('The conversation changed during capture. Try again.')
+        if b'task_started' not in raw:
+            return [], {}
+    source = TranscriptInput(path, raw, stat, session_id, provider)
+    parse = parse_codex_session if provider == 'codex' else parse_claude_session
+    return parse(source), source.warnings
+
+
+def render_codex_context(snapshots, paths, *, detail, turns=0, closeout=False, require_readable=False):
+    """Render the same selected evidence for local browsing and registered MCP reads."""
+    native_sessions, transcripts = [], []
+    for snapshot in snapshots:
+        sid = snapshot['session_id']
+        items = snapshot['items']
+        parsed, _ = captured_turns(paths[sid], sid, 'codex', snapshot)
+        legacy = parsed
+        if turns:
+            # Both readers expose physical record positions. Group by turn ID,
+            # then select by first appearance across both recording formats.
+            positions = {}
+            for item in items:
+                if not item['turn_id']:
+                    raise ValueError('Recorded items lack turn IDs. Choose a full-thread scope.')
+                positions.setdefault(item['turn_id'], item['first_record'])
+            for turn in legacy:
+                first = min(turn.source_record_indices) + 1
+                positions[turn.turn_id] = min(first, positions.get(turn.turn_id, first))
+            selected = set(sorted(positions, key=positions.get)[-turns:])
+            items = [i for i in items if i['turn_id'] in selected]
+            legacy = [t for t in legacy if t.turn_id in selected]
+        legacy = [t for t in legacy if t.prompt_text or t.assistant_text or t.tool_events]
+        if require_readable and not (items or legacy):
+            raise ValueError(f"No readable content in the selected scope for {sid}.")
+        if closeout:
+            finals = [(i['first_record'], native._message_text(i['item'])) for i in items
+                      if i['kind'] == 'AgentMessage' and i['item'].get('phase') == 'final_answer'
+                      and i['source_refs'][-1]['event_type'] == 'item_completed']
+            finals.extend((max(t.source_record_indices) + 1, t.assistant_text) for t in legacy
+                          if t.turn_ended and t.assistant_text)
+            if not finals:
+                raise ValueError('No completed assistant answer recorded in this scope.')
+            return max(finals)[1], 'closeout'
+        if items:
+            native_sessions.append(dict(snapshot, items=items))
+        if legacy:
+            rendered = render(legacy, detail=detail)
+            if len(snapshots) > 1 or items:
+                rendered = 'Transcript records · ' + sid + '\n' + rendered
+            transcripts.append(rendered)
+    blocks = [native.render_many(native_sessions, detail=detail)] if native_sessions else []
+    blocks.extend(transcripts)
+    mode = 'mixed' if native_sessions and transcripts else 'native' if native_sessions else 'legacy'
+    return '\n\n'.join(blocks), mode
 
 
 class AgentTools:
@@ -73,7 +171,7 @@ class AgentTools:
         selected, seen = [root], {session_id}
         if include_children:
             for parent in selected:
-                for child in self.entries:
+                for child in sorted(self.entries, key=lambda row: row['session_id']):
                     if (child['provider'] == provider and child.get('parent_session_id') == parent['session_id']
                             and child['session_id'] not in seen):
                         selected.append(child)
@@ -236,20 +334,8 @@ class AgentTools:
         metadata = {}
         if provider == 'codex':
             digest, bundle = self._capture(provider, session_id, include_children)
-            if any(s['has_native_items'] for s in bundle['sessions']):
-                native_sessions = [s for s in bundle['sessions'] if s['has_native_items']]
-                text = native.render_many(native_sessions, detail=scope == 'full_thread')
-                legacy = [s for s in bundle['sessions'] if not s['has_native_items']]
-                by_id = {r['session_id']: r for r in self.entries if r['provider'] == provider}
-                for snapshot in legacy:
-                    text += '\nLegacy session: ' + snapshot['session_id'] + '\n' + render(
-                        parse_codex_session(by_id[snapshot['session_id']]['path']), detail=scope == 'full_thread')
-                format_name = 'mixed' if legacy else 'native'
-            else:
-                by_id = {r['session_id']: r for r in self.entries if r['provider'] == provider}
-                text = '\n\n'.join(render(parse_codex_session(by_id[s['session_id']]['path']),
-                                          detail=scope == 'full_thread') for s in bundle['sessions'])
-                format_name = 'legacy'
+            paths = {r['session_id']: r['path'] for r in self.entries if r['provider'] == provider}
+            text, format_name = render_codex_context(bundle['sessions'], paths, detail=scope == 'full_thread')
             metadata = {'snapshot_kind': 'native_bundle' if format_name != 'legacy' else 'text',
                         'include_children': include_children, 'context_format': format_name,
                         'edges': copy.deepcopy(bundle['edges']), **self._availability(bundle)}
@@ -262,18 +348,10 @@ class AgentTools:
                 raise ValueError('Registered child traversal currently requires Codex records.')
             self._refresh_entries()
             row = self._entry(provider, session_id)
-            observed = set()
-            with row['path'].open(encoding='utf-8') as stream:
-                for line in stream:
-                    try:
-                        record = json.loads(line)
-                    except ValueError:
-                        continue
-                    if isinstance(record, dict) and record.get('sessionId'):
-                        observed.add(record['sessionId'])
-            if observed != {session_id}:
-                raise ValueError('Claude source session identity does not match the registered session.')
-            text = render(parse_claude_session(row['path']), detail=scope == 'full_thread')
+            parsed, warnings = captured_turns(row['path'], session_id, provider)
+            text = render(parsed, detail=scope == 'full_thread')
+            if warnings:
+                metadata['record_warnings'] = warnings
         text_digest = hashlib.sha256(text.encode()).hexdigest()
         self.snapshots[text_digest] = text
         return {'provider': provider, 'session_id': session_id, 'scope': scope, **metadata,

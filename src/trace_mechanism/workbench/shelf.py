@@ -12,7 +12,7 @@ LIMIT = 1024 * 1024
 
 
 def user_dir():
-    return (
+    folder = (
         Path(
             os.environ.get("AGENT_TRACE_PROMPTS")
             or Path.home() / ".agent-trace/prompts"
@@ -20,6 +20,11 @@ def user_dir():
         .expanduser()
         .absolute()
     )
+    if folder.is_symlink() or (
+        not os.environ.get("AGENT_TRACE_PROMPTS") and folder.parent.is_symlink()
+    ):
+        raise ValueError("Linked prompt directories are not supported.")
+    return folder
 
 
 def read(slug):
@@ -33,34 +38,36 @@ def read(slug):
             if path.stat().st_size > LIMIT:
                 raise ValueError("Prompt exceeds 1 MiB.")
             raw = path.read_text(encoding="utf-8")
-            head, sep, body = (
-                raw[4:].partition("\n---\n")
-                if raw.startswith("---\n")
-                else ("", "", raw)
-            )
-            body = body.lstrip("\n") if sep else raw
-            fields = (
-                dict(line.split(":", 1) for line in head.splitlines() if ":" in line)
-                if sep
-                else {}
-            )
-            title = fields.get("title", "").strip() or next(
-                (s.lstrip("# ").strip()[:80] for s in body.splitlines() if s.strip()),
-                slug,
-            )
-            return dict(
-                slug=slug,
-                title=title,
-                body=body,
-                raw=raw,
-                user=folder != BUNDLED,
-                label=fields.get("cockpit_slot", "").strip() or slug,
-                char_count=len(body),
-                byte_count=len(body.encode()),
-                sha16=hashlib.sha256(body.encode()).hexdigest()[:16],
-                revision=hashlib.sha256(raw.encode()).hexdigest(),
-            )
+            return describe(slug, raw, user=folder != BUNDLED)
     return None
+
+
+def describe(slug, raw, *, user):
+    head, sep, body = (
+        raw[4:].partition("\n---\n") if raw.startswith("---\n") else ("", "", raw)
+    )
+    body = body.lstrip("\n") if sep else raw
+    fields = (
+        dict(line.split(":", 1) for line in head.splitlines() if ":" in line)
+        if sep
+        else {}
+    )
+    title = fields.get("title", "").strip() or next(
+        (s.lstrip("# ").strip()[:80] for s in body.splitlines() if s.strip()),
+        slug,
+    )
+    return dict(
+        slug=slug,
+        title=title,
+        body=body,
+        raw=raw,
+        user=user,
+        label=fields.get("cockpit_slot", "").strip() or slug,
+        char_count=len(body),
+        byte_count=len(body.encode()),
+        sha16=hashlib.sha256(body.encode()).hexdigest()[:16],
+        revision=hashlib.sha256(raw.encode()).hexdigest(),
+    )
 
 
 def listing():

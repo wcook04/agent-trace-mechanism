@@ -29,7 +29,8 @@ export function editPrompts(reload) {
     const data=slug?await (await fetch('/prompt-shelf/'+encodeURIComponent(slug))).json():{};
     el('prompt-name').value=slug; el('prompt-name').disabled=!!slug;
     el('prompt-md').value=data.raw||''; revision=data.revision||null;
-    el('edit-note').textContent='';
+    el('prompt-output').hidden=true;
+    el('edit-note').textContent=data.raw && !data.user ? 'Saving creates a personal copy of this starter.' : '';
   }
   el('manage-prompts').onclick=async()=>{
     try {
@@ -44,6 +45,14 @@ export function editPrompts(reload) {
     try {
       await post('/save-prompt',{slug:el('prompt-name').value.trim(),raw:el('prompt-md').value,revision});
       el('prompt-dialog').close();await reload();
+    } catch(e){el('edit-note').textContent=e.message;}
+  };
+  el('prompt-md').oninput=()=>{el('prompt-output').hidden=true;};
+  el('prompt-preview').onclick=async()=>{
+    try {
+      const {text}=await post('/preview-prompt',{raw:el('prompt-md').value});
+      el('prompt-output').textContent=text;
+      el('prompt-output').hidden=false;
     } catch(e){el('edit-note').textContent=e.message;}
   };
   el('prompt-cancel').onclick=()=>el('prompt-dialog').close();

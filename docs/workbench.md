@@ -32,3 +32,43 @@ in WebKit using empty temporary provider folders. The normal test suite checks
 the zero-, one- and two-provider cases, parent/worker reads, private access,
 and user prompt persistence. The distribution check repeats isolated-provider
 reads using the wheel installed outside the checkout.
+
+
+## Choose and transfer context
+
+Select a mission and inspect the parent activity strip and worker cards. **Open
+thread** selects a worker. **Preview copy** shows the exact text and session IDs
+for the chosen scope. **Copy this text** transfers that capture even if a new
+event arrives. **Refresh + Copy** instead reads the files again. Full-thread
+scopes traverse the currently discovered tree. Latest and last-N cover only
+the selected conversation. Large native tool outputs use excerpts and exact
+field handles. Mixed Codex recordings also include the transcript projection,
+which can repeat a message recorded in both formats. Incomplete records can
+produce warnings. A duplicate session identity needs resolving on disk.
+
+Local browsing requires no upload. Copying to the clipboard leaves the text
+there until it is replaced. Pasting it into a model, or explicitly registering
+a source for an agent to retrieve, can send content to that provider. The setup
+skill explains installation. Registration separately chooses the files a
+connected MCP server may read.
+
+## Candidate evidence
+
+Build from a clean Git checkout. The Mac builder exports one revision, checks
+the frozen module origins and bundled interface assets, and writes the app ZIP,
+source ZIP and a SHA-256 build receipt under `dist/candidate-<revision>/`. The
+receipt records the build environment. Ad-hoc signing here supports local
+testing. A public download still requires the distribution signing and
+notarization exercise and first launch of the downloaded artifact in a clean
+macOS account. [Apple's distribution guidance](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution)
+
+With a candidate wheel and its MCP extra installed, run
+`python tools/check_workbench_journey.py --python /absolute/path/to/venv/bin/python`
+from a Python environment with Playwright and Chromium. An optional
+`--chrome PATH` selects a local Chromium executable. The check uses public
+recordings, a temporary home and an isolated browser clipboard. Add `--claude`
+to exercise a signed-in Claude Code session and compare its actual MCP result
+to the clipboard hash. This optional step calls the provider.
+`tools/check_workbench_replay.py ORIGINAL_CHECKOUT` is a maintainer comparison
+against the original Swift activity reader and native tree renderer. It covers
+the supported fixture intersection. The app needs neither that checkout nor Swift.

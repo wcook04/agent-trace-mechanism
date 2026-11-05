@@ -3978,10 +3978,25 @@
       @container trace-workbench (max-width: 950px) { .mission-activity-footer { flex-wrap: wrap; gap: 4px; } }
       .team-worker .activity-tile-icon { background: color-mix(in srgb, var(--event-accent) 10%, #19212d); }
       #mission-activity-command { font: 12px/1.5 var(--sans); color: #cbd9e8; background: transparent; padding: 6px 0; cursor: default; }
-    #prompt-dialog {color:#dbe5f2;background:#19202a;border:1px solid #485465;border-radius:10px;width:min(600px,90vw);padding:22px;font:14px/1.5 var(--sans)} #prompt-dialog::backdrop{background:#0009} #prompt-dialog label{display:block;margin:9px 0} #prompt-dialog :is(input,textarea,select){display:block;width:100%;background:#14191f;color:inherit;padding:8px;border:1px solid #485465;border-radius:5px;font:inherit} #prompt-md{height:26vh} #prompt-dir{overflow-wrap:anywhere} #prompt-dialog button{margin-top:10px}
+    :is(#prompt-dialog,#trace-preview) {color:#dbe5f2;background:#19202a;border:1px solid #485465;border-radius:10px;width:min(600px,90vw);padding:22px;font:14px/1.5 var(--sans)} :is(#prompt-dialog,#trace-preview)::backdrop{background:#0009} :is(#prompt-dialog,#trace-preview) label{display:block;margin:9px 0} :is(#prompt-dialog,#trace-preview) :is(input,textarea,select){display:block;width:100%;background:#14191f;color:inherit;padding:8px;border:1px solid #485465;border-radius:5px;font:inherit} #prompt-md{height:26vh} #prompt-dir{overflow-wrap:anywhere} :is(#prompt-dialog,#trace-preview) button{margin-top:10px}
+    #trace-preview {max-height:85vh} #trace-preview pre,#prompt-output {white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:45vh;background:#14191f;padding:12px}
+    #trace-preview ul{padding-inline-start:20px;overflow-wrap:anywhere;max-height:15vh;overflow:auto}
+    #trace-preview h2,#prompt-dialog h2{margin-top:0}
+
     #latest-clip-trigger,#operator-hud,#reinstall-app,#prompt-hotkeys,#prompt-paste-access,#minimize-bar,#agent-trace-compact,#shell-mode-toggle{display:none!important} body.desktop #public-float{display:inline-block}
     #public-float,#public-compact,#capsule-open{display:none} body.desktop #public-compact{display:inline-block} .workbench-head .interface-sizing{margin-left:auto} .scope-contract-sub{min-width:0} .scope-contract-stats{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     html:has(body.capsule),body.capsule{background:transparent!important} body.capsule .app{display:none} body.capsule #capsule-open{display:flex;align-items:center;justify-content:center;gap:8px;width:100vw;height:100vh;overflow:hidden;background:#19202a;color:#edf0f7;border:1px solid #527188;border-radius:24px;cursor:pointer} #capsule-open .brand-mark{width:34px;height:34px} #capsule-open span{display:none} body.capsule #capsule-open:hover span{display:inline;white-space:nowrap}
+    @media (max-width: 850px) {
+      body[data-native-window-mode="window"] #systembar-dropdown .workbench-layout {
+        display:grid; grid-template-columns:minmax(0,1fr); grid-template-areas:"missions" "trace" "prompts";
+        grid-template-rows:max-content max-content max-content; overflow:auto; align-content:start;
+      }
+      body[data-native-window-mode="window"] #systembar-dropdown .mission-list-pane {height:auto; overflow:visible}
+      body[data-native-window-mode="window"] #systembar-dropdown #agent-trace-rows {flex:none; height:clamp(150px,36vh,320px); min-height:0; overflow:auto}
+      body[data-native-window-mode="window"] #systembar-dropdown .trace-focus-pane {overflow:visible; border-left:0; padding:12px 0}
+      body[data-native-window-mode="window"] #systembar-dropdown .trace-inspector-scroll {overflow:visible; flex:none}
+    }
+    #mission-pane-delete,#mission-delete {display:none !important}
     </style>
   </head>
   <body data-systembar-expanded="false" data-systembar-pinned="false" data-systembar-mode="compact" data-systembar-content="hidden" data-native-window-mode="compact" data-native-shell-mode="floating">
@@ -4121,6 +4136,7 @@
               </div>
               <div class="selected-mission-actions" aria-label="Selected mission actions">
                 <div class="selected-copy-actions">
+                  <button id="preview-scope" class="btn" type="button">Preview copy</button>
                   <button id="mission-pane-copy-capsule" class="btn primary" type="button" disabled>Copy Capsule</button>
                   <button id="mission-pane-save-reveal" class="btn" type="button" disabled>Save + Reveal</button>
                   <button id="mission-pane-copy-closeout" class="btn" type="button" disabled>Copy Closeout</button>
@@ -4145,6 +4161,7 @@
                   </div>
                   <button id="mission-pane-refresh" class="btn" type="button" title="Refresh missions">Refresh</button>
                 </div>
+                <p id="conflict-note" role="status" hidden></p>
                 <div id="mission-index-receipt" class="mission-index-receipt" role="status" aria-live="polite" aria-atomic="true"></div>
                 <div id="mission-provider-filters" class="mission-quick-filters mission-provider-filters" role="group" aria-label="Filter by agent">
                   <button type="button" data-provider-filter="all" aria-pressed="true">All agents <span class="filter-count">0</span></button>
@@ -4287,7 +4304,13 @@
         </article>
       </section>
     </main>
-    <dialog id="prompt-dialog"><h2>Manage prompts</h2><label>Prompt<select id="prompt-choose"></select></label><label>Filename (without .md)<input id="prompt-name" maxlength="80"></label><label>Markdown<textarea id="prompt-md"></textarea></label><small id="prompt-dir"></small><p id="edit-note" role="status"></p><button class="btn" id="prompt-save">Save prompt</button> <button class="btn" id="prompt-cancel">Close</button></dialog>
+    <dialog id="trace-preview" aria-labelledby="preview-heading"><h2 id="preview-heading">Copy preview</h2>
+      <p id="preview-scope-name"></p><ul id="preview-sources"></ul><p id="preview-warnings" role="status"></p>
+      <pre id="preview-text" tabindex="0"></pre>
+      <p>Browsing stays on this Mac. Pasting into an agent or granting it access can send content to its provider.</p>
+      <button class="btn primary" type="button" id="preview-copy">Copy this text</button>
+      <button class="btn" type="button" id="preview-close">Close</button></dialog>
+    <dialog id="prompt-dialog" aria-labelledby="prompt-editor-heading"><h2 id="prompt-editor-heading">Manage prompts</h2><label>Prompt<select id="prompt-choose"></select></label><label>Filename (without .md)<input id="prompt-name" maxlength="80"></label><label>Markdown<textarea id="prompt-md"></textarea></label><button class="btn" type="button" id="prompt-preview">Preview prompt text</button><pre hidden id="prompt-output" tabindex="0"></pre><small id="prompt-dir"></small><p id="edit-note" role="status"></p><button class="btn" id="prompt-save">Save prompt</button> <button class="btn" id="prompt-cancel">Close</button></dialog>
     <script src="./key.js"></script>
     <script type="module" src="./app.mjs"></script>
   </body>

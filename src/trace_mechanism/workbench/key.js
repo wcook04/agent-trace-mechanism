@@ -66,7 +66,7 @@
             if (response && response.status === 401) {
               try { sessionStorage.removeItem(STORE); } catch (_) {}
               refused('Agent Trace could not read your conversations: this page is not carrying the app key. '
-                + 'Reopen it from the launcher (or run the server with --rotate-key and use the address it prints).');
+                + 'Reopen the app or use the complete address printed by agent-trace-app.');
             }
             return response;
           });

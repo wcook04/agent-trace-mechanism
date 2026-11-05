@@ -36,7 +36,7 @@ class Handler(BaseHTTPRequestHandler):
             "Cache-Control": "no-store",
             "X-Content-Type-Options": "nosniff",
             "Referrer-Policy": "no-referrer",
-            "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+            "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'; connect-src 'self'",
             "Content-Length": str(len(body)),
         }.items():
             self.send_header(key, value)
@@ -83,10 +83,28 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/activity":
                     result = lib.activity(body)
                 elif path == "/trace":
+                    with s.refresh:
+                        lib.discover()
                     result = lib.trace(body)
+                    if body.get("preview") and s.desktop:
+                        with s.preview_lock:
+                            s.preview = (result["text_sha256"], result["text"])
                     delivery = body.get("deliver")
                     if delivery in ("copy", "save") and s.desktop:
                         result["verb"] = s.desktop[delivery](result.pop("text"))
+                elif path == "/copy-preview" and s.desktop:
+                    with s.preview_lock:
+                        if s.preview is None or s.preview[0] != body.get("sha256"):
+                            raise ValueError(
+                                "This preview expired. Open the preview again."
+                            )
+                        text = s.preview[1]
+                    result = {"verb": s.desktop["copy"](text)}
+                elif path == "/preview-prompt":
+                    raw = body.get("raw")
+                    if not isinstance(raw, str) or len(raw.encode()) > shelf.LIMIT:
+                        raise ValueError("Enter up to 1 MiB of Markdown.")
+                    result = {"text": shelf.describe("draft", raw, user=True)["body"]}
                 elif path == "/window" and s.desktop:
                     action = body.get("action")
                     if action not in s.desktop:
@@ -128,6 +146,7 @@ class Handler(BaseHTTPRequestHandler):
                     ok=True,
                     index=dict(
                         active_rows=rows,
+                        ambiguous_sessions=len(lib.conflicts),
                         inactive_rows=[],
                         generated_at=iso(time.time()),
                         operator_markers=read_markers(),
@@ -162,7 +181,14 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 return self.reply(404, {})
             return self.reply(200, result)
-        except (OSError, KeyError, ValueError, TypeError, RuntimeError) as exc:
+        except (
+            OSError,
+            KeyError,
+            ValueError,
+            TypeError,
+            RuntimeError,
+            AttributeError,
+        ) as exc:
             self.reply(400, {"ok": False, "error": str(exc)})
 
     do_GET = do_POST = route
@@ -188,6 +214,8 @@ def start():
     s.origin = "http://" + s.authority
     s.refresh = threading.Lock()
     s.shelf_lock = threading.Lock()
+    s.preview_lock = threading.Lock()
+    s.preview = None
     return s, s.origin + "/#k=" + s.token
 
 

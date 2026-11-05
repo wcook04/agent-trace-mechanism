@@ -1825,9 +1825,9 @@ function traceSourceWindowConfig(sourceWindow) {
     actionLabel: 'Response Bundle',
     receiptLabel: 'latest response bundle',
     optionLabel: 'Latest response bundle',
-    definition: 'saved latest-response capsule with app-visible thinking, tool context, bounded source excerpts, and source shard/projection refs',
+    definition: 'latest recorded turn in the selected conversation',
     intendedUse: 'default copy; closeout included when available',
-    description: 'the selected response, prompt, visible thinking, tool context, and prompt-file/read-output excerpts when available',
+    description: 'the latest recorded turn and its available messages and tool evidence; workers are excluded',
   };
 }
 
@@ -3639,7 +3639,7 @@ function paintMissionEventSignal(node, signal, now = Date.now()) {
 }
 
 function missionWorkerState(worker, now = Date.now(), sampledAt = now) {
-  if (['finished', 'interrupted', 'unavailable'].includes(worker?.state)) return worker.state;
+  if (['finished', 'interrupted', 'unavailable', 'unknown'].includes(worker?.state)) return worker.state;
   const modified = Number(worker?.source_mtime_ms || 0);
   if (!modified || now - sampledAt > 120_000) return 'unknown';
   const age = Math.max(0, now - modified);
@@ -6974,6 +6974,10 @@ async function fetchMissionIndexHttpFallback(reason = 'request', opts = {}) {
       ...(payload && typeof payload === 'object' ? payload : {}),
       http_fallback: true,
     });
+    const conflicts = Number(payload?.index?.ambiguous_sessions || 0);
+    const note = document.getElementById('conflict-note');
+    note.hidden = conflicts === 0;
+    note.textContent = conflicts ? `Duplicate history files claim ${conflicts} session ID(s). Those conversations are hidden until the duplicates are resolved.` : '';
     return Boolean(payload?.ok);
   } catch (error) {
     window.agentTraceStructurerMissionIndex({
@@ -12091,25 +12095,75 @@ try {
   }
 } catch (_) {}
 
-async function portableTrace(action, sourceWindow, closeout) {
-  const row=findMissionByKey(selectedMissionKey);
-  if(!row) return;
-  const scope=sessionTraceScopeParams(sourceWindow || selectedTraceSourceWindow());
-  const receipt=dropdownEls.missionReceipt;
-  const title=missionDisplayTitle(row);
-  const button=action==='save'?dropdownEls.missionPaneSaveReveal:closeout?dropdownEls.missionPaneCopyCloseout:dropdownEls.missionPaneCopyCapsule;
-  if(button) button.disabled=true;
-  receipt.textContent='Reading '+title+'…';
+// Modal editing and previews own keyboard input, including the system Escape shortcut.
+window.addEventListener('keydown', event => {
+  const dialog = document.querySelector('#trace-preview[open],#prompt-dialog[open]');
+  if (dialog && event.key === 'Escape') {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    dialog.close();
+  }
+}, true);
+const previewDialog = document.getElementById('trace-preview');
+const previewCopy = document.getElementById('preview-copy');
+const previewText = document.getElementById('preview-text');
+let previewCapture = null;
+document.getElementById('preview-close').onclick = () => previewDialog.close();
+previewDialog.onclose = () => { previewCapture = null; previewText.textContent = ''; };
+previewCopy.onclick = async () => {
+  if (!previewCapture) return;
+  const { result, summary } = previewCapture;
+  previewCopy.disabled = true;
   try {
-    const result=await post('/trace',{ref:row.ref,...scope,closeout,deliver:desktop?action:null});
-    const verb=result.verb || await deliver(result.text,action);
-    receipt.textContent=verb+' · '+title+' · '+result.sessions+' session(s) · '+_formatKB(result.bytes);
-    if(action==='copy') {
-      const node=dropdownEls.agentTraceRows?.querySelector('[aria-selected="true"]');
-      if(node && missionKey(row)===selectedMissionKey){node.dataset.copy='just_copied';setTimeout(()=>{if(node.dataset.copy==='just_copied')delete node.dataset.copy},15000);}
+    const verb = desktop ? (await post('/copy-preview', {sha256:result.text_sha256})).verb : await deliver(result.text, 'copy');
+    dropdownEls.missionReceipt.textContent = verb + ' · ' + summary;
+    previewDialog.close();
+  } catch (error) {
+    document.getElementById('preview-warnings').textContent = error.message;
+  } finally { previewCopy.disabled = false; }
+};
+const previewButton = document.getElementById('preview-scope');
+previewButton.onclick = () => portableTrace('preview', selectedTraceSourceWindow(), false);
+async function portableTrace(action, sourceWindow, closeout) {
+  const row = findMissionByKey(selectedMissionKey);
+  if (!row) return;
+  const scope = sessionTraceScopeParams(sourceWindow || selectedTraceSourceWindow());
+  const receipt = dropdownEls.missionReceipt;
+  const title = missionDisplayTitle(row);
+  const button = action === 'preview' ? previewButton : action === 'save' ? dropdownEls.missionPaneSaveReveal :
+    closeout ? dropdownEls.missionPaneCopyCloseout : dropdownEls.missionPaneCopyCapsule;
+  if (button) button.disabled = true;
+  receipt.textContent = 'Reading ' + title + '…';
+  try {
+    const result = await post('/trace', {ref:row.ref, ...scope, closeout, preview:action === 'preview', deliver:desktop ? action : null});
+    const scopeLabel = closeout ? 'Closeout' : scope.turns ? `Last ${scope.turns} turn(s), selected conversation only` :
+      scope.depth === 'summary' ? 'Full thread compact' : 'Full thread detailed';
+    const summary = [title, scopeLabel, result.sessions + ' session(s)', _formatKB(result.bytes), ...result.warnings].join(' · ');
+    if (action === 'preview') {
+      previewCapture = {result, summary};
+      document.getElementById('preview-scope-name').textContent = summary;
+      document.getElementById('preview-sources').replaceChildren(...result.sources.map(source => {
+        const item = document.createElement('li');
+        item.textContent = source.title + ' · ' + source.session_id + (source.parent ? ' · child of ' + source.parent : '');
+        return item;
+      }));
+      document.getElementById('preview-warnings').textContent = '';
+      previewText.textContent = result.text;
+      receipt.textContent = 'Preview ready · ' + summary;
+      previewDialog.showModal();
+      return;
     }
-  }catch(err){receipt.textContent=err.message;}
-  finally{if(button)button.disabled=false;}
+    const verb = result.verb || await deliver(result.text, action);
+    receipt.textContent = verb + ' · ' + summary;
+    if (action === 'copy') {
+      const node = dropdownEls.agentTraceRows?.querySelector('[aria-selected="true"]');
+      if (node && missionKey(row) === selectedMissionKey) {
+        node.dataset.copy = 'just_copied';
+        setTimeout(() => { if (node.dataset.copy === 'just_copied') delete node.dataset.copy; }, 15000);
+      }
+    }
+  } catch (err) { receipt.textContent = err.message; }
+  finally { if (button) button.disabled = false; }
 }
 editPrompts(fetchPromptShelfHttpFallback);
 const floatButton=document.getElementById('public-float');

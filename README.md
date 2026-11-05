@@ -2,7 +2,7 @@
 
 [![Agent Trace desktop app showing a running Codex chat, its workers and copy controls](docs/images/agent-trace.png)](docs/images/agent-trace.png)
 
-*The Agent Trace Structurer workbench is included. [Install the app or set up your prompt shelf →](docs/workbench.md)*
+*The Agent Trace Structurer Mac app is a local technical preview. [Install the app or set up your prompt shelf →](docs/workbench.md)*
 
 **Let an agent read your earlier Codex and Claude Code conversations.**
 

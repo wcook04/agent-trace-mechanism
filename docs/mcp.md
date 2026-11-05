@@ -115,3 +115,10 @@ References remain usable after source files change, but only while this server p
 ```
 
 This checks transport, search and field retrieval on existing recorded work. It does not execute the recorded command, run a model, or measure how much context an agent saves.
+
+
+Full-thread Codex context includes both native items and readable transcript
+turns when the file contains both formats. The workbench and MCP use the same
+text projection for the same selected sources and scope. Native item lookup
+and change tracking cover the native records. A mixed capture may change its
+text digest when only transcript records change.

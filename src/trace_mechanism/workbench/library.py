@@ -8,7 +8,8 @@ import threading
 import time
 
 from .. import codex_native
-from ..parser import parse_codex_session, parse_claude_session
+from ..agent_tools import captured_turns, render_codex_context
+from ..parser import _is_real_claude_prompt
 from ..setup import history_root, metadata
 from ..views import render
 
@@ -34,22 +35,24 @@ def records(path, before=None, head=False):
             row = json.loads(line)
             if isinstance(row, dict):
                 out.append((offset, row))
-        except (ValueError, UnicodeDecodeError):
+        except (ValueError, UnicodeDecodeError, RecursionError):
             pass
         offset += len(line)
     return out, start
 
 
 def summary(rows):
-    events, prompt, state, turn_ids = {}, "", "unknown", set()
+    events, prompt, state, turns = {}, "", "unknown", {}
+    current = None
     for offset, row in rows:
         p = row.get("payload") or {}
         if not isinstance(p, dict):
             continue
         typ = p.get("type", "")
         turn = p.get("turn_id")
-        if isinstance(turn, str):
-            turn_ids.add(turn)
+        if isinstance(turn, str) and turn and turn != current:
+            current = turn
+            state, prompt = "unknown", ""
         if typ in ("task_complete", "turn_aborted"):
             state = "finished" if typ == "task_complete" else "interrupted"
         elif typ in ("task_started", "user_message"):
@@ -60,14 +63,13 @@ def summary(rows):
         content = msg.get("content")
         if typ == "user_message":
             prompt = str(p.get("message") or "")[:400]
-        if row.get("type") == "user" and (
-            isinstance(content, str)
-            or isinstance(content, list)
-            and any(isinstance(b, dict) and b.get("type") == "text" for b in content)
+        if (
+            row.get("type") == "user"
+            and isinstance(row.get("message"), dict)
+            and _is_real_claude_prompt(row)
         ):
-            turn_ids.add(offset)
-            if isinstance(content, str):
-                prompt, state = content[:400], "working"
+            current, state = offset, "working"
+            prompt = content[:400] if isinstance(content, str) else ""
         bits = list(content) if isinstance(content, list) else []
         if typ in (
             "function_call",
@@ -98,10 +100,14 @@ def summary(rows):
             ):
                 continue
             token = str(kind).replace("_", "").lower()
-            if token == "agentmessage" and bit.get("phase") == "final_answer":
+            if (
+                token == "agentmessage"
+                and bit.get("phase") == "final_answer"
+                and typ == "item_completed"
+            ):
                 state = "finished"
             if token == "usermessage":
-                prompt = codex_native._message_text(bit)[:400]
+                prompt, state = codex_native._message_text(bit)[:400], "working"
             if token in ("reasoning", "usermessage", "agentmessage"):
                 continue
             key = str(
@@ -121,6 +127,26 @@ def summary(rows):
                 else "started"
             )
             args = bit.get("input")
+            if not args and isinstance(bit.get("arguments"), str):
+                try:
+                    args = json.loads(bit["arguments"])
+                except ValueError:
+                    args = {}
+            label = prev.get("label") or tool.replace("_", " ")
+            if tool == "apply_patch":
+                label = "Patch"
+            elif tool in ("Shell", "Bash", "shell", "exec_command"):
+                command = (
+                    args.get("cmd") or args.get("command")
+                    if isinstance(args, dict)
+                    else None
+                )
+                words = command.split() if isinstance(command, str) else []
+                label = (
+                    Path(words[0]).name
+                    if words
+                    else prev.get("label", "Run shell command")
+                )
             detail = (
                 Path(str(args.get("file_path") or args.get("path") or "")).name
                 if isinstance(args, dict)
@@ -135,24 +161,33 @@ def summary(rows):
                     "write": "edit",
                     "grep": "search",
                 }.get(tool.lower(), "shell"),
-                label="Run shell command"
-                if tool in ("Shell", "Bash", "exec_command")
-                else tool,
+                label=label,
                 status=status,
                 detail=detail[:120],
                 timestamp=row.get("timestamp"),
                 source_offset=prev.get("source_offset", offset),
             )
             state = "tool" if status == "started" else "working"
-        if msg.get("stop_reason") in ("end_turn", "stop_sequence"):
+        if row.get("type") == "assistant" and msg.get("stop_reason") in (
+            "end_turn",
+            "stop_sequence",
+        ):
             state = "finished"
-    return list(events.values()), prompt, state, turn_ids
+        if current is not None:
+            turns[current] = dict(
+                turn_index=turns.get(current, {}).get("turn_index", len(turns) + 1),
+                prompt_preview=prompt,
+                is_complete=state == "finished",
+                state=state,
+            )
+    return list(events.values()), prompt, state, turns
 
 
 class Library:
     def __init__(self):
         self.cache, self.entries = {}, {}
         self.lock = threading.RLock()
+        self.conflicts = set()
 
     def discover(self):
         fresh, entries = {}, {}
@@ -196,7 +231,7 @@ class Library:
                         ):
                             continue
                         rows, start = records(path)
-                        events, prompt, state, ids = summary(rows)
+                        events, prompt, state, turns = summary(rows)
                         first = (
                             summary(records(path, head=True)[0])[1] if start else prompt
                         )
@@ -240,20 +275,24 @@ class Library:
                             else None,
                             source_mtime_ms=st.st_mtime * 1000,
                             worker_state=state,
+                            parent_evidence=(
+                                "subagents_directory"
+                                if provider == "claude"
+                                else "session_metadata"
+                            )
+                            if parent
+                            else None,
                             events=events,
                             history_before=start,
                         )
                         # A partial tail does not establish the session's total turn count.
-                        if not start and ids:
-                            turn = dict(
-                                turn_index=len(ids),
-                                prompt_preview=prompt,
-                                is_complete=state == "finished",
-                            )
+                        if not start and turns:
+                            turn = list(turns.values())[-1]
                             entry["preferred_trace_turn"] = turn
-                            if state == "finished":
-                                entry["latest_completed_turn"] = turn
-                            elif state in ("working", "tool"):
+                            completed = [t for t in turns.values() if t["is_complete"]]
+                            if completed:
+                                entry["latest_completed_turn"] = completed[-1]
+                            if state in ("working", "tool"):
                                 entry["active_turn"] = turn
                     if provider == "codex" and entry["session_id"] in names:
                         entry = dict(entry, source_title=names[entry["session_id"]])
@@ -261,8 +300,20 @@ class Library:
                     entries[entry["ref"]] = entry
                 except (OSError, ValueError, TypeError):
                     continue
+        ids = set()
+        conflicts = set()
+        for entry in entries.values():
+            key = entry["provider"], entry["session_id"]
+            if key in ids:
+                conflicts.add(key)
+            ids.add(key)
+        entries = {
+            ref: e
+            for ref, e in entries.items()
+            if (e["provider"], e["session_id"]) not in conflicts
+        }
         with self.lock:
-            self.cache, self.entries = fresh, entries
+            self.cache, self.entries, self.conflicts = fresh, entries, conflicts
         return [
             dict((k, v) for k, v in e.items() if k not in ("path", "events"))
             for e in sorted(entries.values(), key=lambda e: -e["source_mtime_ms"])
@@ -270,7 +321,9 @@ class Library:
 
     def select(self, data):
         with self.lock:
-            if data.get("ref") in self.entries:
+            if "ref" in data:
+                if data["ref"] not in self.entries:
+                    raise ValueError("Session moved or is ambiguous. Refresh the list.")
                 e = self.entries[data["ref"]]
             else:
                 hits = [
@@ -293,12 +346,19 @@ class Library:
 
     def children(self, e):
         with self.lock:
-            return [
-                c
-                for c in self.entries.values()
-                if c["provider"] == e["provider"]
-                and c["thread_parent"] == e["session_id"]
-            ]
+            return sorted(
+                [
+                    c
+                    for c in self.entries.values()
+                    if c["provider"] == e["provider"]
+                    and c["thread_parent"] == e["session_id"]
+                    and (
+                        c["parent_evidence"] != "subagents_directory"
+                        or c["path"].parent.parent.parent == e["path"].parent
+                    )
+                ],
+                key=lambda c: c["session_id"],
+            )
 
     def activity(self, data):
         e = self.select(data)
@@ -313,6 +373,7 @@ class Library:
             workers.append(
                 dict(
                     id=c["session_id"],
+                    mission_key=f"{c['provider']}:{c['session_id']}",
                     label=c["agent_name"] or c["source_title"],
                     state=c["worker_state"],
                     events=c["events"][-6:],
@@ -357,56 +418,91 @@ class Library:
                             raise ValueError(
                                 "More than 64 linked sessions. Choose a recent-turn scope."
                             )
-        texts = []
+        texts, snapshots, paths, sources, warnings = [], [], {}, [], []
         for item in group:
+            if not turns and not closeout:
+                with self.lock:
+                    if any(
+                        c["provider"] == item["provider"]
+                        and c["thread_parent"] == item["session_id"]
+                        and (c["provider"], c["session_id"]) in self.conflicts
+                        for _, c in self.cache.values()
+                    ):
+                        raise ValueError(
+                            "A linked worker has conflicting history files. Resolve the duplicate before copying."
+                        )
             self.check_path(item)
             path = item["path"]
+            sid = item["session_id"]
             if metadata(path).get("id") != item["recorded_id"]:
-                raise ValueError("Source identity changed.")
-            if item["provider"] == "codex":
-                snap = codex_native.load_rollout(path, session_id=item["session_id"])
-                if snap["has_native_items"]:
-                    ids = list(dict.fromkeys(i["turn_id"] for i in snap["items"]))
-                    if turns:
-                        selected = set(ids[-turns:])
-                        snap["items"] = [
-                            i for i in snap["items"] if i["turn_id"] in selected
-                        ]
-                    if closeout:
-                        final = next(
-                            (
-                                codex_native._message_text(i["item"])
-                                for i in reversed(snap["items"])
-                                if i["kind"] == "AgentMessage"
-                                and i["item"].get("phase") == "final_answer"
-                            ),
-                            "",
-                        )
-                        if not final:
-                            raise ValueError(
-                                "No final assistant message recorded in this scope."
-                            )
-                        texts.append(final)
-                    else:
-                        texts.append(codex_native.render(snap, detail=detail))
-                    continue
-            parsed = (
-                parse_codex_session
-                if item["provider"] == "codex"
-                else parse_claude_session
-            )(path)
-            selected = parsed[-turns:] if turns else parsed
-            if closeout:
-                last = next(
-                    (t.assistant_text for t in reversed(selected) if t.assistant_text),
-                    "",
+                raise ValueError("Source identity changed. Refresh the list.")
+            sources.append(
+                dict(
+                    session_id=sid,
+                    title=item["source_title"],
+                    parent=item["thread_parent"],
+                    relationship=item["parent_evidence"],
                 )
-                if not last:
-                    raise ValueError("No assistant closeout recorded in this scope.")
-                texts.append(last)
+            )
+            if item["provider"] == "codex":
+                snapshot = codex_native.load_rollout(path, session_id=sid)
+                snapshots.append(snapshot)
+                paths[sid] = path
+                for key in (
+                    "pending_records",
+                    "malformed_records",
+                    "oversized_records",
+                    "identity_mismatches",
+                ):
+                    count = snapshot["diagnostics"][key]
+                    if count:
+                        warnings.append(f"{sid}: {count} {key.replace('_', ' ')}")
             else:
-                texts.append(render(selected, detail=detail))
-        text = "\n\n".join(texts)
+                parsed, issues = captured_turns(path, item["recorded_id"], "claude")
+                warnings.extend(
+                    f"{sid}: {count} {issue}" for issue, count in issues.items()
+                )
+                selected = parsed[-turns:] if turns else parsed
+                if closeout:
+                    answer = next(
+                        (
+                            t.assistant_text
+                            for t in reversed(selected)
+                            if t.last_stop_reason in ("end_turn", "stop_sequence")
+                            and t.assistant_text
+                        ),
+                        "",
+                    )
+                    if not answer:
+                        raise ValueError(
+                            "No completed assistant answer recorded in this scope."
+                        )
+                    texts.append(answer)
+                else:
+                    text = render(selected, detail=detail)
+                    if not text:
+                        raise ValueError(f"No readable turns for {sid}.")
+                    texts.append(f"Session: {sid}\n{text}" if len(group) > 1 else text)
+        if snapshots:
+            text, _ = render_codex_context(
+                snapshots,
+                paths,
+                detail=detail,
+                turns=turns,
+                closeout=closeout,
+                require_readable=True,
+            )
+        else:
+            text = "\n\n".join(texts)
         if not text:
             raise ValueError("No readable records in the selected scope.")
-        return dict(ok=True, text=text, bytes=len(text.encode()), sessions=len(group))
+        encoded = text.encode()
+        return dict(
+            ok=True,
+            text=text,
+            bytes=len(encoded),
+            sessions=len(group),
+            sources=sources,
+            warnings=warnings,
+            text_sha256=hashlib.sha256(encoded).hexdigest(),
+        )

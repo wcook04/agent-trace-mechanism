@@ -10,8 +10,7 @@ Open that app if the user already has it. To build it from the public source
 with Python 3.10+:
 
 ```sh
-git clone https://github.com/wcook04/agent-trace-mechanism.git
-cd agent-trace-mechanism
+# Start in the supplied candidate Git checkout containing tools/build_macos_app.py.
 python3 -m venv .venv
 .venv/bin/python -m pip install '.[desktop,mac-build]'
 .venv/bin/python tools/build_macos_app.py
@@ -46,4 +45,4 @@ copy the body. An agent can do the same job on disk:
 3. Create a new file without overwriting an existing prompt. For requested edits
    read the current file first and preserve unrelated metadata. Never write
    inside the app bundle. Press **Refresh** on the shelf and verify the title
-   and body. Removing a user override makes the bundled starter visible again.
+   and body using **Preview prompt text**. Removing a user override makes the bundled starter visible again.

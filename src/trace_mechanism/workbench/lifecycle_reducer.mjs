@@ -206,7 +206,8 @@ export function deriveMissionLifecycle(input = {}) {
   // so without this the freshest signal in the system ranked as merely recent.
   const liveSourceMs = numberOrNull(input.liveSourceMs);
   const sinceSourceSignal = liveSourceMs != null ? Math.max(0, now - liveSourceMs) : Infinity;
-  const sourceLive = sinceSourceSignal < liveActivityMs;
+  const recordedState = row.worker_state;
+  const sourceLive = sinceSourceSignal < liveActivityMs && (!recordedState || ['working', 'tool'].includes(recordedState));
   const activeTurnDormant = !liveGoal && (activeNow || staleActive) && sinceAct >= idleThresholdMs;
   const activeTurnQuiet = !liveGoal && activeNow && !activeTurnDormant && sinceAct >= liveActivityMs;
   const hasTurn = input.hasTurn != null ? Boolean(input.hasTurn) : displayTurn.turn_index != null;
@@ -299,6 +300,20 @@ export function deriveMissionLifecycle(input = {}) {
   } else if (activity === 'recent') {
     text = 'FINISHED'; cls = 'finished'; glyph = '◆';
     reason = 'recent activity; no active response in flight';
+  }
+
+  if (recordedState && !retiredCurrent && copyState.copy === 'none' && !liveGoal) {
+    if (recordedState === 'finished') {
+      text = 'FINISHED'; cls = 'finished'; glyph = '✓'; reason = 'A completed response is recorded.';
+      activity = completedRecently ? 'just_finished' : 'idle';
+    } else if (recordedState === 'interrupted' || recordedState === 'unknown') {
+      text = recordedState === 'interrupted' ? 'INTERRUPTED' : 'UNKNOWN';
+      cls = 'partial'; glyph = '·'; activity = 'idle';
+      reason = recordedState === 'interrupted' ? 'The turn was interrupted.' : 'No recent record establishes the current state.';
+    } else if (!activeNow && !sourceLive) {
+      text = 'QUIET'; cls = 'inactive'; glyph = '·'; activity = 'idle';
+      reason = 'The last observed turn has no recorded completion.';
+    }
   }
 
   return {
