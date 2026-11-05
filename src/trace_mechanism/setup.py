@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import sys
 
+from .recordings import recording_id, claude_worker
 from . import codex_native
 from .parser import parse_claude_session, parse_codex_session
 
@@ -52,9 +53,8 @@ async def verify(manifest):
             if actual != expected:
                 raise ValueError('MCP session listing differs from the selected manifest.')
             for entry in entries:
-                result = await client.call_tool('read_chat_context', {
-                    'provider': entry['provider'], 'session_id': entry['session_id'],
-                    'scope': 'full_thread_concise', 'limit': 1})
+                result = await client.call_tool('read_selected_context', {
+                    'recording_ids': [entry.get('recording_id', '')], 'scope': 'full_thread_concise', 'limit': 1})
                 if result.isError:
                     raise ValueError('A selected history could not be read. Run setup check on each selected file.')
     return {'ok': True, 'sessions_read': len(entries),
@@ -117,8 +117,17 @@ def register(paths, manifest):
     ids = [(report['provider'], report['session_id']) for report in reports]
     if any(not isinstance(sid, str) or not sid for _, sid in ids):
         raise ValueError('Each selected file needs a recorded session identity.')
-    if len(ids) != len(set(ids)):
-        raise ValueError('Select each session once.')
+    for report in reports:
+        path = Path(report['path'])
+        sid = report['session_id']
+        report['recording_id'] = recording_id(path, report['provider'], sid)
+        if report['provider'] == 'claude':
+            parent_path, label = claude_worker(path, sid)
+            if parent_path:
+                report.update(recorded_id=sid, session_id=label, parent_path=str(parent_path))
+    if len({r['recording_id'] for r in reports}) != len(reports):
+        raise ValueError('Select each recording once.')
+    selected_paths = {r['path']: r for r in reports}
     if any(report['coverage'] == 'unsupported' for report in reports):
         raise ValueError('A selected file has no supported records; run check on it first.')
     entries = []
@@ -130,7 +139,13 @@ def register(paths, manifest):
         parent = (spawn.get('parent_thread_id') if isinstance(spawn, dict) else None) or meta.get('parent_thread_id')
         entry = {'provider': report['provider'], 'session_id': report['session_id'],
                  'title': Path(report['path']).stem, 'path': report['path']}
-        if entry['provider'] == 'codex' and ('codex', parent) in ids:
+        entry['recording_id'] = report['recording_id']
+        if 'recorded_id' in report:
+            entry['recorded_id'] = report['recorded_id']
+            owner = selected_paths.get(report['parent_path'])
+            if owner and owner['session_id'] == report['recorded_id']:
+                entry['parent_session_id'] = owner['session_id']
+        if entry['provider'] == 'codex' and ids.count(('codex', parent)) == 1:
             entry['parent_session_id'] = parent
         entries.append(entry)
     parents = {entry['session_id']: entry.get('parent_session_id')

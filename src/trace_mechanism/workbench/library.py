@@ -10,7 +10,8 @@ import threading
 import time
 
 from .. import codex_native
-from ..agent_tools import captured_turns, render_codex_context
+from ..agent_tools import captured_turns, render_codex_context, selected_recording_text
+from ..recordings import recording_id, claude_worker
 from ..parser import _is_real_claude_prompt
 from ..setup import history_root, history_roots, metadata
 from ..views import render
@@ -43,7 +44,7 @@ def records(path, before=None, head=False):
     return out, start
 
 
-def summary(rows):
+def summary(rows, inspect=False):
     events, prompt, state, turns = {}, "", "unknown", {}
     current = None
     for offset, row in rows:
@@ -157,6 +158,16 @@ def summary(rows):
                     if words
                     else prev.get("label", "Run shell command")
                 )
+            command = bit.get("command") or (args.get("command") or args.get("cmd") if isinstance(args, dict) else None)
+            if isinstance(command, list):
+                if len(command) == 3 and command[1] in ("-lc", "-c"):
+                    command = command[2]
+                else:
+                    command = " ".join(str(part) for part in command)
+            if command and bit.get("native_status"):
+                words = str(command).split()
+                if words:
+                    label = Path(words[0]).name[:80]
             detail = (
                 Path(str(args.get("file_path") or args.get("path") or "")).name
                 if isinstance(args, dict)
@@ -177,6 +188,15 @@ def summary(rows):
                 timestamp=row.get("timestamp"),
                 source_offset=prev.get("source_offset", offset),
             )
+            if inspect:
+                output = bit.get("aggregated_output", bit.get("aggregatedOutput", bit.get("output", bit.get("content"))))
+                if isinstance(output, list):
+                    output = "\n".join(str(part.get("text", "")) for part in output if isinstance(part, dict) and part.get("type") == "text")
+                events[key].update(command=str(command or prev.get("command") or "")[:2048],
+                                   output=output[:4096] if isinstance(output, str) else prev.get("output", ""),
+                                   output_truncated=isinstance(output, str) and len(output) > 4096,
+                                   exit_code=bit.get("exit_code", bit.get("exitCode")),
+                                   record_offset=offset)
             state = "tool" if status == "started" else "working"
         if row.get("type") == "assistant" and msg.get("stop_reason") in (
             "end_turn",
@@ -228,12 +248,9 @@ def observe_file(path, root, st, provider):
     if provider == "claude" and "subagents" in relative.parts[1:-1]:
         # Claude workers can share the parent sessionId. Resolve the
         # enclosing session directory, including nested worker files.
-        directory = next(d for d in path.parents if d.name == "subagents")
-        owner = directory.parent
-        if owner.name == sid:
-            parent = sid
-            parent_file = owner.parent / (sid + ".jsonl")
-            sid += "/" + path.relative_to(directory).with_suffix("").as_posix()
+        parent_file, sid = claude_worker(path, recorded_id)
+        if parent_file:
+            parent = recorded_id
         else:
             unlinked = True
     if not isinstance(parent, str):
@@ -243,7 +260,7 @@ def observe_file(path, root, st, provider):
         provider="claude_code" if provider == "claude" else provider,
         session_id=sid,
         recorded_id=recorded_id,
-        ref=hashlib.sha256(f"{path}\0{recorded_id}".encode()).hexdigest(),
+        ref=recording_id(path, provider, recorded_id),
         source_file=str(relative),
         provider_archived=provider == "codex" and root.name == "archived_sessions",
         parent_file=parent_file,
@@ -284,7 +301,8 @@ def observe_file(path, root, st, provider):
 
 
 class Library:
-    def __init__(self):
+    def __init__(self, homes=None):
+        self.homes = homes or {}
         self.cache, self.entries = {}, {}
         self.lock = threading.RLock()
         self.conflicts = set()
@@ -297,7 +315,7 @@ class Library:
         fresh, entries = {}, {}
         names = {}
         discovery = {}
-        idx = history_root("codex").parent / "session_index.jsonl"
+        idx = Path(self.homes.get("codex") or history_root("codex").parent) / "session_index.jsonl"
         if idx.is_file() and not idx.is_symlink():
             try:
                 with idx.open("rb") as f:
@@ -314,6 +332,8 @@ class Library:
                 pass
         for provider in ("codex", "claude"):
             roots = [p.expanduser().absolute() for p in history_roots(provider)]
+            if self.homes.get(provider):
+                roots = [Path(self.homes[provider]) / root.name for root in roots]
             report = {
                 "root": str(roots[0]),
                 "roots": [str(p) for p in roots],
@@ -486,14 +506,14 @@ class Library:
         if before is not None and (type(before) != int or before < 0):
             raise ValueError("Invalid history offset.")
         rows, start = records(e["path"], before)
-        events, _, state, _ = summary(rows)
+        events, _, state, _ = summary(rows, inspect=True)
         children = self.children(e)
         workers = []
         for c in sorted(children, key=lambda c: -c["source_mtime_ms"])[:16]:
             workers.append(
                 dict(
                     id=c["session_id"],
-                    mission_key=f"{c['provider']}:{c['session_id']}",
+                    mission_key=f"file:{c['ref']}",
                     label=c["agent_name"]
                     or c["source_title"]
                     or c["prompt_derived_title"],
@@ -548,10 +568,12 @@ class Library:
 
     def capture_options(self, data):
         group, gaps = self.capture_graph(self.select(data))
+        related = {e["ref"] for e in group}
+        others = [e for ref, e in self.entries.items() if ref not in related]
         return {
             "sources": [
                 dict(
-                    ref=e["ref"],
+                    ref=e["ref"], related=e["ref"] in related, provider=e["provider"],
                     session_id=e["session_id"],
                     parent=e["thread_parent"],
                     source_file=e["source_file"],
@@ -561,7 +583,7 @@ class Library:
                     modified=e["mtime_utc"],
                     readable=e["size_bytes"] <= codex_native.MAX_SOURCE_BYTES,
                 )
-                for e in group
+                for e in [*group, *others]
             ],
             "unavailable": gaps,
             "limit": 64,
@@ -578,6 +600,7 @@ class Library:
         group, gaps = (
             ([e], {}) if turns or closeout or tail_only else self.capture_graph(e)
         )
+        related_refs = {r["ref"] for r in group}
         total = len(group)
         chosen = data.get("selected_refs")
         if chosen is not None:
@@ -593,10 +616,10 @@ class Library:
             if (
                 not requested
                 or len(requested) != len(chosen)
-                or not requested <= {c["ref"] for c in group}
+                or not requested <= self.entries.keys()
             ):
                 raise ValueError("Selection changed. Choose the conversations again.")
-            group = [c for c in group if c["ref"] in requested]
+            group = [self.entries[ref] for ref in chosen]
         elif gaps:
             raise ValueError(
                 "A linked worker is unavailable or has conflicting history files. Use Choose sessions to capture the available sources."
@@ -613,26 +636,17 @@ class Library:
                 "A capture supports 64 sessions and 256 MiB of input in total. Use Choose sessions or preview recent activity."
             )
         texts, snapshots, paths, sources, warnings = [], [], {}, [], []
-        unknown_coverage = False
-        if not (turns or closeout or tail_only):
-            report = self.discovery.get(
-                "claude" if e["provider"] == "claude_code" else "codex", {}
-            )
-            unknown_coverage = bool(
-                report.get("unreadable")
-                or report.get("unsupported")
-                or report.get("unlinked")
-            )
-            if unknown_coverage:
-                warnings.append(
-                    "Some recordings could not be identified; their relationships are unknown."
-                )
+        excluded = len(related_refs - {item["ref"] for item in group})
+        provider_health = {provider: {key: report[key] for key in ("unreadable", "unsupported", "unlinked")}
+                           for provider, report in self.discovery.items()}
         for item in group:
             self.check_path(item)
             path = item["path"]
             sid = item["session_id"]
             st = stats[path]
-            if metadata(path).get("id") != item["recorded_id"]:
+            provider = "codex" if item["provider"] == "codex" else "claude"
+            if (recording_id(path, provider, item["recorded_id"]) != item["ref"]
+                or metadata(path).get("id") != item["recorded_id"]):
                 raise ValueError("Source identity changed. Refresh the list.")
             sources.append(
                 dict(
@@ -645,9 +659,14 @@ class Library:
                     parent=item["thread_parent"],
                     relationship=item["parent_evidence"],
                     modified=iso(st.st_mtime),
+                    version=dict(size=st.st_size, mtime_ns=str(st.st_mtime_ns)),
                 )
             )
-            if tail_only:
+            if chosen is not None:
+                piece, issues = selected_recording_text(path, provider, item["recorded_id"], sid, detail, len(group) > 1)
+                texts.append(piece)
+                warnings.extend(f"{sid}: {issue}" for issue in issues)
+            elif tail_only:
                 rows, start = records(path)
                 events, prompt, state, _ = summary(rows)
                 lines = [
@@ -733,9 +752,9 @@ class Library:
                 )
         if chosen is not None:
             warnings.extend(f"{sid}: {reason}" for sid, reason in gaps.items())
-            if total > len(group):
+            if excluded:
                 warnings.append(
-                    f"{total - len(group)} discovered session(s) excluded by selection"
+                    f"{excluded} related recording(s) excluded by selection"
                 )
         encoded = text.encode()
         return dict(
@@ -747,14 +766,13 @@ class Library:
             coverage=dict(
                 selected=len(group),
                 discovered=total,
-                excluded=total - len(group),
-                relationships="unknown"
-                if unknown_coverage
-                else "known_gaps"
-                if gaps
-                else "discovered",
-                scope="source" if turns or closeout or tail_only else "tree",
+                excluded=excluded,
+                relationships="known_gaps" if gaps else "discovered",
+                scope="explicit" if chosen is not None else "source" if turns or closeout or tail_only else "tree",
             ),
+            discovery_health=provider_health,
+            rendering="activity excerpt" if tail_only else "compact" if not detail else "detailed",
+            consistency="selected_versions_checked",
             unavailable=gaps,
             captured_at=iso(time.time()),
             sources=sources,

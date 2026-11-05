@@ -3999,7 +3999,9 @@
       body[data-native-window-mode="window"] #systembar-dropdown .trace-inspector-scroll {overflow:visible; flex:none}
     }
     #mission-pane-delete,#mission-delete {display:none !important}
-    #source-options {max-height:46vh;overflow:auto} #source-options label{display:flex;gap:8px;align-items:baseline;overflow-wrap:anywhere} #source-options input[type=checkbox]{width:auto}
+    #folder-settings {font-size:12px;color:#b2c2d2;margin:4px 0} #history-folder-form {display:grid;gap:6px} #history-folder-form input {width:65%}
+    #event-inspection {white-space:pre-wrap;overflow-wrap:anywhere;max-height:14em;overflow:auto;font-size:12px;margin:8px 0 0;padding:10px;background:#121820;border:1px solid #344151;border-radius:6px;color:#dce4ef}
+    #source-options {max-height:46vh;overflow:auto} #source-options label[hidden]{display:none} #source-options label{display:flex;gap:8px;align-items:baseline;overflow-wrap:anywhere} #source-options input[type=checkbox]{width:auto}
     #source-options small,#history-roots {color:#aebdcb;overflow-wrap:anywhere} #history-help {font-size:13px;padding:10px;border:1px solid #344151;border-radius:8px} #history-help p {margin:5px 0}
     </style>
   </head>
@@ -4102,6 +4104,7 @@
                 <div class="mission-activity-head"><span>Parent activity</span><div class="activity-history-controls"><button id="mission-activity-earlier" type="button" class="btn small" disabled>← Earlier</button><button id="mission-activity-latest" type="button" class="btn small">Latest →</button></div><span id="mission-activity-state"></span></div>
                 <div id="mission-activity-tiles" class="mission-activity-tiles" role="group" aria-label="Activity history" tabindex="0"></div>
                 <div class="mission-activity-footer"><div id="mission-activity-command"></div><div id="mission-activity-caption"></div></div>
+                <pre id="event-inspection" hidden aria-live="polite"></pre>
               </div>
               <section id="mission-team" class="mission-team" aria-label="Subagent activity" hidden>
                 <div class="team-heading"><strong>Subagents</strong><span id="mission-team-count"></span><span id="mission-team-state"></span><span id="mission-team-note" hidden></span></div>
@@ -4166,7 +4169,15 @@
                   </div>
                   <button id="mission-pane-refresh" class="btn" type="button" title="Refresh missions">Refresh</button>
                 </div>
-                <div id="history-help" hidden><strong>Find your conversations</strong><p>Missions are recorded conversations and agent runs. Start a local Codex or Claude Code conversation, then refresh. Agent Trace looks in these folders.</p><ul id="history-roots"></ul><details><summary>Using a different folder?</summary><p>Launch with CODEX_HOME or CLAUDE_CONFIG_DIR set to your provider’s configuration directory. Agent Trace looks for sessions, archived_sessions or projects inside it. Browsing here does not grant an agent access.</p></details></div>
+                <details id="folder-settings"><summary>History folders</summary>
+                  <p>Choose the configuration folder containing Codex sessions or Claude projects. Leave it blank to use the default.</p>
+                  <form id="history-folder-form">
+                    <label>Codex home <input id="codex-home" placeholder="~/.codex"></label><button type="button" data-pick-folder="codex" hidden>Browse…</button>
+                    <label>Claude Code home <input id="claude-home" placeholder="~/.claude"></label><button type="button" data-pick-folder="claude" hidden>Browse…</button>
+                    <button type="submit">Save folders</button><span id="folder-status" role="status"></span>
+                  </form>
+                </details>
+                <div id="history-help" hidden><strong>Find your conversations</strong><p>Missions are recorded conversations and agent runs. Start a local Codex or Claude Code conversation, then refresh. Agent Trace looks in these folders.</p><ul id="history-roots"></ul></div>
                 <p id="conflict-note" role="status" hidden></p>
                 <div id="mission-index-receipt" class="mission-index-receipt" role="status" aria-live="polite" aria-atomic="true"></div>
                 <div id="mission-provider-filters" class="mission-quick-filters mission-provider-filters" role="group" aria-label="Filter by agent">
@@ -4311,7 +4322,7 @@
       </section>
     </main>
     <dialog id="source-dialog" aria-labelledby="source-heading"><h2 id="source-heading">Choose sessions</h2>
-      <p id="source-note"></p><div id="source-options"></div><p id="source-status" role="status"></p>
+      <p id="source-note"></p><label>Find a recording <input type="search" id="source-search" placeholder="Title or filename"></label><div id="source-options"></div><p id="source-status" role="status"></p>
       <button class="btn" id="source-preview">Preview selection</button> <button class="btn" id="source-tail">Preview recent activity</button> <button class="btn" id="source-close">Close</button></dialog>
     <dialog id="editor-confirm" aria-labelledby="editor-question"><p id="editor-question"></p><button class="btn" id="editor-keep">Keep editing</button> <button class="btn" id="editor-accept"></button></dialog>
     <dialog id="trace-preview" aria-labelledby="preview-heading"><h2 id="preview-heading">Copy preview</h2>

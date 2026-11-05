@@ -46,7 +46,7 @@ class MCPTransportTests(unittest.IsolatedAsyncioTestCase):
                     await client.initialize()
                     listed = await client.list_tools()
                     self.assertEqual({t.name for t in listed.tools},
-                                     {'search_trace_threads', 'read_chat_context', 'read_trace_page',
+                                     {'search_trace_threads', 'read_chat_context', 'read_selected_context', 'read_trace_page',
                                       'search_trace_items', 'read_trace_item', 'read_trace_changes'})
 
                     async def call(name, args):

@@ -8,6 +8,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.types import CallToolResult, TextContent
 
 from .agent_tools import AgentTools
+from .recordings import recording_id, claude_worker
 
 
 def load_manifest(path: Path) -> list[dict]:
@@ -21,7 +22,7 @@ def load_manifest(path: Path) -> list[dict]:
     for row in rows:
         if not isinstance(row, dict) or any(not isinstance(row.get(k), str) or not row[k] for k in ('provider', 'session_id', 'title', 'path')):
             raise ValueError('Each entry requires nonempty provider, session_id, title and path strings.')
-        identity = (row['provider'], row['session_id'])
+        identity = (row['provider'], row.get('recording_id') or row['session_id'])
         if row['provider'] not in ('codex', 'claude') or identity in identities:
             raise ValueError('Provider must be codex or claude and each provider/session ID must be unique.')
         source = Path(row['path'])
@@ -40,6 +41,12 @@ def load_manifest(path: Path) -> list[dict]:
             except OSError:
                 available = False
                 unavailable_reason = 'source_unreadable'
+        if available:
+            physical = recording_id(source, row['provider'], row.get('recorded_id', row['session_id']))
+            if row.get('recording_id', physical) != physical:
+                available, unavailable_reason = False, 'registered_file_replaced'
+            else:
+                row['recording_id'] = physical
         identities.add(identity)
         entries.append({**row, 'path': source, 'source_available': available,
                         'source_unavailable_reason': unavailable_reason})
@@ -50,10 +57,15 @@ def load_manifest(path: Path) -> list[dict]:
             continue
         if not isinstance(parent, str) or not parent:
             raise ValueError('parent_session_id must be a nonempty string.')
-        if row['provider'] != 'codex' or ('codex', parent) not in by_id or parent == row['session_id']:
+        if sum(r['provider'] == row['provider'] and r['session_id'] == parent for r in entries) != 1 or parent == row['session_id']:
             raise ValueError('A parent must identify another registered Codex session.')
         row['parent_edge_verified'] = False
-        if row['source_available']:
+        if row['provider'] == 'claude':
+            owner, label = claude_worker(row['path'], row.get('recorded_id', row['session_id']))
+            if owner != by_id['claude', parent]['path'] or label != row['session_id'] or parent != row.get('recorded_id'):
+                raise ValueError('Claude worker link does not match the registered parent and recording.')
+            row['parent_edge_verified'] = row['source_available']
+        elif row['source_available']:
             observed = None
             try:
                 with row['path'].open(encoding='utf-8') as stream:
@@ -83,7 +95,7 @@ def load_manifest(path: Path) -> list[dict]:
             if cursor in visited:
                 raise ValueError('Session parent relationships contain a cycle.')
             visited.add(cursor)
-            ancestor = by_id.get(('codex', cursor))
+            ancestor = by_id.get((row['provider'], cursor))
             if ancestor is None:
                 raise ValueError('Every ancestor must be explicitly registered.')
             cursor = ancestor.get('parent_session_id')
@@ -110,6 +122,12 @@ def create_server(entries: list[dict], entry_loader=None) -> FastMCP:
                           include_children: bool = False) -> CallToolResult:
         """Read compact or detailed context and return the first page of a stable snapshot."""
         data = tools.read_chat_context(provider, session_id, scope, limit, include_children)
+        return CallToolResult(content=[TextContent(type='text', text=data['text'])], structuredContent=data)
+
+    @server.tool()
+    def read_selected_context(recording_ids: list[str], scope: str = 'full_thread', limit: int = 24000) -> CallToolResult:
+        """Read precisely these registered recording IDs in order. Get IDs from search_trace_threads."""
+        data = tools.read_selected_context(recording_ids, scope, limit)
         return CallToolResult(content=[TextContent(type='text', text=data['text'])], structuredContent=data)
 
     @server.tool()

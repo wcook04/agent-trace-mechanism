@@ -14,6 +14,7 @@ from urllib.parse import urlsplit, parse_qs, unquote
 import webbrowser
 from . import shelf
 from .library import Library
+from ..agent_tools import SnapshotStore
 
 ASSETS = {
     "/": "index.html",
@@ -91,19 +92,17 @@ class Handler(BaseHTTPRequestHandler):
                         lib.discover()
                     result = lib.trace(body)
                     if body.get("preview") and s.desktop:
-                        with s.preview_lock:
-                            s.preview = (result["text_sha256"], result["text"])
+                        handle = secrets.token_urlsafe(24)
+                        s.previews[handle] = result
+                        result["preview_handle"] = handle
                     delivery = body.get("deliver")
                     if delivery in ("copy", "save") and s.desktop:
                         result["verb"] = s.desktop[delivery](result.pop("text"))
                 elif path == "/copy-preview" and s.desktop:
-                    with s.preview_lock:
-                        if s.preview is None or s.preview[0] != body.get("sha256"):
-                            raise ValueError(
-                                "This preview expired. Open the preview again."
-                            )
-                        text = s.preview[1]
-                    result = {"verb": s.desktop["copy"](text)}
+                    capture = s.previews.get(body.get("preview_handle"))
+                    if capture is None or capture["text_sha256"] != body.get("sha256"):
+                        raise ValueError("This preview expired. Open the preview again.")
+                    result = {"verb": s.desktop["copy"](capture["text"])}
                 elif path == "/preview-prompt":
                     raw = body.get("raw")
                     if not isinstance(raw, str) or len(raw.encode()) > shelf.LIMIT:
@@ -114,6 +113,22 @@ class Handler(BaseHTTPRequestHandler):
                     if action not in s.desktop:
                         raise ValueError("Unknown window action.")
                     result = {"value": s.desktop[action](body.get("value"))}
+                elif path == "/history-folders":
+                    homes = {}
+                    for provider in ("codex", "claude"):
+                        value = body.get(provider, "")
+                        if not isinstance(value, str):
+                            raise ValueError("Enter an absolute provider home directory.")
+                        if value.strip():
+                            folder = Path(value.strip()).expanduser()
+                            if not folder.is_absolute() or not folder.is_dir():
+                                raise ValueError(f"The {provider} home must be an existing absolute directory.")
+                            homes[provider] = str(folder.resolve())
+                    with s.refresh:
+                        save_settings(marker_path().with_name("history-folders.json"), homes)
+                        s.library = Library(homes)
+                        s.folder_notice = ""
+                    result = {"ok": True}
                 elif path == "/marker":
                     with s.shelf_lock:
                         markers = read_markers(s, writing=True)
@@ -130,13 +145,7 @@ class Handler(BaseHTTPRequestHandler):
                             markers.pop(key, None)
                         else:
                             markers[key] = body
-                        folder = marker_path().parent
-                        folder.mkdir(mode=0o700, parents=True, exist_ok=True)
-                        with tempfile.NamedTemporaryFile(
-                            mode="w", dir=folder, delete=False
-                        ) as f:
-                            json.dump(markers, f)
-                        os.replace(f.name, marker_path())
+                        save_settings(marker_path(), markers)
                     result = {"ok": True}
                 elif path == "/remove-prompt":
                     with s.shelf_lock:
@@ -155,10 +164,20 @@ class Handler(BaseHTTPRequestHandler):
                 with s.shelf_lock:
                     markers = read_markers(s)
                     notice = s.marker_notice
+                    changed = False
+                    for row in rows:
+                        key = "file:" + row["ref"]
+                        old = f"{row['provider']}:{row['session_id']}"
+                        if not row["ambiguous"] and old in markers and key not in markers:
+                            markers[key] = dict(markers.pop(old), mission_key=key)
+                            changed = True
+                    if changed:
+                        save_settings(marker_path(), markers)
                 result = dict(
                     ok=True,
                     index=dict(
-                        marker_notice=notice,
+                        marker_notice=notice or s.folder_notice,
+                        folder_settings=lib.homes,
                         discovery=discovery,
                         active_rows=rows,
                         ambiguous_sessions=conflicts,
@@ -213,6 +232,15 @@ def marker_path():
     return Path.home() / ".agent-trace" / "mission-markers.json"
 
 
+def save_settings(path, values):
+    if path.parent.is_symlink() or path.is_symlink():
+        raise ValueError("Settings location is a symbolic link.")
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as stream:
+        json.dump(values, stream)
+    os.replace(stream.name, path)
+
+
 def read_markers(server, writing=False):
     path = marker_path()
     server.marker_notice = ""
@@ -241,7 +269,20 @@ def read_markers(server, writing=False):
 
 def start():
     s = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-    s.library = Library()
+    path = marker_path().with_name("history-folders.json")
+    s.folder_notice = ""
+    try:
+        if path.is_symlink() or path.parent.is_symlink():
+            raise ValueError("Settings path is a symbolic link.")
+        homes = json.loads(path.read_text())
+        if not isinstance(homes, dict) or any(k not in ("codex", "claude") or not isinstance(v, str) or not Path(v).is_absolute() for k, v in homes.items()):
+            raise ValueError("Invalid provider directories.")
+    except FileNotFoundError:
+        homes = {}
+    except (OSError, ValueError, RecursionError):
+        homes = {}
+        s.folder_notice = "Saved history folders could not be read. Open History folders to choose them again."
+    s.library = Library(homes)
     s.marker_notice = ""
     s.desktop = None
     s.token = secrets.token_urlsafe(32)
@@ -249,8 +290,7 @@ def start():
     s.origin = "http://" + s.authority
     s.refresh = threading.Lock()
     s.shelf_lock = threading.Lock()
-    s.preview_lock = threading.Lock()
-    s.preview = None
+    s.previews = SnapshotStore(max_count=16)
     return s, s.origin + "/#k=" + s.token
 
 

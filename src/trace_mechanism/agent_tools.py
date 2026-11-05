@@ -1,5 +1,8 @@
 """Explicit-file access to captured records, immutable views and bounded changes."""
+from collections import OrderedDict
 from contextlib import contextmanager
+from threading import RLock
+from .recordings import fixed_selection, recording_id, file_version
 import copy
 import hashlib
 import io
@@ -136,14 +139,66 @@ def render_codex_context(snapshots, paths, *, detail, turns=0, closeout=False, r
     return '\n\n'.join(blocks), mode
 
 
+def selected_recording_text(path, provider, sid, label, detail, multiple):
+    """Render one explicitly chosen file. Never resolve a sibling by its session ID."""
+    issues = []
+    if provider == 'codex':
+        snapshot = native.load_rollout(path, session_id=sid)
+        text, _ = render_codex_context([snapshot], {sid: path}, detail=detail, require_readable=True)
+        issues = [f'{name}: {count}' for name, count in snapshot['diagnostics'].items()
+                  if count and name in ('pending_records', 'malformed_records', 'oversized_records', 'identity_mismatches')]
+    else:
+        turns, warnings, _ = captured_turns(path, sid, 'claude')
+        text = render(turns, detail=detail)
+        issues = [f'{name}: {count}' for name, count in warnings.items()]
+    if not text:
+        raise ValueError(f'No readable content in {label}.')
+    return (f'Session: {label}\n{text}' if multiple else text), issues
+
+
+class SnapshotStore:
+    """FIFO immutable captures with an exact serialized payload budget."""
+    def __init__(self, max_count=32, max_bytes=64 << 20):
+        self.items = OrderedDict()
+        self.max_count, self.max_bytes = max_count, max_bytes
+        self.size = 0
+        self.lock = RLock()
+
+    def __setitem__(self, key, value):
+        with self.lock:
+            if key in self.items:
+                return
+            blob = json.dumps(value, separators=(',', ':'), ensure_ascii=False).encode()
+            if len(blob) > self.max_bytes:
+                raise ValueError('Capture exceeds the snapshot retention budget. Choose a smaller scope.')
+            while self.items and (len(self.items) >= self.max_count or self.size + len(blob) > self.max_bytes):
+                self.size -= len(self.items.popitem(last=False)[1])
+            self.items[key] = blob
+            self.size += len(blob)
+
+    def get(self, key):
+        with self.lock:
+            blob = self.items.get(key)
+        return json.loads(blob) if blob is not None else None
+
+    def __contains__(self, key):
+        return key in self.items
+
+    def __getitem__(self, key):
+        value = self.get(key)
+        if value is None:
+            raise ValueError('Snapshot expired. Capture the selected recordings again.')
+        return value
+
+
 class AgentTools:
     def __init__(self, entries, entry_loader=None):
         self.entries = list(entries)
         self.entry_loader = entry_loader
-        self.snapshots = {}
-        self.native_snapshots = {}
-        self.native_items = {}
-        self.delta_snapshots = {}
+        self.snapshots = SnapshotStore()
+        self.native_snapshots = SnapshotStore()
+        self.native_items = SnapshotStore()
+        self.delta_snapshots = SnapshotStore()
 
     def _refresh_entries(self):
         if self.entry_loader is None:
@@ -160,16 +215,46 @@ class AgentTools:
 
     def _entry(self, provider, session_id):
         rows = [r for r in self.entries if (r['provider'], r['session_id']) == (provider, session_id)]
-        if len(rows) != 1 or provider not in ('codex', 'claude'):
-            raise ValueError('Choose one registered provider and session ID.')
+        recorded_matches = [r for r in self.entries if r['provider'] == provider and r.get('recorded_id', r['session_id']) == session_id]
+        if len(rows) != 1 or len(recorded_matches) > 1 or provider not in ('codex', 'claude'):
+            raise ValueError('Choose one registered provider and session ID. For overlapping IDs use read_selected_context with recording IDs from search_trace_threads.')
+        if rows[0].get('source_unavailable_reason') == 'registered_file_replaced':
+            raise ValueError('Registered file replaced. Register the intended file again.')
         return rows[0]
 
     def search_trace_threads(self, query):
         self._refresh_entries()
         terms = query.casefold().split()
-        return [{key: row[key] for key in ('provider', 'session_id', 'title')}
+        return [{key: row[key] for key in ('provider', 'session_id', 'title', 'recording_id', 'recorded_id', 'parent_session_id') if key in row}
                 for row in self.entries if all(term in
                 f"{row['provider']} {row['session_id']} {row['title']}".casefold() for term in terms)]
+
+    def read_selected_context(self, recording_ids, scope='full_thread', limit=24000):
+        _integer(limit, 'limit', 1, 48000)
+        if (scope not in ('full_thread', 'full_thread_concise') or not isinstance(recording_ids, list)
+                or not 1 <= len(recording_ids) <= 64 or not all(isinstance(x, str) for x in recording_ids)
+                or len(set(recording_ids)) != len(recording_ids)):
+            raise ValueError('Choose up to 64 distinct registered recording IDs and a valid scope.')
+        self._refresh_entries()
+        allowed = {r.get('recording_id'): r for r in self.entries}
+        if any(ref not in allowed or allowed[ref].get('source_available') is False for ref in recording_ids):
+            raise ValueError('A selected recording is unregistered or unavailable.')
+        rows = [allowed[ref] for ref in recording_ids]
+        pieces, warnings = [], []
+        with fixed_selection([r['path'] for r in rows]) as versions:
+            for r in rows:
+                sid = r.get('recorded_id', r['session_id'])
+                if recording_id(r['path'], r['provider'], sid) != r['recording_id']:
+                    raise ValueError('Selected recording changed. Register the intended file again.')
+                piece, issues = selected_recording_text(r['path'], r['provider'], sid, r['session_id'],
+                                                       scope == 'full_thread', len(rows) > 1)
+                pieces.append(piece)
+                warnings.extend(issues)
+        text = '\n\n'.join(pieces)
+        digest = hashlib.sha256(text.encode()).hexdigest()
+        self.snapshots[digest] = text
+        return {**self.read_trace_page(digest, 0, limit), 'recording_ids': recording_ids, 'warnings': warnings,
+                'source_versions': [versions[r['path']] for r in rows], 'consistency': 'selected_versions_checked'}
 
     def _remember_bundle(self, bundle):
         # Filesystem locations and platform-specific errors do not define records.
@@ -179,7 +264,8 @@ class AgentTools:
                                 for s in bundle['sessions']]
         digest = _digest(identity)
         self.native_snapshots[digest] = bundle
-        self.native_items.update({s['sha256']: s for s in bundle['sessions']})
+        for session in bundle['sessions']:
+            self.native_items[session['sha256']] = session
         return digest, bundle
 
     def _capture(self, provider, session_id, include_children=False):
@@ -199,6 +285,18 @@ class AgentTools:
                         seen.add(child['session_id'])
                         if len(selected) > 64:
                             raise ValueError('Select a tree of at most 64 sessions.')
+        if any(sum(r['provider'] == provider and r['session_id'] == selected_row['session_id'] for r in self.entries) != 1 for selected_row in selected):
+            raise ValueError('Tree has ambiguous sessions. Use read_selected_context with explicit recording IDs.')
+        initial = {}
+        for row in selected:
+            if row.get('source_available') is False:
+                continue
+            try:
+                initial[row['path']] = file_version(row['path'])
+            except OSError:
+                continue  # The availability receipt below identifies unavailable children.
+        if sum(v[2] for v in initial.values()) > native.MAX_SOURCE_BYTES:
+            raise ValueError('Choose a tree with at most 256 MiB of source data.')
         sessions, availability = [], []
         for row in selected:
             if row is not root and row.get('source_available') is False:
@@ -219,6 +317,9 @@ class AgentTools:
         edges = [{'parent': r['parent_session_id'], 'child': r['session_id'],
                   'recorded': bool(r.get('parent_edge_verified', False))}
                  for r in selected if r.get('parent_session_id') in seen]
+        for path, version in initial.items():
+            if file_version(path) != version:
+                raise ValueError('A registered source changed during capture. Try again.')
         return self._remember_bundle({'schema': 'native_trace_bundle_v2', 'root_session_id': session_id,
             'include_children': include_children, 'sessions': sessions, 'edges': edges, 'availability': availability})
 
@@ -247,7 +348,7 @@ class AgentTools:
                     'native_sessions': [s['session_id'] for s in bundle['sessions'] if s['has_native_items']],
                     'legacy_sessions': [s['session_id'] for s in bundle['sessions'] if not s['has_native_items']],
                     'changes_track': 'native_items_only'},
-                'consistency': 'assembled_sequentially', 'snapshot_lifetime': 'server_process'}
+                'consistency': 'assembled_sequentially', 'snapshot_lifetime': 'bounded_process_cache'}
 
     def search_trace_items(self, provider, session_id, query='', kind='', failures_only=False,
                            include_children=False, snapshot_sha256='', limit=20, offset=0):
@@ -284,7 +385,7 @@ class AgentTools:
             if bundle is None:
                 snapshot = self.native_items.get(snapshot_sha256)
                 if snapshot is None:
-                    raise ValueError('Unknown native snapshot.')
+                    raise ValueError('Unknown or expired native snapshot.')
                 bundle, kind = {'sessions': [snapshot]}, 'native_core'
             else:
                 kind = 'native_bundle'
@@ -365,11 +466,14 @@ class AgentTools:
                 if bundle['sessions'][0]['has_native_items']:
                     metadata['native_snapshot_sha256'] = bundle['sessions'][0]['sha256']
         else:
-            if include_children:
-                raise ValueError('Registered child traversal currently requires Codex records.')
             self._refresh_entries()
             row = self._entry(provider, session_id)
-            parsed, warnings, _ = captured_turns(row['path'], session_id, provider)
+            if include_children:
+                group = [row, *sorted((r for r in self.entries if r['provider'] == provider and
+                    r.get('parent_session_id') == session_id), key=lambda r: r['session_id'])]
+                if all(r.get('recording_id') for r in group):
+                    return self.read_selected_context([r['recording_id'] for r in group], scope, limit)
+            parsed, warnings, _ = captured_turns(row['path'], row.get('recorded_id', session_id), provider)
             text = render(parsed, detail=scope == 'full_thread')
             if warnings:
                 metadata['record_warnings'] = warnings
@@ -382,7 +486,7 @@ class AgentTools:
         _integer(offset, 'offset', 0, 268435456)
         _integer(limit, 'limit', 1, 48000)
         if sha256 not in self.snapshots:
-            raise ValueError('Unknown text snapshot. Use text_sha256 from read_chat_context.')
+            raise ValueError('Unknown or expired text snapshot. Use text_sha256 from read_chat_context.')
         text = self.snapshots[sha256]
         if offset > len(text):
             raise ValueError('Offset is beyond the snapshot.')

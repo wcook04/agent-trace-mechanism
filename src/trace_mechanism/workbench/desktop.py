@@ -94,6 +94,10 @@ def launch():
             NSOperationQueue.mainQueue().addOperationWithBlock_(apply)
             return mode
 
+        def folder(self, _):
+            selected = window.create_file_dialog(webview.FileDialog.FOLDER)
+            return selected[0] if selected else ""
+
         def floating(self, enabled):
             window.on_top = bool(enabled)
             return window.on_top
@@ -101,6 +105,7 @@ def launch():
     bridge = Native()
     server.desktop = {
         "copy": bridge.copy,
+        "folder": bridge.folder,
         "save": bridge.save,
         "floating": bridge.floating,
         "capsule": bridge.capsule,

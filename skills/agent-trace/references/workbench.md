@@ -25,8 +25,8 @@ On Windows use `.venv\Scripts\python.exe` and `.venv\Scripts\agent-trace-app.exe
 On macOS `agent-trace-app --desktop` also opens the native window when the
 desktop extra is installed. Stop browser mode with Ctrl+C.
 
-Start the user's chosen provider and make a chat if the list is empty. Agent
-Trace reads Codex from `$CODEX_HOME/sessions` or `~/.codex/sessions`, Claude
+Use History folders to choose a custom provider home, or start the chosen provider and make a chat if the list is empty. Agent
+Trace reads Codex from `$CODEX_HOME/sessions` and `$CODEX_HOME/archived_sessions` (default home `~/.codex`), Claude
 Code from `$CLAUDE_CONFIG_DIR/projects` or `~/.claude/projects`. Test a listed
 session with the requested scope and copy action. The app never registers these
 files with MCP. Use the separate setup guide only when agent access is wanted.

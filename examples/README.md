@@ -1,6 +1,8 @@
 # Example records
 
-Start with the current MCP examples. They contain selected records from real work;
+For the interactive README walkthrough, choose [checkout-review](checkout-review) as the Codex home. Its three synthetic recordings capture a failing rounding assertion, a correction and a successful retry.
+
+The current MCP examples follow. They contain selected records from real work;
 their provenance files describe what was retained or omitted. The inspection
 commands read these records without executing the commands recorded inside them.
 

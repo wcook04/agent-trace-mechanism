@@ -9,6 +9,7 @@ The MCP server loads an explicit manifest, then passes requests to the retrieval
 | Source | Responsibility |
 |---|---|
 | [codex_native.py](../src/trace_mechanism/codex_native.py) | Read events, normalize items, render views, search fields and compare states |
+| [recordings.py](../src/trace_mechanism/recordings.py) | Identify physical recordings and verify selected file versions |
 | [agent_tools.py](../src/trace_mechanism/agent_tools.py) | Select sessions and children, save captures and serve pages |
 | [mcp_server.py](../src/trace_mechanism/mcp_server.py) | Load the manifest, define tools and run stdio transport |
 

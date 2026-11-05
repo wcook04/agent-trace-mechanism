@@ -17,6 +17,8 @@ public package supplies the reader, MCP server and [workbench](workbench.md).
 Custom Codex and Claude configuration directories are supported. Registration
 writes absolute source paths and does not change host settings.
 
+Use `search_trace_threads` to find recording IDs. Pass the IDs in preview order to `read_selected_context(recording_ids=[...], scope="full_thread")` to reproduce a detailed explicit selection. This works across providers and with Claude workers sharing their parent’s recorded session ID. Only registered files are eligible. Each registration binds the file on this machine; replacing or relocating it can require a new manifest. Existing manifests that identify a unique chat by provider and session ID still work.
+
 ### Connect Codex
 
 [Verify the server and connect your host](../skills/agent-trace/references/install.md#verify-and-connect).
@@ -51,6 +53,7 @@ A child entry includes `parent_session_id`. The server verifies it against the c
 
 | Tool | Selection and result |
 |---|---|
+| `read_selected_context` | Ordered list of explicitly registered recording IDs → compact or detailed text, source versions, and a digest for pagination |
 | `search_trace_threads` | Title or ID terms → matching registered sessions |
 | `search_trace_items` | Root, optional children, literal query, optional kind/failure filter → paged item descriptors and matching field passages |
 | `read_trace_item` | Session, item, saved capture and optional JSON Pointer → one retained item or field, paged if necessary |
@@ -78,7 +81,7 @@ The `kind` filter uses the returned canonical name: `CommandExecution`, `FileCha
 
 ## Paging and saved versions
 
-A **snapshot** here is a fixed assembled capture of the selected records. It is not the current state of a running chat. The public server stores captures in memory for its own lifetime.
+A **snapshot** here is a fixed assembled capture of the selected records. It is not the current state of a running chat. The server retains captures in bounded memory. Each of the text, native bundle, native item and change caches holds up to 32 captures and 64 MiB of serialized data. The oldest entries expire first. Re-capture after expiration, or restart the server to clear all retained captures.
 
 | Handle | Use |
 |---|---|

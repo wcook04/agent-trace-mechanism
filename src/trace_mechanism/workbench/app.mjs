@@ -692,13 +692,13 @@ function missionKeyFromParts(provider, sessionId) {
 }
 
 function missionKey(row) {
-  if (row?.ambiguous) return `file:${row.ref}`;
+  if (row?.ref) return `file:${row.ref}`;
   const fallbackId = row?.session_id || row?.source_path || row?.path || row?.title || row?.short_label || '';
   return missionKeyFromParts(row?.provider, fallbackId);
 }
 
 function missionRowStableIdentityKey(row) {
-  if (row?.ambiguous) return `file:${row.ref}`;
+  if (row?.ref) return `file:${row.ref}`;
   const fallbackId = row?.session_id || row?.session_file || row?.source_path || row?.path || '';
   return fallbackId ? missionKeyFromParts(row?.provider, fallbackId) : '';
 }
@@ -3857,7 +3857,7 @@ function paintMissionActivity(row) {
   el.dataset.live = String(live);
   const events = missionActivity.history.length ? missionActivity.history : (Array.isArray(data?.events) ? data.events.slice(-12) : []);
   const state = dropdownEls.missionActivityState;
-  if (state) state.textContent = ({ working: 'Live', waiting: 'Awaiting output', finished: 'Finished', quiet: 'Quiet', interrupted: 'Interrupted', unavailable: 'Unavailable', unknown: data ? 'Unknown' : 'Reading…' })[parentState];
+  if (state) state.textContent = ({ working: 'Recent activity', waiting: 'Awaiting output', finished: 'Finished', quiet: 'Quiet', interrupted: 'Interrupted', unavailable: 'Unavailable', unknown: data ? 'Unknown' : 'Reading…' })[parentState];
   const signature = JSON.stringify([missionActivity.key, events]);
   const eventById = new Map(events.map((event) => [String(event.id), event]));
   if (signature !== missionActivity.signature) {
@@ -3908,8 +3908,19 @@ function paintMissionActivity(row) {
     dropdownEls.missionActivityCommand.title = readable;
   }
   if (dropdownEls.missionActivityCaption) dropdownEls.missionActivityCaption.textContent = selected
-    ? `${selected.status === 'started' ? 'Call observed' : selected.status === 'failed' ? 'Reported error' : 'Result received'} · ${selected.timestamp ? compactAgeLabel(selected.timestamp) : 'recent'}`
+    ? `${selected.status === 'started' ? 'Call observed' : selected.status === 'failed' ? 'Reported error' : 'Result received'} · ${selected.timestamp ? compactAgeLabel(selected.timestamp) : 'time unknown'}`
     : '';
+  const inspector = document.getElementById('event-inspection');
+  inspector.hidden = !missionActivity.selectedEventId || !selected;
+  if (!inspector.hidden) {
+    inspector.textContent = [
+      selected.command || selected.tool,
+      selected.exit_code != null ? 'Exit code ' + selected.exit_code : selected.status,
+      selected.output || 'No output recorded in this activity window.',
+      selected.output_truncated && 'Output excerpt · first 4096 characters',
+      row.source_file + ' · byte ' + (selected.record_offset ?? selected.source_offset),
+    ].filter(Boolean).join('\n');
+  }
   if (dropdownEls.missionActivityEarlier) {
     dropdownEls.missionActivityEarlier.disabled = Boolean(missionActivity.historyPendingId || missionActivity.historyQueued) || !(missionActivity.historyBefore > 0);
     dropdownEls.missionActivityEarlier.textContent = missionActivity.historyPendingId || missionActivity.historyQueued ? 'Loading…' : missionActivity.historyBefore === 0 ? 'Start of activity' : '← Earlier';
@@ -6838,6 +6849,13 @@ async function fetchMissionIndexHttpFallback(reason = 'request', opts = {}) {
     const conflicts = Number(payload?.index?.ambiguous_sessions || 0);
     const note = document.getElementById('conflict-note');
     const roots = Object.entries(payload?.index?.discovery || {});
+    if (!document.getElementById('folder-settings').open) {
+      for (const [provider, report] of roots) {
+        const input = document.getElementById(provider + '-home');
+        input.value = payload.index.folder_settings?.[provider] || '';
+        input.placeholder = report.root.replace(/[\\/][^\\/]+$/, '');
+      }
+    }
     const skipped = roots.reduce((n,[,r]) => n + r.unsupported + r.unreadable, 0);
     const notices = [payload?.index?.marker_notice, conflicts && `${conflicts} session ID(s) appear in multiple recordings. Select a file to inspect its contents.`,
       skipped && `${skipped} file(s) or folders could not be identified or read. Their session relationships are unknown.`].filter(Boolean);
@@ -10745,7 +10763,7 @@ function renderAgentTraceDropdownBody(reason = 'render') {
     const marker = missionOperatorMarker(sel);
     if (dropdownEls.missionPaneArchive) {
       dropdownEls.missionPaneArchive.disabled = false;
-      dropdownEls.missionPaneArchive.textContent = marker.archived_at_ms ? 'Restore' : 'Archive';
+      dropdownEls.missionPaneArchive.textContent = marker.archived_at_ms ? 'Show in list' : 'Hide from list';
       dropdownEls.missionPaneArchive.title = marker.archived_at_ms ? 'Return this mission to the mission list' : 'Move this mission to Archived';
     }
     if (dropdownEls.missionPaneDelete) dropdownEls.missionPaneDelete.disabled = false;
@@ -11966,7 +11984,7 @@ previewCopy.onclick = async () => {
   const { result, summary } = previewCapture;
   previewCopy.disabled = true;
   try {
-    const verb = desktop ? (await post('/copy-preview', {sha256:result.text_sha256})).verb : await deliver(result.text, 'copy');
+    const verb = desktop ? (await post('/copy-preview', {sha256:result.text_sha256, preview_handle:result.preview_handle})).verb : await deliver(result.text, 'copy');
     dropdownEls.missionReceipt.textContent = verb + ' · ' + summary;
     previewDialog.close();
   } catch (error) {
@@ -11990,7 +12008,7 @@ async function portableTrace(action, sourceWindow, closeout, selection = null) {
     const scopeLabel = selection?.tail ? 'Recent recorded activity' : selection ? 'Selected conversations · detailed' : closeout ? 'Closeout' : scope.turns ? `Last ${scope.turns} turn(s), selected conversation only` :
       scope.depth === 'summary' ? 'Full thread compact' : 'Full thread detailed';
     const coverage = result.coverage;
-    const coverageLabel = coverage.scope === 'source' ? 'Selected recording only' :
+    const coverageLabel = coverage.scope === 'explicit' ? coverage.selected + ' explicitly chosen' : coverage.scope === 'source' ? 'Selected recording only' :
       [coverage.excluded ? `${coverage.selected} of ${coverage.discovered} discovered recordings selected` : 'All discovered recordings selected',
        coverage.relationships === 'unknown' && 'Discovery incomplete', Object.keys(result.unavailable).length > 0 && 'Known worker gaps'].filter(Boolean).join(' · ');
     const summary = [title, scopeLabel, coverageLabel, result.sessions + ' session(s)', _formatKB(result.bytes), ...result.warnings].join(' · ');
@@ -12023,6 +12041,28 @@ async function portableTrace(action, sourceWindow, closeout, selection = null) {
 const sourceDialog = document.getElementById('source-dialog');
 const sourceList = document.getElementById('source-options');
 let sourceOwner = null;
+document.getElementById('history-folder-form').onsubmit = async event => {
+  event.preventDefault();
+  const status = document.getElementById('folder-status');
+  try {
+    await post('/history-folders', {codex: document.getElementById('codex-home').value, claude: document.getElementById('claude-home').value});
+    await fetchMissionIndexHttpFallback();
+    status.textContent = 'Folders saved.';
+  } catch (error) { status.textContent = error.message; }
+};
+for (const button of document.querySelectorAll('[data-pick-folder]')) {
+  button.hidden = !desktop;
+  button.onclick = async () => {
+    try {
+      const path = await host('folder');
+      if (path) document.getElementById(button.dataset.pickFolder + '-home').value = path;
+    } catch (error) { document.getElementById('folder-status').textContent = error.message; }
+  };
+}
+document.getElementById('source-search').oninput = event => {
+  const term = event.target.value.toLowerCase();
+  for (const label of sourceList.children) label.hidden = !label.textContent.toLowerCase().includes(term);
+};
 document.getElementById('choose-sources').onclick = async () => {
   const row = findMissionByKey(selectedMissionKey);
   if (!row) return;
@@ -12030,15 +12070,17 @@ document.getElementById('choose-sources').onclick = async () => {
     const options = await post('/capture-options', {ref:row.ref});
     if (selectedMissionKey !== missionKey(row)) return;
     sourceOwner = row;
+    document.getElementById('source-search').value = '';
     const gaps = Object.entries(options.unavailable).map(([id,reason]) => id + ' · ' + reason);
-    document.getElementById('source-note').textContent = `Choose up to ${options.limit} discovered conversations. The total input limit is 256 MiB. Recent activity reads the last 128 KiB of the current conversation.`;
+    document.getElementById('source-note').textContent = `Related recordings appear first. You can also add other conversations. Choose up to ${options.limit} discovered conversations. The total input limit is 256 MiB. Recent activity reads the last 128 KiB of the current conversation.`;
     document.getElementById('source-status').textContent = gaps.join(' · ');
     sourceList.replaceChildren(...options.sources.map(source => {
       const label = document.createElement('label');
       const box = document.createElement('input');
       box.type = 'checkbox'; box.value = source.ref; box.disabled = !source.readable;
       box.checked = source.ref === row.ref && source.readable;
-      label.append(box, document.createTextNode(source.title + ' · ' + source.source_file + (source.provider_archived ? ' (Codex archive)' : '') + ' · ' + source.session_id +
+      label.dataset.related = String(source.related);
+      label.append(box, document.createTextNode((source.related ? '' : 'Other · ') + source.title + ' · ' + source.source_file + (source.provider_archived ? ' (Codex archive)' : '') + ' · ' + source.session_id +
         (source.parent ? ' · child of ' + source.parent : '') + (box.disabled ? ' · exceeds 256 MiB' : '')));
       return label;
     }));

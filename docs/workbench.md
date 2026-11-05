@@ -13,7 +13,7 @@ reinstall control and in-Codex attachment plugin are not included.
 
 Missions are locally recorded conversations and agent runs. The list includes both
 active and archived Codex histories. **Archived in Codex** describes the source
-folder. The Archive button changes a workbench preference.
+folder. Hide from list changes a workbench preference.
 
 The list refreshes about every five seconds; the selected activity strip reads a
 bounded tail. Earlier pages back through the selected file. Full-thread copies
@@ -21,9 +21,7 @@ include discovered linked children. Latest and last-N limit the selected session
 Copy Closeout requires a recorded assistant answer in that scope. Progress
 and completion come from available records, so incomplete or old histories
 can have unknown status. An empty provider folder is a normal first launch.
-The first-run panel shows the provider folders actually searched. For a custom
-installation, quit the app, then launch its executable from Terminal with the
-provider roots you use (each setting is optional):
+The first-run panel shows the provider folders actually searched. Use **History folders** to choose provider homes. You can also supply the defaults at launch:
 
 ```sh
 CODEX_HOME="/path/to/codex" CLAUDE_CONFIG_DIR="/path/to/claude" \
@@ -73,14 +71,14 @@ offset even when its ordinal is unknown. An open turn with no recent timestamped
 activity is labelled **Open**.
 
 **Choose sessions…** starts with just the selected conversation. Add individual
-workers to assemble a subset. The preview identifies included sources, their
+workers or other discovered recordings to assemble a selection in displayed order. The preview identifies included sources, their
 recorded links and modification times. Known missing or conflicting workers
 block an automatic tree copy; an explicit selection can still be copied.
-When history files cannot be identified their relationships are unknown.
+The index reports unidentified recordings separately from known gaps in the selected tree.
 Each transfer accepts at most 64 sessions and 256 MiB of source data in total.
 For a larger file, use **Recent activity** in the chooser for a bounded excerpt
 from its last 128 KiB. Files are read sequentially; if a selected file changes
-during capture, retry. A preview already on screen remains unchanged.
+during capture, retry. Browser previews keep their own text. The Mac window retains up to 16 immutable previews or 64 MiB in total. An evicted preview asks for a new capture.
 
 Local browsing requires no upload. Copying to the clipboard leaves the text
 there until it is replaced. Pasting it into a model, or explicitly registering

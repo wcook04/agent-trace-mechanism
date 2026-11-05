@@ -16,8 +16,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @contextmanager
-def app():
+def app(native=False):
     server, _ = start()
+    if native:
+        server.desktop = {"copy": lambda text: text}
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
 
@@ -342,7 +344,7 @@ def test_choose_nested_workers_or_parent_from_oversize_tree(isolated):
     selected = [rows[sid]["ref"] for sid in ("worker1", "worker2")]
     trace = lib.trace({**key, "selected_refs": selected})
     assert {s["session_id"] for s in trace["sources"]} == {"worker1", "worker2"}
-    assert trace["discovered"] == 67 and "65 discovered" in trace["warnings"][0]
+    assert trace["discovered"] == 67 and "65 related" in trace["warnings"][0]
     (folder / "2.jsonl").unlink()
     lib.discover()
     assert "worker2" in lib.capture_options(key)["unavailable"]
@@ -388,6 +390,7 @@ def test_archive_move_duplicate_and_exact_file_capture(isolated):
     active.parent.mkdir()
     archived.rename(active)
     (moved,) = lib.discover()
+    assert moved["ref"] == first["ref"]
     assert moved["session_id"] == first["session_id"] and not moved["provider_archived"]
     assert lib.trace({"ref": moved["ref"]})["text_sha256"] == original["text_sha256"]
     archived.write_text(
@@ -433,8 +436,9 @@ def test_nested_claude_workers_and_unresolved_links(isolated):
         "unlinked"
     ]
     selected = lib.trace({**key, "selected_refs": [key["ref"]]})
+    assert selected["discovery_health"]["claude"]["unlinked"] == 1
     assert selected["coverage"] == dict(
-        scope="tree", selected=1, discovered=3, excluded=2, relationships="unknown"
+        scope="explicit", selected=1, discovered=3, excluded=2, relationships="discovered"
     )
 
 
@@ -477,3 +481,71 @@ def test_worker_append_while_parent_is_being_captured(isolated, monkeypatch):
     monkeypatch.setattr(library.codex_native, "load_rollout", append_after_parent)
     with pytest.raises(ValueError, match="changed during capture"):
         lib.trace({"ref": parent["ref"]})
+
+
+def test_exact_mcp_selection_of_claude_worker_and_disconnected_codex(isolated):
+    from trace_mechanism.agent_tools import AgentTools
+    from trace_mechanism.mcp_server import load_manifest
+    from trace_mechanism.setup import register
+    from trace_mechanism.workbench.library import Library
+
+    project = isolated / '.claude/projects/example'
+    sid = 'synthetic-claude'
+    parent = project / (sid + '.jsonl')
+    worker = project / sid / 'subagents/nested/agent-chosen.jsonl'
+    sibling = worker.with_name('agent-private.jsonl')
+    worker.parent.mkdir(parents=True)
+    fixture = (ROOT / 'tests/fixtures/claude.jsonl').read_text()
+    for path, label in ((parent, 'Coordinator'), (worker, 'Test worker'), (sibling, 'Private sibling')):
+        path.write_text(fixture.replace('Update complete.', label))
+    codex = isolated / '.codex/archived_sessions/other.jsonl'
+    codex.parent.mkdir(parents=True)
+    shutil.copyfile(ROOT / 'examples/codex.jsonl', codex)
+    (codex.parent / 'unidentified.jsonl').write_text('{}\n')
+    lib = Library()
+    by_path = {Path(r['source_file']).name: r for r in lib.discover()}
+    refs = [by_path[p.name]['ref'] for p in (parent, worker, codex)]
+    manifest = isolated / 'selected.json'
+    register([parent, worker, codex], manifest)
+    api = AgentTools(load_manifest(manifest))
+    for chosen in (refs[:2], refs):
+        actual = api.read_selected_context(chosen)
+        preview = lib.trace({'ref': refs[0], 'selected_refs': chosen})
+        assert actual['text_sha256'] == preview['text_sha256']
+        assert 'Coordinator' in actual['text'] and 'Test worker' in actual['text'] and 'Private sibling' not in actual['text']
+        assert preview['discovery_health']['codex']['unsupported'] == 1
+        assert preview['coverage']['relationships'] == 'discovered'
+    with pytest.raises(ValueError, match='unregistered'):
+        api.read_selected_context([by_path[sibling.name]['ref']])
+    with pytest.raises(ValueError, match='recording IDs'):
+        api.read_chat_context('claude', sid, include_children=True)
+
+
+def test_overlapping_native_previews_and_folder_persistence(isolated):
+    src = isolated / 'custom/sessions'
+    src.mkdir(parents=True)
+    shutil.copyfile(ROOT / 'examples/codex.jsonl', src / 'a.jsonl')
+    text = (src / 'a.jsonl').read_text().replace('synthetic-codex', 'second').replace('Update prepared.', 'Second answer.')
+    (src / 'b.jsonl').write_text(text)
+    with app() as api:
+        api('/history-folders', {'codex': str(src.parent)})
+    with app(native=True) as api:
+        rows = api('/mission-index')['index']['active_rows']
+        captures = [api('/trace', {'ref': r['ref'], 'preview': True, 'closeout': True}) for r in rows]
+        assert len(captures) == 2
+        for capture in captures:
+            out = api('/copy-preview', {'sha256': capture['text_sha256'], 'preview_handle': capture['preview_handle']})
+            assert out['verb'] == capture['text']
+
+
+def test_snapshot_retention_expires_old_handles():
+    from trace_mechanism.agent_tools import SnapshotStore
+
+    store = SnapshotStore(max_count=2, max_bytes=100)
+    for key in ('a', 'b', 'c'):
+        store[key] = key
+    assert store.get('a') is None and store['b'] == 'b'
+    store['b'] = 'different content'
+    assert store['b'] == 'b'
+    with pytest.raises(ValueError, match='budget'):
+        store['large'] = 'x' * 100
