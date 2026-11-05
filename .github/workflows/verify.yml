@@ -45,4 +45,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install '.[mcp,test]'
-      - run: python -m pytest tests/test_portable_setup.py tests/test_skill_install.py -q
+      - run: python -m pytest tests/test_portable_setup.py tests/test_skill_install.py tests/test_workbench.py -q
+      - if: runner.os == 'macOS'
+        run: python -m pip install '.[desktop,mac-build]'
+      - if: runner.os == 'macOS'
+        run: python tools/build_macos_app.py
+      - if: runner.os == 'macOS'
+        run: codesign --verify --deep --strict "dist/Agent Trace Structurer.app"

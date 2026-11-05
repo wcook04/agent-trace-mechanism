@@ -9,7 +9,7 @@ Register local session files, then connect the MCP server to your agent. The age
 Follow [Install Agent Trace on this machine](../skills/agent-trace/references/install.md)
 for macOS, Linux, WSL or Windows PowerShell. It covers the package, optional agent
 skill, selected histories, both MCP hosts and a local connection check. The
-public package supplies the reader and MCP server; the desktop UI is separate.
+public package supplies the reader, MCP server and [workbench](workbench.md).
 
 ### Select one history
 

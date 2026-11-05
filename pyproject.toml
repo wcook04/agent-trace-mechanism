@@ -12,12 +12,17 @@ requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 
+[project.scripts]
+agent-trace-app = "trace_mechanism.workbench.server:main"
+
 [project.urls]
 Homepage = "https://github.com/wcook04/agent-trace-mechanism"
 Documentation = "https://github.com/wcook04/agent-trace-mechanism/blob/main/docs/mcp.md"
 Issues = "https://github.com/wcook04/agent-trace-mechanism/issues"
 
 [project.optional-dependencies]
+desktop = ["pywebview>=6,<7; sys_platform == 'darwin'"]
+mac-build = ["pyinstaller>=6.10,<7; sys_platform == 'darwin'"]
 mcp = ["mcp>=1.30,<2"]
 test = ["pytest>=8,<10"]
 build = ["build>=1.2,<2"]
@@ -27,3 +32,4 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 trace_mechanism = ["*.mjs"]
+"trace_mechanism.workbench" = ["*.mjs", "*.js", "*.html", "prompts/*.md"]

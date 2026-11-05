@@ -58,7 +58,13 @@
     "tools/check_distribution.py",
     "skills/agent-trace/SKILL.md",
     "skills/agent-trace/references/install.md",
-    "tools/install_skill.py"
+    "tools/install_skill.py",
+    "docs/workbench.md",
+    "src/trace_mechanism/workbench/index.html",
+    "src/trace_mechanism/workbench/server.py",
+    "src/trace_mechanism/workbench/desktop.py",
+    "tools/build_macos_app.py",
+    "skills/agent-trace/references/workbench.md"
   ],
   "content_routes": {
     "README.md": [
@@ -66,7 +72,8 @@
       "docs/provenance.json",
       "CONTRIBUTING.md",
       "examples/README.md",
-      "skills/agent-trace/SKILL.md"
+      "skills/agent-trace/SKILL.md",
+      "docs/workbench.md"
     ],
     "docs/development.md": [
       "tools/check_layout.py",

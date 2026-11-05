@@ -1,6 +1,6 @@
 # Security and private transcripts
 
-The server reads the files explicitly registered in your manifest. Registering a history makes its supported contents available to the connected agent, including old command output and private source text. It is not limited to your first query, and it does not redact secrets.
+The MCP server reads the files explicitly registered in your manifest. Registering a history makes its supported contents available to the connected agent, including old command output and private source text. It is not limited to your first query, and it does not redact secrets.
 
 The server uses local files and stdio; it does not itself upload histories. Your MCP host may send returned content to its model provider. Local storage therefore does not mean the retrieved content stays on your machine. Choose files you are comfortable providing to that host.
 
@@ -12,4 +12,9 @@ Public examples are deliberately selected records, with provenance describing om
 
 For a security-sensitive report, use [private vulnerability reporting](https://github.com/wcook04/agent-trace-mechanism/security/advisories/new). Provide a minimal synthetic input and the resulting behavior. Ordinary bugs that can be described without sensitive content may be reported publicly.
 
-Only the current published inspection version is covered. The complete Agent Trace app is a separate, unpublished implementation.
+The workbench scans local history roots for display in its own window. This does
+not grant the MCP host access. It serves on a random loopback port and requires a
+per-launch key for history and prompt requests. Treat its launch URL as private.
+Copy and Save transfer text only when requested. Pin/archive/delete affect local
+workbench markers; original conversations stay on disk. Prompt edits are stored
+in the user shelf. The portable window does not install keyboard hooks.

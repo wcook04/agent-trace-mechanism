@@ -2,7 +2,7 @@
 
 [![Agent Trace desktop app showing a running Codex chat, its workers and copy controls](docs/images/agent-trace.png)](docs/images/agent-trace.png)
 
-*Desktop app preview. You can install the history reader and agent tools today. The desktop app and its in-Codex interface aren't packaged yet; both would also be free and open source.*
+*The Agent Trace Structurer workbench is included. [Install the app or set up your prompt shelf →](docs/workbench.md)*
 
 **Let an agent read your earlier Codex and Claude Code conversations.**
 
@@ -48,6 +48,22 @@ For **supported Codex event records**, an agent can also:
 These queries use structured records of individual Codex operations, called *native items* in the code. They are not yet available for Claude histories or older Codex files that contain only conversation records. An agent in either app can query a supported Codex file.
 
 <a id="run-or-inspect"></a>
+
+## Open Agent Trace Structurer
+
+With Python 3.10+ and a checkout of this repository:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install .
+.venv/bin/agent-trace-app
+```
+
+This opens the Missions window in your browser. Use it with **Claude Code only,
+Codex only, or both**. Click a mission, choose a copy scope, and copy the trace.
+**Manage prompts** lets you add your own Markdown prompts. For the native macOS
+window or Windows instructions, see [the workbench guide](docs/workbench.md).
+The [installable skill](skills/agent-trace/SKILL.md) can set it up for you.
 
 ## Try it
 
@@ -112,7 +128,7 @@ Start with [the Codex reader](src/trace_mechanism/codex_native.py), [the convers
 
 [![Agent Trace plugin inside Codex with chat selection and attach, copy and preview controls](docs/images/codex-plugin.png)](docs/images/codex-plugin.png)
 
-The desktop app's plugin lets you select a chat and attach, copy or preview its context inside Codex. Agents can also retrieve context directly through its tools. This repository contains the reader and standalone MCP server used to inspect the mechanism.
+The desktop app's plugin lets you select a chat and attach, copy or preview its context inside Codex. Agents can also retrieve context directly through its tools. This preview of the in-Codex attachment interface is separate from the packaged Missions window and stdio MCP server.
 
 </details>
 
@@ -124,7 +140,7 @@ The desktop app's plugin lets you select a chat and attach, copy or preview its 
 
 I built this while using AI for maths research and making videos and interfaces to help people understand the results.
 
-The core is free and open source, and the full desktop app would be too, under the same Apache-2.0 licence. I won't charge for it. I've just got a lot on my plate, so I'd like to know if people would use it before I spend the time packaging it. If you would, [let me know what you'd use it for](https://github.com/wcook04/agent-trace-mechanism/issues). I'd be happy to make it available.
+The reader and workbench are free and open source under the same Apache-2.0 licence.
 
 I'm also sharing this because I'd like more people to see my main projects. You can find them on [my homepage](https://wcook04.github.io/), or start with [the introduction video](https://www.youtube.com/watch?v=MBmVMMogXTA).
 

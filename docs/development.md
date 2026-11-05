@@ -76,3 +76,5 @@ The native reader and JavaScript builder are copied from the desktop app. [Reade
 The [earlier retrieval recording](codex-retrieval.md), [controlled run](controlled-run.md), [production MCP excerpt](mcp-source-excerpt.txt) and [desktop skill excerpt](skill-source-excerpt.txt) document earlier versions. They support compatibility checks, not current setup. `regenerate_examples.py` owns their generated projections and indexes.
 
 [The layout policy](repository_layout.json) defines directory responsibilities and the required public paths. Keep those paths stable when reorganizing files.
+
+[Workbench sources and build](workbench.md): `src/trace_mechanism/workbench/` owns the frontend, local transport, library adapter and editable shelf. `tools/build_macos_app.py` packages the native window.

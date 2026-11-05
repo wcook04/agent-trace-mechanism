@@ -1,12 +1,16 @@
 ---
 name: agent-trace
-description: Install or troubleshoot the local Agent Trace MCP server, or retrieve evidence from selected Codex and Claude Code histories. Use when setting up Agent Trace, continuing earlier work, checking another chat's commands or comparing recorded outcomes.
+description: Install Agent Trace Structurer, add or edit custom shelf prompts, troubleshoot the local MCP server, or retrieve evidence from selected Codex and Claude Code histories. Use when setting up Agent Trace, continuing earlier work, checking another chat's commands or comparing recorded outcomes.
 ---
 
 # Agent Trace
 
 This skill works with the public `wcook04/agent-trace-mechanism` package. It does
 not depend on its author's desktop app, plugin, folders or private tools.
+
+## Workbench and custom prompts
+
+Use [the workbench and prompt guide](references/workbench.md) when someone wants the app, wants to add their own prompts, or uses just one provider. Check the visible workbench and shelf before reporting success.
 
 ## Setup or repair
 

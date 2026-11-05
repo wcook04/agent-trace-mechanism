@@ -168,7 +168,7 @@ def main():
         if args.action == 'list':
             if not 1 <= args.limit <= 100:
                 raise ValueError('--limit must be between 1 and 100.')
-            root = (args.root or history_root(args.provider)).expanduser().resolve(strict=True)
+            root = (args.root or history_root(args.provider)).expanduser().resolve(strict=args.root is not None)
             dated = []
             for path in root.rglob('*.jsonl'):
                 try:
