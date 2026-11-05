@@ -57,9 +57,14 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/parser.mjs"
                 else file / ("key.js" if path == "/key.js" else ASSETS[path])
             )
-            return self.reply(
-                200, file.read_bytes(), MIME.get(file.suffix, "text/javascript")
-            )
+            asset = file.read_bytes()
+            if path == "/" and s.desktop:
+                asset = asset.replace(
+                    b"<head>",
+                    b'<head><meta name="agent-trace-desktop" content="true">',
+                    1,
+                )
+            return self.reply(200, asset, MIME.get(file.suffix, "text/javascript"))
         if self.headers.get(
             "Origin", s.origin
         ) != s.origin or not secrets.compare_digest(
@@ -79,6 +84,14 @@ class Handler(BaseHTTPRequestHandler):
                     result = lib.activity(body)
                 elif path == "/trace":
                     result = lib.trace(body)
+                    delivery = body.get("deliver")
+                    if delivery in ("copy", "save") and s.desktop:
+                        result["verb"] = s.desktop[delivery](result.pop("text"))
+                elif path == "/window" and s.desktop:
+                    action = body.get("action")
+                    if action not in s.desktop:
+                        raise ValueError("Unknown window action.")
+                    result = {"value": s.desktop[action](body.get("value"))}
                 elif path == "/marker":
                     with s.shelf_lock:
                         markers = read_markers()
@@ -169,6 +182,7 @@ def read_markers():
 def start():
     s = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     s.library = Library()
+    s.desktop = None
     s.token = secrets.token_urlsafe(32)
     s.authority = "127.0.0.1:" + str(s.server_port)
     s.origin = "http://" + s.authority

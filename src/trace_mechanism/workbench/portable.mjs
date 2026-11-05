@@ -4,9 +4,10 @@ export async function post(path, value) {
   if (!res.ok) throw Error(out.error || 'Local request failed');
   return out;
 }
-export function host(action,...args) {
-  if (!window.pywebview?.api) return null;
-  return window.pywebview.api[action](window.__agentTraceKey,...args);
+export const desktop=Boolean(document.querySelector('meta[name=agent-trace-desktop]'));
+export function host(action,value) {
+  if (!desktop) return null;
+  return post('/window',{action,value}).then(response=>response.value);
 }
 export async function deliver(text,action) {
   if (action==='save') {

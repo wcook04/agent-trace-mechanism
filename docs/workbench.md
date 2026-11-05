@@ -25,3 +25,10 @@ keeps its existing explicit-file manifest. The
 [Mac builder](../tools/build_macos_app.py) produces a local architecture build
 in `dist/`; the runtime does not invoke a system Python, Node, or provider CLI.
 There is no notarized download in this change.
+
+On a Mac with a desktop session and the desktop extra installed, run
+`python tools/check_macos_window.py` to exercise collapse, restore and float
+in WebKit using empty temporary provider folders. The normal test suite checks
+the zero-, one- and two-provider cases, parent/worker reads, private access,
+and user prompt persistence. The distribution check repeats isolated-provider
+reads using the wheel installed outside the checkout.

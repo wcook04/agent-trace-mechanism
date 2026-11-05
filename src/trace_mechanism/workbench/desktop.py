@@ -1,7 +1,6 @@
 """macOS window and pasteboard for the portable workbench."""
 
 from pathlib import Path
-import secrets
 import sys
 import tempfile
 import threading
@@ -31,22 +30,14 @@ def launch():
     server, url = start()
 
     class Native:
-        def _check(self, token):
-            if not isinstance(token, str) or not secrets.compare_digest(
-                token, server.token
-            ):
-                raise ValueError("Invalid workbench session.")
-
-        def copy(self, token, text):
-            self._check(token)
+        def copy(self, text):
             pb = NSPasteboard.generalPasteboard()
             pb.clearContents()
             if not pb.setString_forType_(text, NSPasteboardTypeString):
                 raise RuntimeError("Clipboard refused the copy.")
             return "Copied"
 
-        def save(self, token, text):
-            self._check(token)
+        def save(self, text):
             directory = Path.home() / "Downloads"
             directory.mkdir(exist_ok=True)
             with tempfile.NamedTemporaryFile(
@@ -63,8 +54,7 @@ def launch():
             )
             return "Saved and revealed"
 
-        def capsule(self, token, mode):
-            self._check(token)
+        def capsule(self, mode):
             if mode not in ("compact", "hover", "leave", "window"):
                 raise ValueError("Unknown window mode.")
 
@@ -104,11 +94,17 @@ def launch():
             NSOperationQueue.mainQueue().addOperationWithBlock_(apply)
             return mode
 
-        def floating(self, token, enabled):
-            self._check(token)
+        def floating(self, enabled):
             window.on_top = bool(enabled)
             return window.on_top
 
+    bridge = Native()
+    server.desktop = {
+        "copy": bridge.copy,
+        "save": bridge.save,
+        "floating": bridge.floating,
+        "capsule": bridge.capsule,
+    }
     with server:
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -116,7 +112,6 @@ def launch():
             window = webview.create_window(
                 "Agent Trace Structurer",
                 url,
-                js_api=Native(),
                 width=1340,
                 height=820,
                 min_size=(620, 440),

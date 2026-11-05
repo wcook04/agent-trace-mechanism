@@ -1,4 +1,4 @@
-import { post, host, deliver, editPrompts } from './portable.mjs';
+import { post, host, deliver, editPrompts, desktop } from './portable.mjs';
 // v12 boot probe: mark module entry BEFORE any other code that could throw.
 // Captured by the WKUserScript installed in Swift; receipt at
 // ~/Library/Application Support/Agent Trace Structurer/last_boot_probe.json.
@@ -10882,11 +10882,11 @@ function renderAgentTraceDropdownBody(reason = 'render') {
       dropdownEls.missionPaneCopyCapsule.textContent = copyActionText.replace('Trace ', '');
     }
     if (dropdownEls.missionDownloadDenoised) {
-      dropdownEls.missionDownloadDenoised.textContent = (window.pywebview?.api ? 'Save + Reveal' : 'Save .txt');
+      dropdownEls.missionDownloadDenoised.textContent = (desktop ? 'Save + Reveal' : 'Save .txt');
       dropdownEls.missionDownloadDenoised.disabled = !hasTraceTurn;
     }
     if (dropdownEls.missionPaneSaveReveal) {
-      dropdownEls.missionPaneSaveReveal.textContent = (window.pywebview?.api ? 'Save + Reveal' : 'Save .txt');
+      dropdownEls.missionPaneSaveReveal.textContent = (desktop ? 'Save + Reveal' : 'Save .txt');
       dropdownEls.missionPaneSaveReveal.disabled = !hasTraceTurn;
     }
     const marker = missionOperatorMarker(sel);
@@ -12101,8 +12101,8 @@ async function portableTrace(action, sourceWindow, closeout) {
   if(button) button.disabled=true;
   receipt.textContent='Reading '+title+'…';
   try {
-    const result=await post('/trace',{ref:row.ref,...scope,closeout});
-    const verb=await deliver(result.text,action);
+    const result=await post('/trace',{ref:row.ref,...scope,closeout,deliver:desktop?action:null});
+    const verb=result.verb || await deliver(result.text,action);
     receipt.textContent=verb+' · '+title+' · '+result.sessions+' session(s) · '+_formatKB(result.bytes);
     if(action==='copy') {
       const node=dropdownEls.agentTraceRows?.querySelector('[aria-selected="true"]');
@@ -12114,8 +12114,8 @@ async function portableTrace(action, sourceWindow, closeout) {
 editPrompts(fetchPromptShelfHttpFallback);
 const floatButton=document.getElementById('public-float');
 const readyDesktop=()=>document.body.classList.add('desktop');
-if(window.pywebview?.api) readyDesktop();
-window.addEventListener('pywebviewready',readyDesktop);
+if(desktop) readyDesktop();
+
 floatButton.onclick=async()=>{const state=await host('floating',floatButton.getAttribute('aria-pressed')!=='true');floatButton.setAttribute('aria-pressed',String(state));floatButton.textContent=state?'Unfloat':'Float';};
 setInterval(()=>{if(!document.hidden)fetchMissionIndexHttpFallback('session_poll');},5000);
 
