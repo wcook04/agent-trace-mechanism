@@ -4153,7 +4153,7 @@
                   <button id="mission-pane-pin" class="btn" type="button" title="Pin or unpin this mission in the review queue">Pin</button>
                   <button id="mission-pane-snooze" class="btn" type="button" title="Snooze this mission for two hours">Snooze</button>
                   <button id="mission-pane-reviewed" class="btn" type="button" title="Mark this mission reviewed or handled">Mark reviewed</button>
-                  <button id="mission-pane-archive" class="btn" type="button" title="Move this mission to Archived">Archive</button>
+                  <button id="mission-pane-archive" class="btn" type="button" title="Hide this conversation from the main list">Hide from list</button>
                   <button id="mission-pane-delete" class="btn" type="button" title="Delete this mission from Agent Trace">Delete…</button>
                 </div>
                 <div id="mission-receipt" class="dropdown-receipt" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -4192,6 +4192,7 @@
                   <button type="button" data-mission-filter="waiting" aria-pressed="false">Open <span class="filter-count">0</span></button>
                   <button type="button" data-mission-filter="pinned" aria-pressed="false">Pinned <span class="filter-count">0</span></button>
                   <button type="button" data-mission-filter="archived" aria-pressed="false">Archived <span class="filter-count">0</span></button>
+                  <button type="button" hidden data-mission-filter="hidden" aria-pressed="false">Hidden <span class="filter-count">0</span></button>
                 </div>
                 <div class="mission-pane-control-row">
                   <div class="mission-pane-controls">

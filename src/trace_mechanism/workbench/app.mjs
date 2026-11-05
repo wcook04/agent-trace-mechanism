@@ -1717,7 +1717,7 @@ function changeSelectedMissionDisposition(disposition, expectedKey = selectedMis
   safeRenderAgentTraceDropdown(`operator_marker_${disposition}`);
   renderMissionRail();
   updateAgentTraceSummary();
-  setMissionReceipt(`${disposition === 'deleted' ? 'Deleted from Agent Trace' : disposition === 'archived' ? 'Archived' : 'Restored'}: ${title}.`);
+  setMissionReceipt(`${disposition === 'deleted' ? 'Deleted from Agent Trace' : disposition === 'archived' ? 'Hidden from list' : 'Shown in list'}: ${title}.`);
   return true;
 }
 
@@ -10076,7 +10076,8 @@ function missionStatusText(row, renderStart = Date.now()) {
 function missionMatchesQuickFilter(row, filter = missionQuickFilter, now = Date.now()) {
   const marker = missionOperatorMarker(row);
   if (marker.deleted_at_ms) return false;
-  if (filter === 'archived') return Boolean(marker.archived_at_ms || row.provider_archived);
+  if (filter === 'hidden') return Boolean(marker.archived_at_ms);
+  if (filter === 'archived') return Boolean(row.provider_archived);
   if (marker.archived_at_ms) return false;
   if (filter === 'all') return true;
   if (filter === 'pinned') return Boolean(marker.pinned);
@@ -10123,11 +10124,12 @@ function setMissionProviderFilter(filter) {
 }
 
 function updateMissionQuickFilters(rows, now = Date.now()) {
-  const counts = { all: 0, running: 0, waiting: 0, pinned: 0, archived: 0 };
+  const counts = { all: 0, running: 0, waiting: 0, pinned: 0, archived: 0, hidden: 0 };
   for (const row of rows) {
     const marker = missionOperatorMarker(row);
     if (marker.deleted_at_ms) continue;
-    if (marker.archived_at_ms || row.provider_archived) counts.archived += 1;
+    if (row.provider_archived) counts.archived += 1;
+    if (marker.archived_at_ms) counts.hidden += 1;
     if (marker.archived_at_ms) continue;
     counts.all += 1;
     const status = missionStatusText(row, now);
@@ -10137,6 +10139,7 @@ function updateMissionQuickFilters(rows, now = Date.now()) {
   }
   for (const button of dropdownEls?.missionQuickFilters?.querySelectorAll('[data-mission-filter]') || []) {
     const filter = button.dataset.missionFilter;
+    if (filter === 'hidden') button.hidden = !counts.hidden && missionQuickFilter !== 'hidden';
     button.setAttribute('aria-pressed', String(filter === missionQuickFilter));
     const count = button.querySelector('.filter-count');
     if (count) count.textContent = String(counts[filter] || 0);
@@ -10144,7 +10147,7 @@ function updateMissionQuickFilters(rows, now = Date.now()) {
 }
 
 function setMissionQuickFilter(filter) {
-  if (!['all', 'running', 'waiting', 'pinned', 'archived'].includes(filter)) return false;
+  if (!['all', 'running', 'waiting', 'pinned', 'archived', 'hidden'].includes(filter)) return false;
   missionQuickFilter = filter;
   if (dropdownEls?.agentTraceRows) dropdownEls.agentTraceRows.scrollTop = 0;
   for (const button of dropdownEls?.missionQuickFilters?.querySelectorAll('[data-mission-filter]') || []) {
@@ -10764,7 +10767,7 @@ function renderAgentTraceDropdownBody(reason = 'render') {
     if (dropdownEls.missionPaneArchive) {
       dropdownEls.missionPaneArchive.disabled = false;
       dropdownEls.missionPaneArchive.textContent = marker.archived_at_ms ? 'Show in list' : 'Hide from list';
-      dropdownEls.missionPaneArchive.title = marker.archived_at_ms ? 'Return this mission to the mission list' : 'Move this mission to Archived';
+      dropdownEls.missionPaneArchive.title = marker.archived_at_ms ? 'Return this mission to the mission list' : 'Hide this conversation from the main list';
     }
     if (dropdownEls.missionPaneDelete) dropdownEls.missionPaneDelete.disabled = false;
     if (dropdownEls.missionPanePin) {

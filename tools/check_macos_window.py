@@ -226,7 +226,7 @@ def check_download(archive, receipt, screenshots, denied, interactions):
                                 and "retired" not in text
                             )
                         )
-                        and (bool(providers) or "no sessions" in text)
+                        and (bool(providers) or ("find your conversations" in text and "history folders" in text))
                     )
 
                 wait_for(visible, f"Expected fixture rows did not appear in {case}")

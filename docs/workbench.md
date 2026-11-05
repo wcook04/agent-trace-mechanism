@@ -13,7 +13,7 @@ reinstall control and in-Codex attachment plugin are not included.
 
 Missions are locally recorded conversations and agent runs. The list includes both
 active and archived Codex histories. **Archived in Codex** describes the source
-folder. Hide from list changes a workbench preference.
+folder. **Hide from list** changes a workbench preference. Use the **Hidden** filter and **Show in list** to bring it back.
 
 The list refreshes about every five seconds; the selected activity strip reads a
 bounded tail. Earlier pages back through the selected file. Full-thread copies
