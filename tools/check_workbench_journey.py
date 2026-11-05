@@ -15,7 +15,7 @@ from playwright.sync_api import expect, sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def fresh_agent(python, home, manifest, sid, expected):
+def fresh_agent(python, home, manifest, provider, sid, expected):
     config = {
         "mcpServers": {
             "agent-trace": {
@@ -32,8 +32,8 @@ def fresh_agent(python, home, manifest, sid, expected):
     }
     tool = "mcp__agent-trace__read_chat_context"
     prompt = (
-        f"Call {tool} for provider codex, session_id {sid}, scope full_thread, "
-        "include_children true and limit 1. Return its text_sha256 unchanged."
+        f"Call {tool} for provider {provider}, session_id {sid}, scope full_thread, "
+        f"include_children {str(provider == 'codex').lower()} and limit 1. Return its text_sha256 unchanged."
     )
     result = subprocess.run(
         [
@@ -77,12 +77,12 @@ def fresh_agent(python, home, manifest, sid, expected):
     )
 
 
-def fresh_codex(python, home, manifest, sid, expected):
+def fresh_codex(python, home, manifest, provider, sid, expected):
     args = ["-I", "-m", "trace_mechanism.mcp_server", "--manifest", str(manifest)]
-    answer = home / "model-answer.txt"
+    answer = home / f"model-answer-{provider}.txt"
     prompt = (
-        f"Call release_read.read_chat_context for provider codex, session_id {sid}, "
-        "scope full_thread, include_children true and limit 1. Return its text_sha256 alone. "
+        f"Call release_read.read_chat_context for provider {provider}, session_id {sid}, "
+        f"scope full_thread, include_children {str(provider == 'codex').lower()} and limit 1. Return its text_sha256 alone. "
         "Use no shell or filesystem tools."
     )
     result = subprocess.run(
@@ -145,6 +145,10 @@ def run(args, home):
         CLAUDE_CONFIG_DIR=str(home / "custom-claude"),
         AGENT_TRACE_PROMPTS=str(home / "prompts"),
     )
+    claude_path = home / "custom-claude/projects/example/claude.jsonl"
+    claude_path.parent.mkdir(parents=True)
+    shutil.copyfile(ROOT / "tests/fixtures/claude.jsonl", claude_path)
+    claude_sid = json.loads(claude_path.read_text().splitlines()[0])["sessionId"]
     python = os.path.abspath(args.python)
     server = subprocess.Popen(
         [python, "-I", "-m", "trace_mechanism.workbench.server", "--no-browser"],
@@ -209,12 +213,40 @@ def run(args, home):
                 "async () => (await navigator.clipboard.readText()).includes('arrival-after-preview')"
             )
             copied = page.evaluate("navigator.clipboard.readText()")
+            page.locator("#choose-sources").click()
+            expect(page.locator("#source-options input:checked")).to_have_count(1)
+            page.locator("#source-preview").click()
+            expect(page.locator("#preview-sources li")).to_have_count(1)
+            assert (
+                "excluded by selection"
+                in page.locator("#preview-scope-name").inner_text()
+            )
+            page.locator("#preview-close").click()
+            page.locator("#agent-trace-rows .title-text").filter(
+                has_text="Read and update example.txt."
+            ).click()
+            page.get_by_text("Full thread detailed", exact=True).filter(
+                visible=True
+            ).first.click()
+            page.locator("#preview-scope").click()
+            expect(page.locator("#preview-text")).to_contain_text("Update complete.")
+            page.locator("#preview-copy").click()
+            page.wait_for_function(
+                "async () => (await navigator.clipboard.readText()).includes('Update complete.')"
+            )
+            claude_copy = page.evaluate("navigator.clipboard.readText()")
             page.locator("#manage-prompts").click()
             page.locator("#prompt-name").fill("personal")
             body = "# Check the run\nCompare the captured evidence."
             page.locator("#prompt-md").fill("---\ntitle: My own review\n---\n" + body)
             page.locator("#prompt-preview").click()
             expect(page.locator("#prompt-output")).to_have_text(body)
+            page.keyboard.press("Escape")
+            expect(page.locator("#editor-confirm")).to_be_visible()
+            page.locator("#editor-keep").click()
+            expect(page.locator("#prompt-md")).to_have_value(
+                "---\ntitle: My own review\n---\n" + body
+            )
             page.locator("#prompt-save").click()
             page.reload()
             page.get_by_text("My own review", exact=True).first.click()
@@ -243,6 +275,7 @@ def run(args, home):
                 "trace_mechanism.setup",
                 "register",
                 *files,
+                claude_path,
                 "--manifest",
                 manifest,
             ],
@@ -251,18 +284,25 @@ def run(args, home):
             check=True,
             stdout=subprocess.DEVNULL,
         )
-        digest = hashlib.sha256(copied.encode()).hexdigest()
-        if args.claude:
-            fresh_agent(python, home, manifest, sid, digest)
-        if args.codex:
-            fresh_codex(python, home, manifest, sid, digest)
+        captures = {"codex": (sid, copied), "claude": (claude_sid, claude_copy)}
+        checked = []
+        for host, enabled, call in (
+            ("Claude Code", args.claude, fresh_agent),
+            ("Codex", args.codex, fresh_codex),
+        ):
+            if enabled:
+                for provider, (identity, content) in captures.items():
+                    digest = hashlib.sha256(content.encode()).hexdigest()
+                    call(python, home, manifest, provider, identity, digest)
+                    checked.append(
+                        {"host": host, "source": provider, "clipboard_sha256": digest}
+                    )
         print(
             json.dumps(
                 {
-                    "sessions": len(files),
-                    "clipboard_sha256": digest,
-                    "claude_model_verified": args.claude,
-                    "codex_model_verified": args.codex,
+                    "codex_sessions": len(files),
+                    "claude_sessions": 1,
+                    "verified_reads": checked,
                 }
             )
         )

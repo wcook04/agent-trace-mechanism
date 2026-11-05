@@ -40,6 +40,81 @@ def main():
                 original_sample["worker_state"],
                 meaning(original_sample["events"]),
             )
+        # Replay successive states of a live source. Backdated timestamps do not
+        # reorder the records. A second tool starts before the first finishes.
+        live = Path(folder) / "interleaved.jsonl"
+        frames = [
+            {
+                "type": "user",
+                "sessionId": "replay",
+                "message": {"content": "Check two files"},
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "id": "a",
+                            "name": "Read",
+                            "input": {"file_path": "a"},
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "id": "b",
+                            "name": "Edit",
+                            "input": {"file_path": "b"},
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "user",
+                "timestamp": "2020-01-01T00:00:00Z",
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "a",
+                            "content": "x" * 12000,
+                        }
+                    ]
+                },
+            },
+            {
+                "type": "user",
+                "message": {
+                    "content": [
+                        {"type": "tool_result", "tool_use_id": "b", "content": "done"}
+                    ]
+                },
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [{"type": "text", "text": "Both checked"}],
+                    "stop_reason": "end_turn",
+                },
+            },
+        ]
+        for index, frame in enumerate(frames):
+            with live.open("a") as output:
+                output.write(json.dumps(frame) + "\n")
+            sample = json.loads(subprocess.check_output([reader, live, "claude_code"]))
+            events, _, state, _ = summary(records(live)[0])
+            assert meaning(events) == meaning(sample["events"]), (index, events, sample)
+            assert (state == "finished") == (sample["worker_state"] == "finished"), (
+                index,
+                state,
+                sample,
+            )
         files = sorted((ROOT / "examples/launch-review").glob("*.jsonl"))
         reference = original.trace._codex_native_core()
         for detail in (True, False):

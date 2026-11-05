@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import plistlib
 from pathlib import Path
 import shutil
 import subprocess
@@ -21,7 +22,7 @@ def wait_for(condition, description):
         time.sleep(0.1)
 
 
-def check_download(archive, receipt, screenshots, denied):
+def check_download(archive, receipt, screenshots, denied, interactions):
     """Observe the extracted application's fixture rows without sending native input."""
     from Quartz import (
         CGWindowListCopyWindowInfo,
@@ -43,7 +44,21 @@ def check_download(archive, receipt, screenshots, denied):
         embedded = json.loads(
             (app / "Contents/Resources/notices/build.json").read_text()
         )
-        assert embedded["revision"] == build["revision"]
+        info = plistlib.loads((app / "Contents/Info.plist").read_bytes())
+        assert (info["CFBundleShortVersionString"], info["CFBundleVersion"]) == (
+            build["version"],
+            build["build_number"],
+        )
+        assert all(
+            embedded[key] == build[key]
+            for key in ("revision", "version", "build_number")
+        )
+        driver = scratch / "exercise-window"
+        if interactions:
+            subprocess.run(
+                ["swiftc", root / "tools/macos/exercise_window.swift", "-o", driver],
+                check=True,
+            )
         subprocess.run(["codesign", "--verify", "--deep", "--strict", app], check=True)
         policy = subprocess.run(
             ["spctl", "--assess", "--type", "execute", "-vv", app],
@@ -90,6 +105,48 @@ def check_download(archive, receipt, screenshots, denied):
                             }
                         )
                     )
+            if len(providers) == 2:
+                codex_dir = home / "codex-root/sessions"
+                parent = codex_dir / "source.jsonl"
+                fixtures = json.loads(parent.read_text().splitlines()[0])
+                titles = {
+                    "synthetic-codex": "Review the onboarding guide",
+                    "example-reviewer": "Check setup examples",
+                    "link-reviewer": "Verify reference links",
+                }
+                (codex_dir.parent / "session_index.jsonl").write_text(
+                    "\n".join(
+                        json.dumps({"id": sid, "thread_name": title})
+                        for sid, title in titles.items()
+                    )
+                )
+                for sid, nickname in (
+                    ("example-reviewer", "Examples"),
+                    ("link-reviewer", "References"),
+                ):
+                    worker = parent.read_text().splitlines()
+                    worker[0] = json.dumps(
+                        {
+                            "type": "session_meta",
+                            "payload": {
+                                "id": sid,
+                                "parent_thread_id": fixtures["payload"]["id"],
+                                "agent_nickname": nickname,
+                            },
+                        }
+                    )
+                    (codex_dir / (sid + ".jsonl")).write_text("\n".join(worker) + "\n")
+                lines = parent.read_text().splitlines()[:-1]
+                lines[2] = json.dumps(
+                    {
+                        "type": "event_msg",
+                        "payload": {
+                            "type": "user_message",
+                            "message": "Review the onboarding guide and check its examples and references.",
+                        },
+                    }
+                )
+                parent.write_text("\n".join(lines) + "\n")
             env = {
                 k: os.environ[k]
                 for k in (
@@ -110,16 +167,13 @@ def check_download(archive, receipt, screenshots, denied):
             )
             snapshot = (screenshots or scratch) / ("workbench-" + case + ".png")
             snapshot.parent.mkdir(parents=True, exist_ok=True)
-            child = subprocess.Popen(
-                [
-                    "sandbox-exec",
-                    "-p",
-                    profile,
-                    app / "Contents/MacOS/Agent Trace Structurer",
-                ],
-                cwd=home,
-                env=env,
-            )
+            command = [
+                "sandbox-exec",
+                "-p",
+                profile,
+                app / "Contents/MacOS/Agent Trace Structurer",
+            ]
+            child = subprocess.Popen(command, cwd=home, env=env)
             try:
 
                 def visible():
@@ -147,13 +201,70 @@ def check_download(archive, receipt, screenshots, denied):
                     )
                     text = subprocess.check_output([ocr, snapshot], text=True).lower()
                     return (
-                        ("codex release fixture" in text) == ("codex" in providers)
+                        (
+                            (
+                                "review the onboarding guide"
+                                if len(providers) == 2
+                                else "codex release fixture"
+                            )
+                            in text
+                        )
+                        == ("codex" in providers)
                         and ("read and update example.txt" in text)
                         == ("claude" in providers)
                         and (bool(providers) or "no sessions" in text)
                     )
 
                 wait_for(visible, f"Expected fixture rows did not appear in {case}")
+                if interactions and len(providers) == 2:
+
+                    def control(action, element, *args):
+                        return subprocess.check_output(
+                            [driver, str(child.pid), action, element, *args], text=True
+                        ).strip()
+
+                    control("press", "public-float")
+                    wait_for(
+                        lambda: control("value", "public-float") == "1", "Float failed"
+                    )
+                    control("press", "public-float")
+                    control("press", "public-compact")
+                    control("press", "capsule-open")
+                    control("present", "mission-pane-refresh")
+                    control("press", "choose-sources")
+                    control("press", "source-preview")
+                    control("present", "preview-copy")
+                    control("press", "preview-copy")
+                    wait_for(
+                        lambda: (
+                            "Review the onboarding guide"
+                            in subprocess.check_output(["pbpaste"], text=True)
+                        ),
+                        "Captured parent missing from native pasteboard",
+                    )
+                    control("press", "manage-prompts")
+                    control("set", "prompt-name", "review")
+                    control(
+                        "set",
+                        "prompt-md",
+                        "# Review notes\nUse only the selected evidence.",
+                    )
+                    control("press", "prompt-save")
+                    wait_for(
+                        lambda: (home / "prompts/review.md").exists(),
+                        "Native prompt save failed",
+                    )
+                    child.terminate()
+                    child.wait(timeout=10)
+                    child = subprocess.Popen(command, cwd=home, env=env)
+                    control("press", "button:Review notes")
+                    wait_for(
+                        lambda: (
+                            "Use only the selected evidence."
+                            in subprocess.check_output(["pbpaste"], text=True)
+                        ),
+                        "Saved prompt unavailable after native relaunch",
+                    )
                 print(
                     f"{case}: packaged window displayed the expected histories.",
                     flush=True,
@@ -185,6 +296,11 @@ def main():
         default=[],
         help="Additional checkout to deny the app",
     )
+    parser.add_argument(
+        "--interactions",
+        action="store_true",
+        help="Press controls in the extracted app using an already authorized Accessibility test driver",
+    )
     args = parser.parse_args()
     if args.archive:
         return check_download(
@@ -192,6 +308,7 @@ def main():
             args.receipt or args.archive.with_name("build-receipt.json"),
             args.screenshots,
             args.deny_read,
+            args.interactions,
         )
     import webview
     from trace_mechanism.workbench.desktop import launch

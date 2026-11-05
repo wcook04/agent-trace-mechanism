@@ -82,6 +82,10 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError("Expected an object.")
                 if path == "/activity":
                     result = lib.activity(body)
+                elif path == "/capture-options":
+                    with s.refresh:
+                        lib.discover()
+                        result = lib.capture_options(body)
                 elif path == "/trace":
                     with s.refresh:
                         lib.discover()
@@ -112,7 +116,7 @@ class Handler(BaseHTTPRequestHandler):
                     result = {"value": s.desktop[action](body.get("value"))}
                 elif path == "/marker":
                     with s.shelf_lock:
-                        markers = read_markers()
+                        markers = read_markers(s, writing=True)
                         key = body.get("mission_key")
                         if (
                             not isinstance(key, str)
@@ -132,6 +136,9 @@ class Handler(BaseHTTPRequestHandler):
                             json.dump(markers, f)
                         os.replace(f.name, marker_path())
                     result = {"ok": True}
+                elif path == "/remove-prompt":
+                    with s.shelf_lock:
+                        result = shelf.remove(body.get("slug"), body.get("revision"))
                 elif path == "/save-prompt":
                     with s.shelf_lock:
                         result = shelf.save(
@@ -142,14 +149,18 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/mission-index":
                 with s.refresh:
                     rows = lib.discover()
+                with s.shelf_lock:
+                    markers = read_markers(s)
                 result = dict(
                     ok=True,
                     index=dict(
+                        marker_notice=s.marker_notice,
+                        discovery=lib.discovery,
                         active_rows=rows,
                         ambiguous_sessions=len(lib.conflicts),
                         inactive_rows=[],
                         generated_at=iso(time.time()),
-                        operator_markers=read_markers(),
+                        operator_markers=markers,
                     ),
                 )
             elif path == "/catalogue":
@@ -198,16 +209,35 @@ def marker_path():
     return Path.home() / ".agent-trace" / "mission-markers.json"
 
 
-def read_markers():
+def read_markers(server, writing=False):
+    path = marker_path()
     try:
-        return json.loads(marker_path().read_text(encoding="utf-8"))
+        if path.is_symlink() or path.parent.is_symlink():
+            raise OSError("The preferences location is a symbolic link.")
+        try:
+            markers = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(markers, dict) or any(
+                not isinstance(m, dict) for m in markers.values()
+            ):
+                raise ValueError("Invalid marker format")
+            return markers
+        except (ValueError, RecursionError):
+            backup = path.with_name(f"{path.stem}.damaged-{secrets.token_hex(6)}.json")
+            path.rename(backup)
+            server.marker_notice = f"Pin and archive settings could not be read. The original was saved at {backup}."
     except FileNotFoundError:
-        return {}
+        pass
+    except OSError as exc:
+        server.marker_notice = f"Pin and archive settings are unavailable: {exc}"
+        if writing:
+            raise ValueError(server.marker_notice) from exc
+    return {}
 
 
 def start():
     s = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     s.library = Library()
+    s.marker_notice = ""
     s.desktop = None
     s.token = secrets.token_urlsafe(32)
     s.authority = "127.0.0.1:" + str(s.server_port)

@@ -3978,7 +3978,7 @@
       @container trace-workbench (max-width: 950px) { .mission-activity-footer { flex-wrap: wrap; gap: 4px; } }
       .team-worker .activity-tile-icon { background: color-mix(in srgb, var(--event-accent) 10%, #19212d); }
       #mission-activity-command { font: 12px/1.5 var(--sans); color: #cbd9e8; background: transparent; padding: 6px 0; cursor: default; }
-    :is(#prompt-dialog,#trace-preview) {color:#dbe5f2;background:#19202a;border:1px solid #485465;border-radius:10px;width:min(600px,90vw);padding:22px;font:14px/1.5 var(--sans)} :is(#prompt-dialog,#trace-preview)::backdrop{background:#0009} :is(#prompt-dialog,#trace-preview) label{display:block;margin:9px 0} :is(#prompt-dialog,#trace-preview) :is(input,textarea,select){display:block;width:100%;background:#14191f;color:inherit;padding:8px;border:1px solid #485465;border-radius:5px;font:inherit} #prompt-md{height:26vh} #prompt-dir{overflow-wrap:anywhere} :is(#prompt-dialog,#trace-preview) button{margin-top:10px}
+    :is(#prompt-dialog,#trace-preview,#source-dialog,#editor-confirm) {color:#dbe5f2;background:#19202a;border:1px solid #485465;border-radius:10px;width:min(600px,90vw);padding:22px;font:14px/1.5 var(--sans)} :is(#prompt-dialog,#trace-preview,#source-dialog,#editor-confirm)::backdrop{background:#0009} :is(#prompt-dialog,#trace-preview,#source-dialog,#editor-confirm) label{display:block;margin:9px 0} :is(#prompt-dialog,#trace-preview,#source-dialog,#editor-confirm) :is(input,textarea,select){display:block;width:100%;background:#14191f;color:inherit;padding:8px;border:1px solid #485465;border-radius:5px;font:inherit} #prompt-md{height:26vh} #prompt-dir{overflow-wrap:anywhere} :is(#prompt-dialog,#trace-preview,#source-dialog,#editor-confirm) button{margin-top:10px}
     #trace-preview[open] {display:flex; flex-direction:column; max-height:90vh; box-sizing:border-box}
     #trace-preview > :not(pre) {flex-shrink:0} #trace-preview pre {min-height:2em}
     #trace-preview footer {display:flex;gap:8px} #trace-preview pre,#prompt-output {white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:45vh;background:#14191f;padding:12px}
@@ -3999,6 +3999,8 @@
       body[data-native-window-mode="window"] #systembar-dropdown .trace-inspector-scroll {overflow:visible; flex:none}
     }
     #mission-pane-delete,#mission-delete {display:none !important}
+    #source-options {max-height:46vh;overflow:auto} #source-options label{display:flex;gap:8px;align-items:baseline;overflow-wrap:anywhere} #source-options input[type=checkbox]{width:auto}
+    #source-options small,#history-roots {color:#aebdcb;overflow-wrap:anywhere} #history-help {font-size:13px;padding:10px;border:1px solid #344151;border-radius:8px} #history-help p {margin:5px 0}
     </style>
   </head>
   <body data-systembar-expanded="false" data-systembar-pinned="false" data-systembar-mode="compact" data-systembar-content="hidden" data-native-window-mode="compact" data-native-shell-mode="floating">
@@ -4138,6 +4140,7 @@
               </div>
               <div class="selected-mission-actions" aria-label="Selected mission actions">
                 <div class="selected-copy-actions">
+                  <button id="choose-sources" class="btn" type="button">Choose sessions…</button>
                   <button id="preview-scope" class="btn" type="button">Preview copy</button>
                   <button id="mission-pane-copy-capsule" class="btn primary" type="button" disabled>Copy Capsule</button>
                   <button id="mission-pane-save-reveal" class="btn" type="button" disabled>Save + Reveal</button>
@@ -4163,6 +4166,7 @@
                   </div>
                   <button id="mission-pane-refresh" class="btn" type="button" title="Refresh missions">Refresh</button>
                 </div>
+                <div id="history-help" hidden><strong>Find your conversations</strong><p>Start a local Codex or Claude Code conversation, then refresh. Agent Trace looks in these folders.</p><ul id="history-roots"></ul><details><summary>Using a different folder?</summary><p>Launch with CODEX_HOME or CLAUDE_CONFIG_DIR set to your provider’s configuration directory. Agent Trace looks for sessions or projects inside it. Browsing here does not grant an agent access.</p></details></div>
                 <p id="conflict-note" role="status" hidden></p>
                 <div id="mission-index-receipt" class="mission-index-receipt" role="status" aria-live="polite" aria-atomic="true"></div>
                 <div id="mission-provider-filters" class="mission-quick-filters mission-provider-filters" role="group" aria-label="Filter by agent">
@@ -4306,13 +4310,17 @@
         </article>
       </section>
     </main>
+    <dialog id="source-dialog" aria-labelledby="source-heading"><h2 id="source-heading">Choose sessions</h2>
+      <p id="source-note"></p><div id="source-options"></div><p id="source-status" role="status"></p>
+      <button class="btn" id="source-preview">Preview selection</button> <button class="btn" id="source-tail">Preview recent activity</button> <button class="btn" id="source-close">Close</button></dialog>
+    <dialog id="editor-confirm" aria-labelledby="editor-question"><p id="editor-question"></p><button class="btn" id="editor-keep">Keep editing</button> <button class="btn" id="editor-accept"></button></dialog>
     <dialog id="trace-preview" aria-labelledby="preview-heading"><h2 id="preview-heading">Copy preview</h2>
       <p id="preview-scope-name"></p><ul id="preview-sources"></ul><p id="preview-warnings" role="status"></p>
       <pre id="preview-text" tabindex="0"></pre>
       <p>Browsing stays on this Mac. Pasting into an agent or granting it access can send content to its provider.</p>
       <footer><button class="btn primary" type="button" id="preview-copy">Copy this text</button>
       <button class="btn" type="button" id="preview-close">Close</button></footer></dialog>
-    <dialog id="prompt-dialog" aria-labelledby="prompt-editor-heading"><h2 id="prompt-editor-heading">Manage prompts</h2><label>Prompt<select id="prompt-choose"></select></label><label>Filename (without .md)<input id="prompt-name" maxlength="80"></label><label>Markdown<textarea id="prompt-md"></textarea></label><button class="btn" type="button" id="prompt-preview">Preview prompt text</button><pre hidden id="prompt-output" tabindex="0"></pre><small id="prompt-dir"></small><p id="edit-note" role="status"></p><button class="btn" id="prompt-save">Save prompt</button> <button class="btn" id="prompt-cancel">Close</button></dialog>
+    <dialog id="prompt-dialog" aria-labelledby="prompt-editor-heading"><h2 id="prompt-editor-heading">Manage prompts</h2><label>Prompt<select id="prompt-choose"></select></label><label>Filename (without .md)<input id="prompt-name" maxlength="80"></label><label>Markdown<textarea id="prompt-md"></textarea></label><button class="btn" type="button" id="prompt-preview">Preview prompt text</button><pre hidden id="prompt-output" tabindex="0"></pre><small id="prompt-dir"></small><p id="edit-note" role="status"></p><button class="btn" id="prompt-save">Save prompt</button> <button class="btn" id="prompt-remove" hidden></button> <button class="btn" id="prompt-cancel">Close</button></dialog>
     <script src="./key.js"></script>
     <script type="module" src="./app.mjs"></script>
   </body>

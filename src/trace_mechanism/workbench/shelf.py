@@ -38,7 +38,10 @@ def read(slug):
             if path.stat().st_size > LIMIT:
                 raise ValueError("Prompt exceeds 1 MiB.")
             raw = path.read_text(encoding="utf-8")
-            return describe(slug, raw, user=folder != BUNDLED)
+            return dict(
+                describe(slug, raw, user=folder != BUNDLED),
+                starter=(BUNDLED / (slug + ".md")).is_file(),
+            )
     return None
 
 
@@ -114,3 +117,11 @@ def save(slug, raw, revision):
     finally:
         Path(temp.name).unlink(missing_ok=True)
     return read(slug)
+
+
+def remove(slug, revision):
+    current = read(slug)
+    if not current or not current["user"] or current["revision"] != revision:
+        raise ValueError("The personal prompt changed. Reopen it before removing it.")
+    (user_dir() / (slug + ".md")).unlink()
+    return {"ok": True, "restored": current["starter"]}

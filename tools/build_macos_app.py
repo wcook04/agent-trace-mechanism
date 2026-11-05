@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import plistlib
 import shutil
 import zipfile
 import subprocess
@@ -13,6 +14,11 @@ import sys
 import sysconfig
 from importlib.metadata import distribution
 import tempfile
+
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -71,7 +77,23 @@ if __name__ == "__main__":
                     (notices / (name + "-" + f.name)).write_bytes(
                         dep.locate_file(f).read_bytes()
                     )
+        if (
+            subprocess.check_output(
+                [*git, "rev-parse", "--is-shallow-repository"], text=True
+            ).strip()
+            == "true"
+        ):
+            raise SystemExit(
+                "Use a full Git checkout to assign the commit build number."
+            )
+        with (export / "pyproject.toml").open("rb") as project:
+            version = tomllib.load(project)["project"]["version"]
+        build_number = subprocess.check_output(
+            [*git, "rev-list", "--count", revision], text=True
+        ).strip()
         build_info = {
+            "version": version,
+            "build_number": build_number,
             "revision": revision,
             "architecture": platform.machine(),
             "python": platform.python_version(),
@@ -136,6 +158,11 @@ if __name__ == "__main__":
                 "Frozen reader modules did not come from the archived revision."
             )
         app = output / "Agent Trace Structurer.app"
+        info_path = app / "Contents/Info.plist"
+        info = plistlib.loads(info_path.read_bytes())
+        info.update(CFBundleShortVersionString=version, CFBundleVersion=build_number)
+        info_path.write_bytes(plistlib.dumps(info))
+        subprocess.run(["codesign", "--force", "--sign", "-", app], check=True)
         assets = app / "Contents/Resources/trace_mechanism/workbench"
         for asset in (src / "trace_mechanism/workbench").rglob("*"):
             if asset.is_file() and asset.suffix in (".html", ".js", ".mjs", ".md"):

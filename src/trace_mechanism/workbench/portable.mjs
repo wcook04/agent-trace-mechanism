@@ -24,36 +24,77 @@ export async function deliver(text,action) {
 }
 export function editPrompts(reload) {
   const el=id=>document.getElementById(id);
-  let revision=null;
-  async function pick(slug) {
-    const data=slug?await (await fetch('/prompt-shelf/'+encodeURIComponent(slug))).json():{};
-    el('prompt-name').value=slug; el('prompt-name').disabled=!!slug;
-    el('prompt-md').value=data.raw||''; revision=data.revision||null;
-    el('prompt-output').hidden=true;
-    el('edit-note').textContent=data.raw && !data.user ? 'Saving creates a personal copy of this starter.' : '';
+  const editor = el('prompt-dialog');
+  const confirm = el('editor-confirm');
+  let original = {}, slug = '', loading = 0, pending = null;
+  function question(message, action, accept) {
+    pending = accept;
+    el('editor-question').textContent = message;
+    el('editor-accept').textContent = action;
+    confirm.showModal();
+    el('editor-keep').focus();
   }
-  el('manage-prompts').onclick=async()=>{
+  el('editor-keep').onclick = () => { pending = null; confirm.close(); };
+  el('editor-accept').onclick = () => { const accept = pending; pending = null; confirm.close(); accept?.(); };
+  function leave(action) {
+    if (el('prompt-md').value !== (original.raw || '') || el('prompt-name').value !== slug)
+      question('Discard your unsaved prompt changes?', 'Discard changes', action);
+    else action();
+  }
+  async function pick(next) {
+    const generation = ++loading;
     try {
-      const data=await (await fetch('/prompt-shelf')).json();
-      el('prompt-choose').replaceChildren(new Option('New prompt',''),...data.items.map(i=>new Option(i.title,i.slug)));
-      el('prompt-dir').textContent=data.directory;
-      await pick('');el('prompt-dialog').showModal();
-    } catch(e) {el('prompts-receipt').textContent=e.message;}
+      const response = next ? await fetch('/prompt-shelf/'+encodeURIComponent(next)) : null;
+      const data = response ? await response.json() : {};
+      if (generation !== loading) return;
+      if (response && !response.ok) throw Error(data.error || 'Prompt could not be opened.');
+      original = data; slug = next;
+      el('prompt-choose').value = next;
+      el('prompt-name').value = next; el('prompt-name').disabled = Boolean(next);
+      el('prompt-md').value = data.raw || ''; el('prompt-output').hidden = true;
+      el('prompt-remove').hidden = !data.user;
+      el('prompt-remove').textContent = data.starter ? 'Restore starter' : 'Delete prompt';
+      el('edit-note').textContent = data.raw && !data.user ? 'Saving creates a personal copy of this starter.' : '';
+    } catch (error) { el('edit-note').textContent = error.message; }
+  }
+  async function refreshChoices() {
+    const response = await fetch('/prompt-shelf');
+    const data = await response.json();
+    if (!response.ok) throw Error(data.error);
+    el('prompt-choose').replaceChildren(new Option('New prompt',''),...data.items.map(i=>new Option(i.title,i.slug)));
+    el('prompt-dir').textContent = data.directory;
+  }
+  el('manage-prompts').onclick = async () => {
+    try { await refreshChoices(); await pick(''); editor.showModal(); }
+    catch(error) { el('prompts-receipt').textContent = error.message; }
   };
-  el('prompt-choose').onchange=()=>pick(el('prompt-choose').value).catch(e=>el('edit-note').textContent=e.message);
-  el('prompt-save').onclick=async()=>{
+  el('prompt-choose').onchange = event => {
+    const next = event.target.value; event.target.value = slug;
+    leave(() => pick(next));
+  };
+  el('prompt-save').onclick = async () => {
     try {
-      await post('/save-prompt',{slug:el('prompt-name').value.trim(),raw:el('prompt-md').value,revision});
-      el('prompt-dialog').close();await reload();
-    } catch(e){el('edit-note').textContent=e.message;}
+      await post('/save-prompt',{slug:el('prompt-name').value.trim(),raw:el('prompt-md').value,revision:original.revision || null});
+      editor.close(); await reload();
+    } catch(error) { el('edit-note').textContent = error.message; }
   };
-  el('prompt-md').oninput=()=>{el('prompt-output').hidden=true;};
-  el('prompt-preview').onclick=async()=>{
+  el('prompt-remove').onclick = () => {
+    const action = original.starter ? 'Restore starter' : 'Delete prompt';
+    question(original.starter ? 'Remove your edits and restore the bundled starter?' : 'Delete this personal prompt?', action, async () => {
+      try {
+        const result = await post('/remove-prompt',{slug,revision:original.revision});
+        await refreshChoices(); await pick(result.restored ? slug : ''); await reload();
+      } catch(error) { el('edit-note').textContent = error.message; }
+    });
+  };
+  el('prompt-md').oninput = () => {el('prompt-output').hidden=true;};
+  el('prompt-preview').onclick = async () => {
     try {
-      const {text}=await post('/preview-prompt',{raw:el('prompt-md').value});
-      el('prompt-output').textContent=text;
-      el('prompt-output').hidden=false;
-    } catch(e){el('edit-note').textContent=e.message;}
+      const raw = el('prompt-md').value;
+      const {text} = await post('/preview-prompt',{raw});
+      if (el('prompt-md').value === raw) {el('prompt-output').textContent=text; el('prompt-output').hidden=false;}
+    } catch(error) {el('edit-note').textContent=error.message;}
   };
-  el('prompt-cancel').onclick=()=>el('prompt-dialog').close();
+  el('prompt-cancel').onclick = () => leave(() => editor.close());
+  editor.oncancel = event => { event.preventDefault(); el('prompt-cancel').click(); };
 }

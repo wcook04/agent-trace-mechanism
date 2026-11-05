@@ -6978,8 +6978,19 @@ async function fetchMissionIndexHttpFallback(reason = 'request', opts = {}) {
     });
     const conflicts = Number(payload?.index?.ambiguous_sessions || 0);
     const note = document.getElementById('conflict-note');
-    note.hidden = conflicts === 0;
-    note.textContent = conflicts ? `Duplicate history files claim ${conflicts} session ID(s). Those conversations are hidden until the duplicates are resolved.` : '';
+    const roots = Object.entries(payload?.index?.discovery || {});
+    const skipped = roots.reduce((n,[,r]) => n + r.unsupported + r.unreadable, 0);
+    const notices = [payload?.index?.marker_notice, conflicts && `Duplicate history files claim ${conflicts} session ID(s). Resolve the duplicates to include them.`,
+      skipped && `${skipped} file(s) or folders could not be identified or read. Their session relationships are unknown.`].filter(Boolean);
+    note.hidden = notices.length === 0;
+    note.textContent = notices.join(' ');
+    const help = document.getElementById('history-help');
+    help.hidden = !payload?.ok || Boolean(payload.index.active_rows.length);
+    if (!help.hidden) document.getElementById('history-roots').replaceChildren(...roots.map(([provider, r]) => {
+      const li = document.createElement('li');
+      li.textContent = (provider === 'codex' ? 'Codex' : 'Claude Code') + ' · ' + r.root + (r.exists ? '' : ' (folder absent)');
+      return li;
+    }));
     return Boolean(payload?.ok);
   } catch (error) {
     window.agentTraceStructurerMissionIndex({
@@ -9889,7 +9900,7 @@ function renderPromptsDropdown() {
   }
   const items = promptShelfIndex.items || [];
   if (items.length === 0) {
-    dropdownEls.promptsRows.innerHTML = '<div class="prompts-empty">no prompts in obsidian/prompt_shelf/items/</div>';
+    dropdownEls.promptsRows.innerHTML = '<div class="prompts-empty">Your shelf is empty. Use Manage prompts to add a Markdown prompt.</div>';
     return;
   }
   const html = items.map((item, index) => {
@@ -10757,7 +10768,7 @@ function renderAgentTraceDropdownBody(reason = 'render') {
           const traceText = missionTraceCellLabel(copySize);
           const age = missionAgeFields(row, displayTurn, activeTrace);
           const attentionCue = attention.attention_reasons?.[0] || '';
-          const searchCue = dropdownSearch ? 'search hit · select row, copy capsule/full thread, or reveal source' : '';
+          const searchCue = dropdownSearch ? 'search hit · select row, copy capsule/full thread, or preview the text' : '';
           // Lead the preview with the actual prompt/content — the per-row signal the
           // operator scans for. The attention cue (often the same "copy readiness
           // amber: …" boilerplate on every row) and search hint follow, so they
@@ -12099,11 +12110,13 @@ try {
 
 // Modal editing and previews own keyboard input, including the system Escape shortcut.
 window.addEventListener('keydown', event => {
-  const dialog = document.querySelector('#trace-preview[open],#prompt-dialog[open]');
+  const dialog = document.querySelector('#editor-confirm[open]') || document.querySelector('#trace-preview[open],#prompt-dialog[open],#source-dialog[open]');
   if (dialog && event.key === 'Escape') {
     event.preventDefault();
     event.stopImmediatePropagation();
-    dialog.close();
+    if (dialog.id === 'prompt-dialog') document.getElementById('prompt-cancel').click();
+    else if (dialog.id === 'editor-confirm') document.getElementById('editor-keep').click();
+    else dialog.close();
   }
 }, true);
 const previewDialog = document.getElementById('trace-preview');
@@ -12126,8 +12139,8 @@ previewCopy.onclick = async () => {
 };
 const previewButton = document.getElementById('preview-scope');
 previewButton.onclick = () => portableTrace('preview', selectedTraceSourceWindow(), false);
-async function portableTrace(action, sourceWindow, closeout) {
-  const row = findMissionByKey(selectedMissionKey);
+async function portableTrace(action, sourceWindow, closeout, selection = null) {
+  const row = selection?.row || findMissionByKey(selectedMissionKey);
   if (!row) return;
   const scope = sessionTraceScopeParams(sourceWindow || selectedTraceSourceWindow());
   const receipt = dropdownEls.missionReceipt;
@@ -12137,8 +12150,8 @@ async function portableTrace(action, sourceWindow, closeout) {
   if (button) button.disabled = true;
   receipt.textContent = 'Reading ' + title + '…';
   try {
-    const result = await post('/trace', {ref:row.ref, ...scope, closeout, preview:action === 'preview', deliver:desktop ? action : null});
-    const scopeLabel = closeout ? 'Closeout' : scope.turns ? `Last ${scope.turns} turn(s), selected conversation only` :
+    const result = await post('/trace', {ref:row.ref, ...scope, ...(selection?.tail ? {activity_only:true} : selection ? {selected_refs:selection.refs} : {}), closeout, preview:action === 'preview', deliver:desktop ? action : null});
+    const scopeLabel = selection?.tail ? 'Recent recorded activity' : selection ? 'Selected conversations · detailed' : closeout ? 'Closeout' : scope.turns ? `Last ${scope.turns} turn(s), selected conversation only` :
       scope.depth === 'summary' ? 'Full thread compact' : 'Full thread detailed';
     const summary = [title, scopeLabel, result.sessions + ' session(s)', _formatKB(result.bytes), ...result.warnings].join(' · ');
     if (action === 'preview') {
@@ -12146,10 +12159,10 @@ async function portableTrace(action, sourceWindow, closeout) {
       document.getElementById('preview-scope-name').textContent = summary;
       document.getElementById('preview-sources').replaceChildren(...result.sources.map(source => {
         const item = document.createElement('li');
-        item.textContent = source.title + ' · ' + source.session_id + (source.parent ? ' · child of ' + source.parent : '');
+        item.textContent = source.title + ' · ' + source.session_id + ' · source modified ' + new Date(source.modified).toLocaleString() + (source.parent ? ' · child of ' + source.parent : '');
         return item;
       }));
-      document.getElementById('preview-warnings').textContent = '';
+      document.getElementById('preview-warnings').textContent = 'Read sequentially at ' + new Date(result.captured_at).toLocaleTimeString() + '. Large native outputs use excerpts and field references.';
       previewText.textContent = result.text;
       receipt.textContent = 'Preview ready · ' + summary;
       previewDialog.showModal();
@@ -12167,6 +12180,45 @@ async function portableTrace(action, sourceWindow, closeout) {
   } catch (err) { receipt.textContent = err.message; }
   finally { if (button) button.disabled = false; }
 }
+const sourceDialog = document.getElementById('source-dialog');
+const sourceList = document.getElementById('source-options');
+let sourceOwner = null;
+document.getElementById('choose-sources').onclick = async () => {
+  const row = findMissionByKey(selectedMissionKey);
+  if (!row) return;
+  try {
+    const options = await post('/capture-options', {ref:row.ref});
+    if (selectedMissionKey !== missionKey(row)) return;
+    sourceOwner = row;
+    const gaps = Object.entries(options.unavailable).map(([id,reason]) => id + ' · ' + reason);
+    document.getElementById('source-note').textContent = `Choose up to ${options.limit} discovered conversations. The total input limit is 256 MiB. Recent activity reads the last 128 KiB of the current conversation.`;
+    document.getElementById('source-status').textContent = gaps.join(' · ');
+    sourceList.replaceChildren(...options.sources.map(source => {
+      const label = document.createElement('label');
+      const box = document.createElement('input');
+      box.type = 'checkbox'; box.value = source.ref; box.disabled = !source.readable;
+      box.checked = source.ref === row.ref && source.readable;
+      label.append(box, document.createTextNode(source.title + ' · ' + source.session_id +
+        (source.parent ? ' · child of ' + source.parent : '') + (box.disabled ? ' · exceeds 256 MiB' : '')));
+      return label;
+    }));
+    sourceDialog.showModal();
+  } catch (error) { dropdownEls.missionReceipt.textContent = error.message; }
+};
+document.getElementById('source-tail').onclick = () => {
+  sourceDialog.close();
+  portableTrace('preview', SOURCE_WINDOW_FULL_THREAD, false, {row:sourceOwner, tail:true});
+};
+document.getElementById('source-close').onclick = () => sourceDialog.close();
+document.getElementById('source-preview').onclick = () => {
+  const refs = [...sourceList.querySelectorAll('input:checked')].map(box => box.value);
+  if (!refs.length || refs.length > 64) {
+    document.getElementById('source-status').textContent = 'Select between 1 and 64 conversations.';
+    return;
+  }
+  sourceDialog.close();
+  portableTrace('preview', SOURCE_WINDOW_FULL_THREAD, false, {row:sourceOwner, refs});
+};
 editPrompts(fetchPromptShelfHttpFallback);
 const floatButton=document.getElementById('public-float');
 const readyDesktop=()=>document.body.classList.add('desktop');

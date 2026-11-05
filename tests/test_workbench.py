@@ -286,3 +286,80 @@ def test_large_tool_output_preserves_exact_terminal_message(isolated):
     with pytest.raises(ValueError):
         lib.trace({**identity, "turns": 1, "closeout": True})
     assert "First prompt" not in lib.trace({**identity, "turns": 1})["text"]
+
+
+@pytest.mark.parametrize("damaged", [b'{"bad":', b"[]", b'{"codex:a":4}', b"\xff"])
+def test_damaged_preferences_preserved_without_hiding_sessions(isolated, damaged):
+    folder = isolated / ".codex/sessions"
+    folder.mkdir(parents=True)
+    shutil.copyfile(ROOT / "examples/codex.jsonl", folder / "source.jsonl")
+    marker = isolated / ".agent-trace/mission-markers.json"
+    marker.parent.mkdir()
+    marker.write_bytes(damaged)
+    with app() as api:
+        index = api("/mission-index")["index"]
+        assert len(index["active_rows"]) == 1 and index["operator_markers"] == {}
+        (backup,) = marker.parent.glob("mission-markers.damaged-*.json")
+        assert backup.read_bytes() == damaged and str(backup) in index["marker_notice"]
+        api("/marker", {"mission_key": "codex:a", "pinned": True})
+        assert api("/mission-index")["index"]["operator_markers"]["codex:a"]["pinned"]
+        assert backup.read_bytes() == damaged
+
+
+def test_choose_nested_workers_or_parent_from_oversize_tree(isolated):
+    from trace_mechanism.workbench.library import Library
+
+    folder = isolated / ".codex/sessions"
+    folder.mkdir(parents=True)
+    fixture = (ROOT / "examples/codex.jsonl").read_text().splitlines()
+    for i in range(67):
+        parent = None if not i else "worker1" if i == 2 else "worker0"
+        meta = {"id": f"worker{i}", "agent_nickname": f"Name {i}"}
+        if parent:
+            meta["parent_thread_id"] = parent
+        (folder / f"{i}.jsonl").write_text(
+            "\n".join(
+                [json.dumps({"type": "session_meta", "payload": meta}), *fixture[1:]]
+            )
+            + "\n"
+        )
+    lib = Library()
+    rows = {r["session_id"]: r for r in lib.discover()}
+    key = {"ref": rows["worker0"]["ref"]}
+    assert rows["worker1"]["agent_name"] == "Name 1"
+    assert len(lib.capture_options(key)["sources"]) == 67
+    with pytest.raises(ValueError, match="64"):
+        lib.trace(key)
+    selected = [rows[sid]["ref"] for sid in ("worker1", "worker2")]
+    trace = lib.trace({**key, "selected_refs": selected})
+    assert {s["session_id"] for s in trace["sources"]} == {"worker1", "worker2"}
+    assert trace["discovered"] == 67 and "65 discovered" in trace["warnings"][0]
+    (folder / "2.jsonl").unlink()
+    lib.discover()
+    assert "worker2" in lib.capture_options(key)["unavailable"]
+    assert lib.trace({**key, "selected_refs": [key["ref"]]})["sessions"] == 1
+    with pytest.raises(ValueError):
+        lib.trace({**key, "selected_refs": selected})
+    tail = lib.trace({**key, "activity_only": True})
+    assert tail["sessions"] == 1 and "Source bytes" in tail["text"]
+
+
+def test_prompt_removal_respects_starter_and_revision(isolated):
+    with app() as api:
+        starter = api("/prompt-shelf/continue")
+        override = api(
+            "/save-prompt",
+            {"slug": "continue", "revision": starter["revision"], "raw": "Personal"},
+        )
+        with pytest.raises(HTTPError):
+            api("/remove-prompt", {"slug": "continue", "revision": starter["revision"]})
+        assert api(
+            "/remove-prompt", {"slug": "continue", "revision": override["revision"]}
+        )["restored"]
+        assert api("/prompt-shelf/continue")["raw"] == starter["raw"]
+        custom = api("/save-prompt", {"slug": "mine", "raw": "Custom"})
+        assert not api(
+            "/remove-prompt", {"slug": "mine", "revision": custom["revision"]}
+        )["restored"]
+        with pytest.raises(HTTPError):
+            api("/prompt-shelf/mine")

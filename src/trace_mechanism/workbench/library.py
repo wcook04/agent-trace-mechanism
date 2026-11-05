@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import threading
 import time
@@ -196,10 +197,13 @@ class Library:
         self.cache, self.entries = {}, {}
         self.lock = threading.RLock()
         self.conflicts = set()
+        self.discovery = {}
+        self.missing = {}
 
     def discover(self):
         fresh, entries = {}, {}
         names = {}
+        discovery = {}
         idx = history_root("codex").parent / "session_index.jsonl"
         if idx.is_file() and not idx.is_symlink():
             try:
@@ -217,7 +221,29 @@ class Library:
                 pass
         for provider in ("codex", "claude"):
             root = history_root(provider).expanduser().resolve()
-            for path in root.rglob("*.jsonl"):
+            report = {
+                "root": str(root),
+                "exists": root.is_dir(),
+                "unreadable": 0,
+                "unsupported": 0,
+                "recognized": 0,
+            }
+            discovery[provider] = report
+
+            def skipped_directory(_error):
+                report["unreadable"] += 1
+
+            paths = (
+                (
+                    Path(folder) / name
+                    for folder, _, files in os.walk(root, onerror=skipped_directory)
+                    for name in files
+                    if name.endswith(".jsonl")
+                )
+                if root.exists()
+                else ()
+            )
+            for path in paths:
                 try:
                     if (
                         path.is_symlink()
@@ -237,6 +263,7 @@ class Library:
                             or not isinstance(sid, str)
                             or not sid
                         ):
+                            report["unsupported"] += 1
                             continue
                         rows, start = records(path)
                         events, prompt, state, turns = summary(rows)
@@ -295,9 +322,11 @@ class Library:
                             size_bytes=st.st_size,
                             thread_parent=parent,
                             agent_name=meta.get("agent_nickname")
-                            or (spawn or {}).get("agent_nickname")
-                            if isinstance(spawn, dict)
-                            else None,
+                            or (
+                                spawn.get("agent_nickname")
+                                if isinstance(spawn, dict)
+                                else None
+                            ),
                             source_mtime_ms=st.st_mtime * 1000,
                             worker_state=state,
                             parent_evidence=(
@@ -323,8 +352,9 @@ class Library:
                     if provider == "codex" and entry["session_id"] in names:
                         entry = dict(entry, source_title=names[entry["session_id"]])
                     entries[entry["ref"]] = entry
+                    report["recognized"] += 1
                 except (OSError, ValueError, TypeError):
-                    continue
+                    report["unreadable"] += 1
         ids = set()
         conflicts = set()
         for entry in entries.values():
@@ -338,7 +368,20 @@ class Library:
             if (e["provider"], e["session_id"]) not in conflicts
         }
         with self.lock:
-            self.cache, self.entries, self.conflicts = fresh, entries, conflicts
+            for path, (_, old) in self.cache.items():
+                if path not in fresh and old.get("thread_parent"):
+                    self.missing[path] = {
+                        k: old[k]
+                        for k in ("provider", "session_id", "thread_parent", "ref")
+                    }
+            for path in fresh:
+                self.missing.pop(path, None)
+            self.cache, self.entries, self.conflicts, self.discovery = (
+                fresh,
+                entries,
+                conflicts,
+                discovery,
+            )
         return [
             dict((k, v) for k, v in e.items() if k not in ("path", "events"))
             for e in sorted(entries.values(), key=lambda e: -e["source_mtime_ms"])
@@ -426,6 +469,67 @@ class Library:
             ),
         )
 
+    def capture_graph(self, root):
+        """Traverse only edges observed in this discovery. Preserve known gaps separately."""
+        with self.lock:
+            children = {}
+            for item in self.entries.values():
+                if item["provider"] == root["provider"]:
+                    children.setdefault(item["thread_parent"], []).append(item)
+            group, seen = [root], {root["ref"]}
+            for parent in group:
+                for child in sorted(
+                    children.get(parent["session_id"], []),
+                    key=lambda c: c["session_id"],
+                ):
+                    if (
+                        child["parent_evidence"] == "subagents_directory"
+                        and child["path"].parent.parent.parent != parent["path"].parent
+                    ):
+                        continue
+                    if child["ref"] in seen:
+                        raise ValueError(
+                            "The selected history has a cyclic parent relationship."
+                        )
+                    seen.add(child["ref"])
+                    group.append(child)
+            parents = {item["session_id"] for item in group}
+            gaps = {
+                item["session_id"]: "unavailable since discovery"
+                for item in self.missing.values()
+                if item["provider"] == root["provider"]
+                and item["thread_parent"] in parents
+            }
+            for _, item in self.cache.values():
+                if (
+                    (item["provider"], item["session_id"]) in self.conflicts
+                    and item["provider"] == root["provider"]
+                    and item["thread_parent"] in parents
+                ):
+                    gaps[item["session_id"]] = "conflicting history files"
+            for item in group:
+                gaps.pop(item["session_id"], None)
+        return group, gaps
+
+    def capture_options(self, data):
+        group, gaps = self.capture_graph(self.select(data))
+        return {
+            "sources": [
+                dict(
+                    ref=e["ref"],
+                    session_id=e["session_id"],
+                    parent=e["thread_parent"],
+                    title=e["source_title"] or e["prompt_derived_title"],
+                    bytes=e["size_bytes"],
+                    modified=e["mtime_utc"],
+                    readable=e["size_bytes"] <= codex_native.MAX_SOURCE_BYTES,
+                )
+                for e in group
+            ],
+            "unavailable": gaps,
+            "limit": 64,
+        }
+
     def trace(self, data):
         e = self.select(data)
         turns = data.get("turns", 0)
@@ -433,37 +537,48 @@ class Library:
             raise ValueError("Invalid turn count.")
         detail = data.get("depth") != "summary"
         closeout = data.get("closeout") is True
-        group = [e]
-        if not turns and not closeout:
-            seen = {e["ref"]}
-            for parent in group:
-                for c in self.children(parent):
-                    if c["ref"] in seen:
-                        raise ValueError(
-                            "The selected history has a cyclic parent relationship."
-                        )
-                    seen.add(c["ref"])
-                    group.append(c)
-                    if len(group) > 64:
-                        raise ValueError(
-                            "More than 64 linked sessions. Choose a recent-turn scope."
-                        )
+        tail_only = data.get("activity_only") is True
+        group, gaps = (
+            ([e], {}) if turns or closeout or tail_only else self.capture_graph(e)
+        )
+        total = len(group)
+        chosen = data.get("selected_refs")
+        if chosen is not None:
+            if (
+                turns
+                or closeout
+                or tail_only
+                or not isinstance(chosen, list)
+                or not all(isinstance(ref, str) for ref in chosen)
+            ):
+                raise ValueError("Choose sessions for a whole-conversation capture.")
+            requested = set(chosen)
+            if (
+                not requested
+                or len(requested) != len(chosen)
+                or not requested <= {c["ref"] for c in group}
+            ):
+                raise ValueError("Selection changed. Choose the conversations again.")
+            group = [c for c in group if c["ref"] in requested]
+        elif gaps:
+            raise ValueError(
+                "A linked worker is unavailable or has conflicting history files. Use Choose sessions to capture the available sources."
+            )
+        if not tail_only and (
+            len(group) > 64
+            or sum(c["size_bytes"] for c in group) > codex_native.MAX_SOURCE_BYTES
+        ):
+            raise ValueError(
+                "A capture supports 64 sessions and 256 MiB of input in total. Use Choose sessions or preview recent activity."
+            )
         texts, snapshots, paths, sources, warnings = [], [], {}, [], []
+        stats = {}
         for item in group:
-            if not turns and not closeout:
-                with self.lock:
-                    if any(
-                        c["provider"] == item["provider"]
-                        and c["thread_parent"] == item["session_id"]
-                        and (c["provider"], c["session_id"]) in self.conflicts
-                        for _, c in self.cache.values()
-                    ):
-                        raise ValueError(
-                            "A linked worker has conflicting history files. Resolve the duplicate before copying."
-                        )
             self.check_path(item)
             path = item["path"]
             sid = item["session_id"]
+            st = path.stat()
+            stats[path] = st.st_dev, st.st_ino, st.st_mtime_ns, st.st_size
             if metadata(path).get("id") != item["recorded_id"]:
                 raise ValueError("Source identity changed. Refresh the list.")
             sources.append(
@@ -472,9 +587,29 @@ class Library:
                     title=item["source_title"] or item["prompt_derived_title"],
                     parent=item["thread_parent"],
                     relationship=item["parent_evidence"],
+                    modified=iso(st.st_mtime),
                 )
             )
-            if item["provider"] == "codex":
+            if tail_only:
+                rows, start = records(path)
+                events, prompt, state, _ = summary(rows)
+                lines = [
+                    f"Recent recorded activity · {sid}",
+                    f"Source bytes {start}–{st.st_size} · observed state {state}",
+                ]
+                if prompt:
+                    lines.append(f"Prompt excerpt: {prompt}")
+                lines.extend(
+                    f"Byte {ev['source_offset']} · {ev['label']} · {ev['status']}"
+                    for ev in events
+                )
+                if not rows:
+                    lines.append("No complete record in this byte range.")
+                texts.append("\n".join(lines))
+                warnings.append(
+                    "Activity summary only · last 128 KiB of the selected source · message and tool bodies excluded"
+                )
+            elif item["provider"] == "codex":
                 snapshot = codex_native.load_rollout(path, session_id=sid)
                 snapshots.append(snapshot)
                 paths[sid] = path
@@ -528,12 +663,27 @@ class Library:
             text = "\n\n".join(texts)
         if not text:
             raise ValueError("No readable records in the selected scope.")
+        for path, before in stats.items():
+            after = path.stat()
+            if before != (after.st_dev, after.st_ino, after.st_mtime_ns, after.st_size):
+                raise ValueError(
+                    "A selected source changed during capture. Refresh and try again."
+                )
+        if chosen is not None:
+            warnings.extend(f"{sid}: {reason}" for sid, reason in gaps.items())
+            if total > len(group):
+                warnings.append(
+                    f"{total - len(group)} discovered session(s) excluded by selection"
+                )
         encoded = text.encode()
         return dict(
             ok=True,
             text=text,
             bytes=len(encoded),
             sessions=len(group),
+            discovered=total,
+            unavailable=gaps,
+            captured_at=iso(time.time()),
             sources=sources,
             warnings=warnings,
             text_sha256=hashlib.sha256(encoded).hexdigest(),
