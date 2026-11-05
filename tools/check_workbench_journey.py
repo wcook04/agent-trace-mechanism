@@ -77,6 +77,53 @@ def fresh_agent(python, home, manifest, sid, expected):
     )
 
 
+def fresh_codex(python, home, manifest, sid, expected):
+    args = ["-I", "-m", "trace_mechanism.mcp_server", "--manifest", str(manifest)]
+    answer = home / "model-answer.txt"
+    prompt = (
+        f"Call release_read.read_chat_context for provider codex, session_id {sid}, "
+        "scope full_thread, include_children true and limit 1. Return its text_sha256 alone. "
+        "Use no shell or filesystem tools."
+    )
+    result = subprocess.run(
+        [
+            "codex",
+            "exec",
+            "--ignore-user-config",
+            "--ignore-rules",
+            "--ephemeral",
+            "--skip-git-repo-check",
+            "--sandbox",
+            "read-only",
+            "--json",
+            "-c",
+            "mcp_servers.release_read.command=" + json.dumps(python),
+            "-c",
+            "mcp_servers.release_read.args=" + json.dumps(args),
+            "-c",
+            'mcp_servers.release_read.tools.read_chat_context.approval_mode="approve"',
+            "-o",
+            answer,
+            prompt,
+        ],
+        cwd=home,
+        capture_output=True,
+        text=True,
+        timeout=180,
+        check=True,
+    )
+    events = [json.loads(line) for line in result.stdout.splitlines() if line.strip()]
+    assert any(
+        item.get("type") == "mcp_tool_call"
+        and item.get("server") == "release_read"
+        and item.get("tool") == "read_chat_context"
+        and item.get("status") == "completed"
+        for event in events
+        if isinstance(item := event.get("item"), dict)
+    ), "Codex did not complete the read"
+    assert expected in answer.read_text(), "Codex returned a different digest"
+
+
 def run(args, home):
     folder = home / "custom-codex/sessions"
     folder.mkdir(parents=True)
@@ -207,12 +254,15 @@ def run(args, home):
         digest = hashlib.sha256(copied.encode()).hexdigest()
         if args.claude:
             fresh_agent(python, home, manifest, sid, digest)
+        if args.codex:
+            fresh_codex(python, home, manifest, sid, digest)
         print(
             json.dumps(
                 {
                     "sessions": len(files),
                     "clipboard_sha256": digest,
-                    "fresh_agent_verified": args.claude,
+                    "claude_model_verified": args.claude,
+                    "codex_model_verified": args.codex,
                 }
             )
         )
@@ -234,6 +284,11 @@ if __name__ == "__main__":
         "--claude",
         action="store_true",
         help="Call a signed-in Claude Code model on public fixtures",
+    )
+    parser.add_argument(
+        "--codex",
+        action="store_true",
+        help="Call a signed-in Codex model on public fixtures",
     )
     with tempfile.TemporaryDirectory(prefix="trace-journey-") as tmp:
         run(parser.parse_args(), Path(tmp))

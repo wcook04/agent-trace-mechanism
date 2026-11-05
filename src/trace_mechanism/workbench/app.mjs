@@ -1781,7 +1781,7 @@ function traceSourceWindowConfig(sourceWindow) {
       optionLabel: `Last ${lastN} turn${plural}`,
       definition: `the most recent ${lastN} turn${plural} of this provider session with bounded evidence excerpts`,
       intendedUse: 'hand the next model just enough recent context to continue',
-      description: `the most recent ${lastN} turn${plural} with visible thinking, tool context, and source excerpts`,
+      description: `the most recent ${lastN} turn${plural} in this conversation, including recorded tool evidence`,
     };
   }
   if (value === SOURCE_WINDOW_FULL_THREAD) {
@@ -1804,7 +1804,7 @@ function traceSourceWindowConfig(sourceWindow) {
       // Name the substitutions, not just the word "summaries": what a compact
       // copy carries in place of the real thing is the only way to judge
       // whether it is enough for the job you are about to paste it into.
-      definition: 'messages, visible reasoning summaries, command previews, changed paths and agent activity; output bodies omitted',
+      definition: 'messages and recorded tool summaries from this conversation and its discovered workers',
       intendedUse: 'scan recorded work; use detailed view or exact field reads when needed',
       description: 'item summaries and bounded command previews; no command output or diff bodies',
     };
@@ -2039,6 +2039,8 @@ function traceMeasurementWouldForceStaleIndexedTurn(row, sourceWindow, variant =
 }
 
 function heuristicTraceArtifactBytes(row, sourceWindow, displayTurn = null) {
+  // A raw JSONL size cannot establish the rendered size of a portable copy.
+  if (row?.ref) return 0;
   const value = normalizeTraceSourceWindow(sourceWindow);
   const turn = displayTurn || (rowHasActiveTrace(row) ? activityDisplayTurn(row) : traceDisplayTurn(row));
   const traceWindow = traceWindowForSource(row, value, turn);
@@ -3512,9 +3514,9 @@ function renderMissionScopeContract(row, selectedSourceWindow = selectedTraceSou
 
 function scopeOperatorDescription(value) {
   if (parseLastNTurns(value)) return 'Recent turns with commands, outcomes and output previews.';
-  if (value === SOURCE_WINDOW_FULL_THREAD_CONCISE) return 'Messages, reasoning summaries, command previews and changed paths.';
-  if (value === SOURCE_WINDOW_FULL_THREAD) return 'Commands, outcomes, patches and output previews; open exact fields for full bodies.';
-  return 'Latest recorded work with visible reasoning summaries and tool context.';
+  if (value === SOURCE_WINDOW_FULL_THREAD_CONCISE) return 'Messages and tool summaries from this conversation and its discovered workers.';
+  if (value === SOURCE_WINDOW_FULL_THREAD) return 'Detailed messages and tool evidence from this conversation and its discovered workers.';
+  return 'The latest recorded turn in this conversation. Workers are excluded.';
 }
 
 function clampInterfaceZoom(value) {

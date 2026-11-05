@@ -66,9 +66,10 @@ With a candidate wheel and its MCP extra installed, run
 `python tools/check_workbench_journey.py --python /absolute/path/to/venv/bin/python`
 from a Python environment with Playwright and Chromium. An optional
 `--chrome PATH` selects a local Chromium executable. The check uses public
-recordings, a temporary home and an isolated browser clipboard. Add `--claude`
-to exercise a signed-in Claude Code session and compare its actual MCP result
-to the clipboard hash. This optional step calls the provider.
+recordings, a temporary home and an isolated browser clipboard. Add `--claude` or `--codex`
+to exercise a signed-in host and compare its actual MCP read to the clipboard
+hash. Both flags may be combined. These checks call the selected providers and
+allow the read tool only for their temporary fixture configuration.
 `tools/check_workbench_replay.py ORIGINAL_CHECKOUT` is a maintainer comparison
 against the original Swift activity reader and native tree renderer. It covers
 the supported fixture intersection. The app needs neither that checkout nor Swift.
