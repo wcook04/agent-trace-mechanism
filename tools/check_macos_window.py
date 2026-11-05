@@ -28,7 +28,16 @@ def main():
     def drive():
         window = webview.windows[0]
         try:
-            window.events.loaded.wait(10)
+            # WebKit can report the first document load before ES modules bind
+            # their controls or the workbench has opened its first panel.
+            wait_for(
+                lambda: window.run_js(
+                    "Boolean(document.body.classList.contains('desktop') && "
+                    "document.querySelector('#public-compact')?.onclick && "
+                    "document.querySelector('#manage-prompts')?.getBoundingClientRect().width)"
+                ),
+                "Workbench controls did not become ready",
+            )
             # run_js evaluates code directly; the workbench disallows eval().
             window.run_js("document.querySelector('#public-compact').click()")
             wait_for(lambda: window.width < 220, "Capsule did not collapse")
