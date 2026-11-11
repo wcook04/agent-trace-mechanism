@@ -6,6 +6,8 @@ Find a local **Codex or Claude Code conversation**, see what its workers actuall
 
 In this example the checkout total was off by a cent. Click the first **pytest** tile to see the failed assertion, **git** to see the rounding change, and the second **pytest** to see the test pass. Back in the parent conversation, **Choose sessions…** lets you copy the investigation and its test worker while leaving out the documentation worker. [Try the synthetic recording](#try-the-example).
 
+[Introduction to the projects](https://www.youtube.com/watch?v=Yk_kUQUCylc) · [Agent Trace walkthrough](https://www.youtube.com/watch?v=gkjescasrbY) · [Short demo](https://www.youtube.com/watch?v=LbNzdh5pLZ8)
+
 ## Try it
 
 From a terminal on macOS or Linux, with Git and Python 3.10 or later installed:
