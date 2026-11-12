@@ -28,7 +28,7 @@ py -3 -m venv .venv
 .\.venv\Scripts\agent-trace-app.exe
 ```
 
-The workbench opens on this computer. Its **Missions** list contains recorded conversations and agent runs, including archived Codex chats. Open **History folders** to choose a custom provider home. **Hide from list** changes the workbench view. **Archived in Codex** describes where Codex stored the recording.
+The workbench opens on this computer. Its **Missions** list contains recorded conversations and agent runs from all projects in the configured history folders, including archived Codex chats. Open **History folders** to choose a custom provider home. **Hide from list** changes the workbench view. **Archived in Codex** describes where Codex stored the recording.
 
 **On a Mac**, the native window adds a floating capsule and system pasteboard. From the same checkout, install the desktop extra and launch it:
 

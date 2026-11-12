@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 import json
+import os
 from pathlib import Path
 import shutil
 import threading
@@ -80,6 +81,46 @@ def test_cold_provider_matrix(isolated, hosts):
             assert api("/trace", {**identity, "turns": 1})["text"]
     assert not list(isolated.rglob("*.toml"))
     assert not list(isolated.rglob("*.md"))
+
+
+def test_copy_older_codex_session_from_another_project(isolated):
+    fixture = (ROOT / "examples/codex.jsonl").read_text()
+    _, _, events = fixture.partition("\n")
+    home = isolated / ".codex/sessions"
+    other_project = isolated / "other-project"
+    older = home / "2026/01/01"
+    recent = home / "2026/02/01"
+    older.mkdir(parents=True)
+    recent.mkdir(parents=True)
+    target_id = "019b76da-a800-7000-8000-000000000001"
+    target = older / "older.jsonl"
+
+    def record(path, session_id, cwd, answer, mtime):
+        meta = {"type": "session_meta", "payload": {"id": session_id, "cwd": str(cwd)}}
+        path.write_text(json.dumps(meta) + "\n" + events.replace("Update prepared.", answer))
+        os.utime(path, (mtime, mtime))
+
+    record(target, target_id, other_project, "Other project answer.", 1767225600)
+    for i in range(81):
+        record(recent / f"current-{i}.jsonl", f"current-{i}", isolated, "Current project answer.", 1769904000)
+
+    with app(native=True) as api:
+        rows = api("/mission-index")["index"]["active_rows"]
+        assert len(rows) == 82 and rows[-1]["session_id"] == target_id
+        identity = {"provider": "codex", "session_id": target_id}
+        preview = api("/trace", {**identity, "depth": "summary", "preview": True})
+        ref = rows[-1]["ref"]
+        assert preview["sources"][0]["ref"] == ref
+        assert preview["sessions"] == 1
+        assert "Other project answer." in preview["text"]
+        assert "Current project answer." not in preview["text"]
+        copied = api("/copy-preview", {"preview_handle": preview["preview_handle"], "sha256": preview["text_sha256"]})
+        assert copied["verb"] == preview["text"]
+
+        record(target, target_id, other_project, "Updated other project answer.", 1767225601)
+        refreshed = api("/trace", {"ref": ref, "depth": "summary", "deliver": "copy"})
+        assert refreshed["sources"][0]["ref"] == ref
+        assert "Updated other project answer." in refreshed["verb"]
 
 
 def test_parent_and_workers_keep_their_own_evidence(isolated):
