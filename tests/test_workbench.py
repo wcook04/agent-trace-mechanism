@@ -9,7 +9,7 @@ import subprocess
 import sys
 import sysconfig
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
@@ -227,7 +227,21 @@ def test_installed_console_launch_from_unrelated_directory(isolated):
                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8") as process:
         with ThreadPoolExecutor(max_workers=1) as reader:
             try:
-                url = reader.submit(process.stdout.readline).result(timeout=20).strip()
+                first_line = reader.submit(process.stdout.readline)
+                try:
+                    url = first_line.result(timeout=20).strip()
+                except FutureTimeoutError:
+                    diagnostic = f"Process return code: {process.poll()}"
+                    if sys.platform == "darwin" and shutil.which("sample"):
+                        try:
+                            sample = subprocess.run(
+                                ["sample", str(process.pid), "1", "1"],
+                                capture_output=True, text=True, timeout=10,
+                            )
+                            diagnostic += "\n" + (sample.stdout + sample.stderr)[:16000]
+                        except (OSError, subprocess.TimeoutExpired) as exc:
+                            diagnostic += f"\nStack sample unavailable: {exc}"
+                    pytest.fail("Console startup did not return a URL within 20 seconds.\n" + diagnostic)
                 origin, token = url.split("/#k=", 1)
                 with urlopen(origin, timeout=10) as response:
                     assert b"Missions" in response.read()
@@ -256,6 +270,17 @@ def test_installed_console_launch_from_unrelated_directory(isolated):
                 except subprocess.TimeoutExpired:
                     process.kill()
                     process.wait(timeout=10)
+
+
+def test_loopback_startup_does_not_require_reverse_dns(isolated, monkeypatch):
+    import socket
+
+    def unavailable_dns(_host):
+        raise TimeoutError("Reverse DNS is unavailable")
+
+    monkeypatch.setattr(socket, "getfqdn", unavailable_dns)
+    with app() as api:
+        assert api("/mission-index")["index"]["active_rows"] == []
 
 
 def test_parent_and_workers_keep_their_own_evidence(isolated):

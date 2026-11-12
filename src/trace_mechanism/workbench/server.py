@@ -2,6 +2,7 @@
 
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from socketserver import TCPServer
 import json
 from pathlib import Path
 import secrets
@@ -23,6 +24,14 @@ ASSETS = {
     "/lifecycle_reducer.mjs": "lifecycle_reducer.mjs",
 }
 MIME = {".html": "text/html", ".mjs": "text/javascript"}
+
+
+class LoopbackHTTPServer(ThreadingHTTPServer):
+    def server_bind(self):
+        # The workbench uses a numeric loopback authority. HTTPServer's default
+        # reverse-DNS lookup is unnecessary and can stall startup offline.
+        TCPServer.server_bind(self)
+        self.server_name, self.server_port = self.server_address[:2]
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -268,7 +277,7 @@ def read_markers(server, writing=False):
 
 
 def start():
-    s = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    s = LoopbackHTTPServer(("127.0.0.1", 0), Handler)
     path = marker_path().with_name("history-folders.json")
     s.folder_notice = ""
     try:
