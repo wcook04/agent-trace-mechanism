@@ -5,7 +5,11 @@ import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
+import sys
+import sysconfig
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
@@ -121,6 +125,137 @@ def test_copy_older_codex_session_from_another_project(isolated):
         refreshed = api("/trace", {"ref": ref, "depth": "summary", "deliver": "copy"})
         assert refreshed["sources"][0]["ref"] == ref
         assert "Updated other project answer." in refreshed["verb"]
+
+
+@pytest.mark.parametrize("location", ["default", "environment", "tilde", "saved"])
+def test_new_user_history_locations_and_restart(isolated, monkeypatch, capsys, location):
+    launcher = isolated / "unrelated project"
+    launcher.mkdir()
+    monkeypatch.chdir(launcher)
+    homes = {
+        provider: isolated / (f".{provider}" if location == "default" else f"history storage é/{provider} home")
+        for provider in ("codex", "claude")
+    }
+    if location in ("environment", "tilde"):
+        for provider, variable in (("codex", "CODEX_HOME"), ("claude", "CLAUDE_CONFIG_DIR")):
+            home = homes[provider]
+            value = "~/" + home.relative_to(isolated).as_posix() if location == "tilde" else str(home)
+            monkeypatch.setenv(variable, value)
+    with app() as api:
+        assert api("/mission-index")["index"]["active_rows"] == []
+
+    sources = {}
+    fixture = (ROOT / "examples/codex.jsonl").read_text(encoding="utf-8")
+    for sid, folder, answer in (
+        ("active-chat", "sessions/2026/01/01", "Active answer."),
+        ("archived-chat", "archived_sessions", "Archived answer."),
+    ):
+        path = homes["codex"] / folder / f"{sid}.jsonl"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(fixture.replace("synthetic-codex", sid).replace("Update prepared.", answer), encoding="utf-8")
+        sources[sid] = path
+    native = homes["codex"] / "sessions/native.jsonl"
+    shutil.copyfile(ROOT / "examples/native-command.jsonl", native)
+    claude = homes["claude"] / "projects/another-project/chat.jsonl"
+    claude.parent.mkdir(parents=True)
+    shutil.copyfile(ROOT / "tests/fixtures/claude.jsonl", claude)
+    (homes["codex"] / "session_index.jsonl").write_text(
+        json.dumps({"id": "active-chat", "thread_name": "My named conversation"}) + "\n", encoding="utf-8")
+    (native.parent / "partial.jsonl").write_text('{"type":', encoding="utf-8")
+    if location != "saved":
+        from trace_mechanism.setup import main
+        for provider, expected in (("codex", set(sources)), ("claude", {"synthetic-claude"})):
+            monkeypatch.setattr(sys, "argv", ["setup", "list", "--provider", provider])
+            main()
+            listed = json.loads(capsys.readouterr().out)
+            assert expected <= {row.get("session_id") for row in listed}
+    if location == "saved":
+        with app() as api:
+            api("/history-folders", {provider: str(home) for provider, home in homes.items()})
+        # Persisted choices must survive a restart and take precedence over
+        # launcher defaults, including defaults that contain no histories.
+        monkeypatch.setenv("CODEX_HOME", str(isolated / "unused codex home"))
+        monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(isolated / "unused claude home"))
+
+    for _ in range(2):
+        with app(native=True) as api:
+            index = api("/mission-index")["index"]
+            rows = index["active_rows"]
+            assert len(rows) == 4
+            for provider, home in homes.items():
+                assert all(Path(root).parent == home for root in index["discovery"][provider]["roots"])
+            for row in rows:
+                capture = api("/trace", {"ref": row["ref"], "depth": "full", "preview": True})
+                assert capture["sources"][0]["ref"] == row["ref"]
+                assert capture["text"]
+                copied = api("/copy-preview", {"preview_handle": capture["preview_handle"], "sha256": capture["text_sha256"]})
+                assert copied["verb"] == capture["text"]
+                if row["session_id"] == "active-chat":
+                    assert "Active answer." in capture["text"] and not row["provider_archived"]
+                    assert row["source_title"] == "My named conversation"
+                elif row["session_id"] == "archived-chat":
+                    assert "Archived answer." in capture["text"] and row["provider_archived"]
+                elif row["provider"] == "claude_code":
+                    assert "Update complete." in capture["text"]
+                else:
+                    assert "Ran 2 tests" in capture["text"]
+
+    # Copy the preview actually reviewed, even after the source advances;
+    # refreshing must select the same recording and return its new contents.
+    with app(native=True) as api:
+        identity = {"provider": "codex", "session_id": "active-chat", "depth": "summary"}
+        before = api("/trace", {**identity, "preview": True})
+        path = sources["active-chat"]
+        path.write_text(path.read_text(encoding="utf-8").replace("Active answer.", "New answer."), encoding="utf-8")
+        frozen = api("/copy-preview", {"preview_handle": before["preview_handle"], "sha256": before["text_sha256"]})
+        assert frozen["verb"] == before["text"]
+        after = api("/trace", {**identity, "deliver": "copy"})
+        assert "New answer." in after["verb"] and after["text_sha256"] != before["text_sha256"]
+        assert after["sources"][0]["ref"] == before["sources"][0]["ref"]
+
+
+def test_installed_console_launch_from_unrelated_directory(isolated):
+    launcher = isolated / "launch from here"
+    launcher.mkdir()
+    command = Path(sysconfig.get_path("scripts")) / ("agent-trace-app.exe" if os.name == "nt" else "agent-trace-app")
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    env.pop("PYTHONHOME", None)
+    env["PYTHONNOUSERSITE"] = "1"
+    # Keep startup bounded without sleeping or leaving a server behind on failure.
+    with subprocess.Popen([str(command), "--no-browser"], cwd=launcher, env=env,
+                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8") as process:
+        with ThreadPoolExecutor(max_workers=1) as reader:
+            try:
+                url = reader.submit(process.stdout.readline).result(timeout=20).strip()
+                origin, token = url.split("/#k=", 1)
+                with urlopen(origin, timeout=10) as response:
+                    assert b"Missions" in response.read()
+                request = Request(origin + "/mission-index", headers={"X-Agent-Trace-Key": token})
+                with urlopen(request, timeout=10) as response:
+                    assert json.load(response)["index"]["active_rows"] == []
+                folder = isolated / ".codex/archived_sessions"
+                folder.mkdir(parents=True)
+                shutil.copyfile(ROOT / "examples/codex.jsonl", folder / "saved-chat.jsonl")
+                with urlopen(request, timeout=10) as response:
+                    (row,) = json.load(response)["index"]["active_rows"]
+                assert row["provider_archived"]
+                capture_request = Request(
+                    origin + "/trace",
+                    data=json.dumps({"provider": "codex", "session_id": row["session_id"], "depth": "summary"}).encode(),
+                    headers={"X-Agent-Trace-Key": token},
+                )
+                with urlopen(capture_request, timeout=10) as response:
+                    capture = json.load(response)
+                assert "Update prepared." in capture["text"]
+                assert capture["sources"][0]["ref"] == row["ref"]
+            finally:
+                process.terminate()
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=10)
 
 
 def test_parent_and_workers_keep_their_own_evidence(isolated):

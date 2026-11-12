@@ -66,7 +66,14 @@ When changing a tool, update [its reference](mcp.md) and test its actual stdio c
 This builds a source distribution and a wheel from it, checks the package files
 and licence notices, and installs the wheel into a temporary environment outside
 the checkout. It then checks the installed JavaScript resource and Python entry
-points and runs the real MCP search-and-read contract through stdio. It needs
+points and runs the real MCP search-and-read contract through stdio. It also
+copies the workbench tests and their public fixtures outside the checkout and
+runs them against that installed wheel with an isolated Python import path.
+These checks cover a fresh home, launch from another directory, default and
+custom history locations, `~` paths, spaces and Unicode, archived chats, both
+providers, restarts, exact recording selection, preview copying and source
+updates. The console entry point is started as a separate process; native copy
+callbacks are simulated without writing the tester's system clipboard. It needs
 network access to install build and runtime dependencies. It does not publish a
 package or register a server with your apps.
 

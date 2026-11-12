@@ -48,11 +48,11 @@ No runtime step depends on the shell still being in the checkout.
 "$TRACE_PYTHON" -m trace_mechanism.setup list --provider claude
 ```
 
-These list metadata, not conversation text, and register nothing. Codex defaults
-to `$CODEX_HOME/sessions` or `~/.codex/sessions`; Claude defaults to
+These list metadata, not conversation text, and register nothing. Codex searches
+both `sessions` and `archived_sessions` under `$CODEX_HOME` or `~/.codex`; Claude defaults to
 `$CLAUDE_CONFIG_DIR/projects` or `~/.claude/projects`. Variables are read from the
 setup process's environment. Use `list --provider codex --root "/actual/history/folder"`
-for another location, including Codex's `archived_sessions` directory. If a root
+to search only that directory instead. If a root
 is absent, find the host's actual configuration or make a local chat first;
 don't recursively search the entire disk.
 

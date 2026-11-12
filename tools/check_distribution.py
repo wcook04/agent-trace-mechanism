@@ -55,7 +55,7 @@ def main() -> None:
             / "venv"
             / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
         )
-        run(str(python), "-m", "pip", "install", f"{wheel}[mcp]", cwd=scratch)
+        run(str(python), "-m", "pip", "install", f"{wheel}[mcp,test]", cwd=scratch)
         digest = hashlib.sha256(
             (ROOT / "src/trace_mechanism/structurer.mjs").read_bytes()
         ).hexdigest()
@@ -165,8 +165,38 @@ def main() -> None:
                 subprocess.run(
                     [str(python), "-I", *args], cwd=home, env=env, check=True
                 )
+        # Replay the customer journeys against the installed wheel, not imports
+        # from the source checkout. Copy only the tests and their public fixtures.
+        for relative in (
+            Path("tests/test_workbench.py"),
+            Path("tests/fixtures/claude.jsonl"),
+            Path("examples/codex.jsonl"),
+            *(p.relative_to(ROOT) for p in (ROOT / "examples/launch-review").glob("*.jsonl")),
+        ):
+            destination = scratch / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / relative, destination)
+        user_home = scratch / "installed user"
+        launch_dir = scratch / "unrelated launch directory"
+        user_home.mkdir()
+        launch_dir.mkdir()
+        env = {**os.environ, "HOME": str(user_home), "USERPROFILE": str(user_home),
+               "PATH": str(python.parent), "PYTHONNOUSERSITE": "1"}
+        for var in ("CODEX_HOME", "CLAUDE_CONFIG_DIR", "AGENT_TRACE_PROMPTS", "PYTHONPATH", "PYTHONHOME"):
+            env.pop(var, None)
+        subprocess.run(
+            [str(python), "-I", "-c",
+             "from pathlib import Path; import sys, trace_mechanism; "
+             "assert Path(trace_mechanism.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())"],
+            cwd=launch_dir, env=env, check=True,
+        )
+        subprocess.run(
+            [str(python), "-I", "-m", "pytest", "--import-mode=importlib", "-q",
+             str(scratch / "tests/test_workbench.py")],
+            cwd=launch_dir, env=env, check=True,
+        )
         print(
-            "Distribution passed: sdist, wheel bytes, licence notices, installed resource, CLI and MCP retrieval."
+            "Distribution passed: sdist, wheel bytes, licence notices, installed resource, CLI, MCP retrieval and installed workbench journeys."
         )
 
 

@@ -14,8 +14,8 @@ from .parser import parse_claude_session, parse_codex_session
 
 def history_root(provider):
     if provider == 'codex':
-        return Path(os.environ.get('CODEX_HOME') or Path.home() / '.codex') / 'sessions'
-    return Path(os.environ.get('CLAUDE_CONFIG_DIR') or Path.home() / '.claude') / 'projects'
+        return Path(os.environ.get('CODEX_HOME') or Path.home() / '.codex').expanduser() / 'sessions'
+    return Path(os.environ.get('CLAUDE_CONFIG_DIR') or Path.home() / '.claude').expanduser() / 'projects'
 
 
 def history_roots(provider):
