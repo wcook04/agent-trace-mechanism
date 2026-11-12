@@ -73,7 +73,10 @@ These checks cover a fresh home, launch from another directory, default and
 custom history locations, `~` paths, spaces and Unicode, archived chats, both
 providers, restarts, exact recording selection, preview copying and source
 updates. The console entry point is started as a separate process; native copy
-callbacks are simulated without writing the tester's system clipboard. It needs
+callbacks are simulated without writing the tester's system clipboard. Inherited
+pytest options and plugins are excluded so collection-only settings cannot
+masquerade as an executed test run. The symlink test reports a skip when Windows
+denies symlink creation; ordinary discovery and copy tests still run. It needs
 network access to install build and runtime dependencies. It does not publish a
 package or register a server with your apps.
 

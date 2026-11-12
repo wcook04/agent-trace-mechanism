@@ -407,11 +407,24 @@ def test_ambiguous_children_and_untrusted_writes(isolated):
         ):
             with pytest.raises(HTTPError):
                 api("/save-prompt", {"slug": "intrusion", "raw": "test"}, headers)
-        outside = isolated / "private.md"
-        outside.write_text("secret")
-        prompts = isolated / ".agent-trace/prompts"
-        prompts.mkdir(parents=True)
+
+
+def test_symlink_writes_and_replaced_history(isolated):
+    outside = isolated / "private.md"
+    outside.write_text("secret")
+    prompts = isolated / ".agent-trace/prompts"
+    prompts.mkdir(parents=True)
+    try:
         (prompts / "linked.md").symlink_to(outside)
+    except OSError as exc:
+        if getattr(exc, "winerror", None) == 1314:
+            pytest.skip("Windows has not granted this user symbolic-link creation.")
+        raise
+    folder = isolated / ".codex/sessions"
+    folder.mkdir(parents=True)
+    shutil.copyfile(ROOT / "examples/native-command.jsonl", folder / "coordinator.jsonl")
+    with app() as api:
+        (parent,) = api("/mission-index")["index"]["active_rows"]
         for url, body in (
             ("/prompt-shelf/linked", None),
             ("/save-prompt", {"slug": "linked", "raw": "overwritten"}),

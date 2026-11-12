@@ -182,8 +182,10 @@ def main() -> None:
         launch_dir.mkdir()
         env = {**os.environ, "HOME": str(user_home), "USERPROFILE": str(user_home),
                "PATH": str(python.parent), "PYTHONNOUSERSITE": "1"}
-        for var in ("CODEX_HOME", "CLAUDE_CONFIG_DIR", "AGENT_TRACE_PROMPTS", "PYTHONPATH", "PYTHONHOME"):
+        for var in ("CODEX_HOME", "CLAUDE_CONFIG_DIR", "AGENT_TRACE_PROMPTS", "PYTHONPATH", "PYTHONHOME",
+                    "PYTEST_ADDOPTS", "PYTEST_PLUGINS"):
             env.pop(var, None)
+        env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
         subprocess.run(
             [str(python), "-I", "-c",
              "from pathlib import Path; import sys, trace_mechanism; "
