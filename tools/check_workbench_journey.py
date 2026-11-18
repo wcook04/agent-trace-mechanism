@@ -236,6 +236,20 @@ def run(args, home):
             ).first.click()
             page.locator("#preview-scope").click()
             expect(page.locator("#preview-text")).to_contain_text("Update complete.")
+            # The copy starts with the counted note; the same preview offers the
+            # note for the coding conversation, and both options change the text.
+            noted = page.locator("#preview-text").inner_text()
+            assert noted.startswith("ABOUT THIS COPY") and "END OF NOTE" in noted
+            page.locator("#preview-return-note").click()
+            page.wait_for_function(
+                "async () => (await navigator.clipboard.readText()).startsWith('ABOUT THIS REVIEW')"
+            )
+            page.locator("#preview-note").uncheck()
+            expect(page.locator("#preview-text")).not_to_contain_text("ABOUT THIS COPY")
+            assert page.locator("#preview-text").inner_text() == noted.split("END OF NOTE\n\n", 1)[1]
+            page.locator("#preview-note").check()
+            expect(page.locator("#preview-text")).to_contain_text("ABOUT THIS COPY")
+            assert page.locator("#preview-text").inner_text() == noted
             page.locator("#preview-copy").click()
             page.wait_for_function(
                 "async () => (await navigator.clipboard.readText()).includes('Update complete.')"

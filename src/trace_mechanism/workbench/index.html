@@ -3984,6 +3984,7 @@
     #trace-preview footer {display:flex;gap:8px} #trace-preview pre,#prompt-output {white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:45vh;background:#14191f;padding:12px}
     #trace-preview ul{padding-inline-start:20px;overflow-wrap:anywhere;max-height:15vh;overflow:auto}
     #trace-preview h2,#prompt-dialog h2{margin-top:0}
+    #preview-options {display:flex;flex-wrap:wrap;gap:4px 18px;margin:0 0 8px} #preview-options label {display:flex;align-items:center;gap:6px;width:auto;margin:0;font:inherit} #preview-options input {width:14px;height:14px;min-width:0;flex:none;margin:0;padding:0}
 
     #latest-clip-trigger,#operator-hud,#reinstall-app,#prompt-hotkeys,#prompt-paste-access,#minimize-bar,#agent-trace-compact,#shell-mode-toggle{display:none!important} body.desktop #public-float{display:inline-block}
     #public-float,#public-compact,#capsule-open{display:none} body.desktop #public-compact{display:inline-block} .workbench-head .interface-sizing{margin-left:auto} .scope-contract-sub{min-width:0} .scope-contract-stats{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -4328,9 +4329,11 @@
     <dialog id="editor-confirm" aria-labelledby="editor-question"><p id="editor-question"></p><button class="btn" id="editor-keep">Keep editing</button> <button class="btn" id="editor-accept"></button></dialog>
     <dialog id="trace-preview" aria-labelledby="preview-heading"><h2 id="preview-heading">Copy preview</h2>
       <p id="preview-scope-name"></p><ul id="preview-sources"></ul><p id="preview-warnings" role="status"></p>
+      <p id="preview-options"><label title="Applies to every copy made in this browser until you change it."><input type="checkbox" id="preview-note" checked> Start with what this copy leaves out</label> <label title="Claude Code saves thinking as text. Codex saves reasoning in encrypted form, so a Codex copy cannot include it."><input type="checkbox" id="preview-thinking"> Include the assistant's thinking (Claude Code)</label></p>
       <pre id="preview-text" tabindex="0"></pre>
       <p>Browsing stays on this Mac. Pasting into an agent or granting it access can send content to its provider.</p>
       <footer><button class="btn primary" type="button" id="preview-copy">Copy this text</button>
+      <button class="btn" type="button" id="preview-return-note" title="Paste this beside the reviewer's answer in the coding conversation. It says what the reviewer was not given.">Copy note for the coding chat</button>
       <button class="btn" type="button" id="preview-close">Close</button></footer></dialog>
     <dialog id="prompt-dialog" aria-labelledby="prompt-editor-heading"><h2 id="prompt-editor-heading">Manage prompts</h2><label>Prompt<select id="prompt-choose"></select></label><label>Filename (without .md)<input id="prompt-name" maxlength="80"></label><label>Markdown<textarea id="prompt-md"></textarea></label><button class="btn" type="button" id="prompt-preview">Preview prompt text</button><pre hidden id="prompt-output" tabindex="0"></pre><small id="prompt-dir"></small><p id="edit-note" role="status"></p><button class="btn" id="prompt-save">Save prompt</button> <button class="btn" id="prompt-remove" hidden></button> <button class="btn" id="prompt-cancel">Close</button></dialog>
     <script src="./key.js"></script>

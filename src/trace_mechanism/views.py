@@ -13,9 +13,12 @@ def structured(turns):
             for turn in turns]
 
 
-def chronological_events(turn):
+def chronological_events(turn, thinking=False):
     """Order distinct records; do not claim ordering within one provider record."""
     events = []
+    if thinking:
+        for event in getattr(turn, 'thinking_events', ()):
+            events.append((event.source_record_index, 'thinking', event))
     for event in turn.assistant_events:
         events.append((event.source_record_index, 'assistant', event))
     for event in turn.tool_events:
@@ -27,15 +30,17 @@ def chronological_events(turn):
     return sorted(events, key=lambda item: item[0])
 
 
-def render(turns, detail=False):
+def render(turns, detail=False, thinking=False):
     lines = []
     for turn in turns:
         lines.extend([f'USER: {json.dumps(turn.prompt_text, ensure_ascii=False)}',
                       f'STATUS: {"complete" if turn.is_complete else "incomplete"}'])
         if not detail:
             lines.append('TOOL_RESULTS: [omitted in compact view]')
-        for _, kind, event in chronological_events(turn):
-            if kind == 'assistant':
+        for _, kind, event in chronological_events(turn, thinking):
+            if kind == 'thinking':
+                lines.append(f'THINKING: {json.dumps(event.text, ensure_ascii=False)}')
+            elif kind == 'assistant':
                 lines.append(f'ASSISTANT: {json.dumps(event.text, ensure_ascii=False)}')
             elif kind == 'call':
                 allowed = {'path', 'file_path', 'filename', 'command', 'cmd'}

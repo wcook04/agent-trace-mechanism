@@ -10,7 +10,8 @@ import threading
 import time
 
 from .. import codex_native
-from ..agent_tools import captured_turns, render_codex_context, selected_recording_text
+from ..agent_tools import captured_turns, claude_text, render_codex_context, selected_recording_text, visibility_fields, with_note
+from .. import visibility
 from ..recordings import recording_id, claude_worker
 from ..parser import _is_real_claude_prompt
 from ..setup import history_root, history_roots, metadata
@@ -595,6 +596,7 @@ class Library:
         if type(turns) is not int or not 0 <= turns <= 10000:
             raise ValueError("Invalid turn count.")
         detail = data.get("depth") != "summary"
+        thinking = data.get("thinking") is True
         closeout = data.get("closeout") is True
         tail_only = data.get("activity_only") is True
         group, gaps = (
@@ -636,6 +638,7 @@ class Library:
                 "A capture supports 64 sessions and 256 MiB of input in total. Use Choose sessions or preview recent activity."
             )
         texts, snapshots, paths, sources, warnings = [], [], {}, [], []
+        inventories = []
         excluded = len(related_refs - {item["ref"] for item in group})
         provider_health = {provider: {key: report[key] for key in ("unreadable", "unsupported", "unlinked")}
                            for provider, report in self.discovery.items()}
@@ -663,7 +666,7 @@ class Library:
                 )
             )
             if chosen is not None:
-                piece, issues = selected_recording_text(path, provider, item["recorded_id"], sid, detail, len(group) > 1)
+                piece, issues = selected_recording_text(path, provider, item["recorded_id"], sid, detail, len(group) > 1, inventories, thinking)
                 texts.append(piece)
                 warnings.extend(f"{sid}: {issue}" for issue in issues)
             elif tail_only:
@@ -699,13 +702,14 @@ class Library:
                     if count:
                         warnings.append(f"{sid}: {count} {key.replace('_', ' ')}")
             else:
-                parsed, issues, finals = captured_turns(
-                    path, item["recorded_id"], "claude"
+                text, issues, finals, selected = claude_text(
+                    path, item["recorded_id"], detail, turns,
+                    None if closeout else inventories,
+                    thinking and not closeout,
                 )
                 warnings.extend(
                     f"{sid}: {count} {issue}" for issue, count in issues.items()
                 )
-                selected = parsed[-turns:] if turns else parsed
                 if closeout:
                     answer = next(
                         (
@@ -722,11 +726,11 @@ class Library:
                         )
                     texts.append(answer)
                 else:
-                    text = render(selected, detail=detail)
                     if not text:
                         raise ValueError(f"No readable turns for {sid}.")
                     texts.append(f"Session: {sid}\n{text}" if len(group) > 1 else text)
         if snapshots:
+            selection = []
             text, _ = render_codex_context(
                 snapshots,
                 paths,
@@ -734,7 +738,12 @@ class Library:
                 turns=turns,
                 closeout=closeout,
                 require_readable=True,
+                selection=selection,
             )
+            if not closeout:
+                inventories.extend(
+                    visibility.codex_inventory(part, detail=detail) for part in selection
+                )
         else:
             text = "\n\n".join(texts)
         if not text:
@@ -756,9 +765,14 @@ class Library:
                 warnings.append(
                     f"{excluded} related recording(s) excluded by selection"
                 )
+        noted = data.get("note") is not False
+        text, inventory = with_note(
+            text, inventories, note=noted, excluded=excluded, unavailable=len(gaps)
+        )
         encoded = text.encode()
         return dict(
             ok=True,
+            **visibility_fields(text, inventory, noted),
             text=text,
             bytes=len(encoded),
             sessions=len(group),

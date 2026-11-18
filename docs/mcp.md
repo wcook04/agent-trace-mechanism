@@ -90,6 +90,8 @@ A **snapshot** here is a fixed assembled capture of the selected records. It is 
 | `sha256` from a text read | Compatibility alias for `text_sha256`, not a native change baseline |
 | Snapshot hash in an item/field reference | Select the retained session snapshot for that exact read |
 
+The text from `read_chat_context` and `read_selected_context` starts with a note counting what the rendering leaves out of the saved files, so `text_sha256` covers the note. Both also return `visibility`, the counts behind the note, and `return_note`, the text to give the coding conversation with a review ([reviewer visibility](reviewer-visibility.md)).
+
 `read_chat_context` returns both text and native handles when supported native items are present. Its native handle can be used directly for `read_trace_changes`. A legacy-only text read has no native-item baseline. A mixed selection retains legacy conversation text and lists native coverage by session; its change queries track only native items.
 
 | Operation | Offset/limit unit | Default / maximum |

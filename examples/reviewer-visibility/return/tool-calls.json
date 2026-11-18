@@ -1,0 +1,33 @@
+{
+  "haiku.plain": {
+    "coding_model": "claude-haiku-5-5",
+    "tool_calls_after_the_review": [
+      {
+        "tool": "Bash",
+        "command": "cd /work/run1 && cat price.py && echo ---- && python3 -m unittest -v tests.test_price tests.test_rounding 2>&1; echo \"exit=$?\"; echo ---- && grep -n \"test_rounding\" NOTES.md; ls tests/"
+      }
+    ]
+  },
+  "sonnet.plain": {
+    "coding_model": "claude-sonnet-5-5",
+    "tool_calls_after_the_review": [
+      {
+        "tool": "Bash",
+        "command": "cd /work/run4 && grep -n \"AI agents\" NOTES.md; ls tests; python3 -m unittest -v 2>&1; echo rc=$?"
+      }
+    ]
+  },
+  "haiku.return-note": {
+    "coding_model": "claude-haiku-5-5",
+    "tool_calls_after_the_review": []
+  },
+  "sonnet.return-note": {
+    "coding_model": "claude-sonnet-5-5",
+    "tool_calls_after_the_review": [
+      {
+        "tool": "Bash",
+        "command": "cd /work/run5 && grep -n \"AI agents\" NOTES.md; ls tests; cat price.py; python3 -m unittest -v 2>&1; echo rc=$?"
+      }
+    ]
+  }
+}
