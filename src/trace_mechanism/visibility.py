@@ -215,16 +215,38 @@ def codex_inventory(selection, *, detail, final_only=False):
     inv = _blank('codex', 'final answer' if final_only else 'detailed' if detail else 'compact')
     items, every = selection['items'], selection['all_items']
     out = inv['left_out']
-    order = []
+    # A Codex file can hold a turn as native items, as older transcript records, or as both, and
+    # the copy prints both. Turns are ordered by first record across the two, as the selection is.
+    legacy, legacy_all = list(selection.get('legacy', ())), list(selection.get('legacy_all', ()))
+    positions = {}
     for entry in every:
-        if entry['turn_id'] not in order:
-            order.append(entry['turn_id'])
-    chosen_turns = {entry['turn_id'] for entry in items}
-    recorded = len(order) or len(selection.get('legacy_all', ()))
-    included = len(chosen_turns) or len(selection.get('legacy', ()))
-    first = min((order.index(turn) + 1 for turn in chosen_turns), default=1 if included else 0)
+        positions.setdefault(entry['turn_id'], entry['first_record'])
+    for turn in legacy_all:
+        at = min(turn.source_record_indices) + 1 if turn.source_record_indices else float('inf')
+        positions[turn.turn_id] = min(at, positions.get(turn.turn_id, at))
+    order = sorted(positions, key=positions.get)
+    chosen_turns = {entry['turn_id'] for entry in items} | {turn.turn_id for turn in legacy}
+    recorded, included = len(order), len(chosen_turns)
+    first = min((order.index(turn) + 1 for turn in chosen_turns), default=0)
     inv['turns'] = {'included': included, 'recorded': recorded, 'first': first}
     _add(out, 'earlier_turns', max(0, first - 1))
+    for turn in legacy:
+        for event in turn.tool_events:
+            if final_only:
+                continue
+            if event.result_observed and detail:
+                inv['quoted_results'] += 1
+            elif event.result_observed:
+                # The same length the marker at the call prints.
+                _add(out, 'tool_results', 1, len(event.output_text or ''))
+            trimmed = set(event.input) - COMPACT_INPUT_KEYS if isinstance(event.input, dict) else bool(event.input)
+            if event.call_observed and not detail and trimmed:
+                _add(out, 'tool_inputs')
+                names = inv.setdefault('trimmed_tools', [])
+                if event.name not in names:
+                    names.append(str(event.name))
+    if legacy and not items and not detail and not final_only:
+        inv['marked'] = True
     last_record = max((entry['first_record'] for entry in items), default=-1)
     summaries, threads, unnamed_threads = 0, set(), 0
     for entry in items:
@@ -297,7 +319,7 @@ def combine(inventories, *, excluded=0, unavailable=0):
         total['thinking_included'] = total.get('thinking_included', 0) + inv.get('thinking_included', 0)
         total['final_only'] = total.get('final_only', False) or inv.get('final_only', False)
     # Only a copy made wholly from Claude Code files has a marker at every left-out result.
-    total['marked'] = all(inv['provider'] == 'claude' and inv['view'] == 'compact' for inv in inventories)
+    total['marked'] = all(inv.get('marked', inv['provider'] == 'claude' and inv['view'] == 'compact') for inv in inventories)
     single = inventories[0] if len(inventories) == 1 else None
     if single:
         total['turns'] = single['turns']
