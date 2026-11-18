@@ -9,8 +9,9 @@ import io
 import json
 import os
 from . import codex_native as native
-from .parser import parse_claude_session, parse_codex_session
+from .parser import AssistantEvent, parse_claude_session, parse_codex_session
 from .views import render
+from . import visibility
 
 
 def _integer(value, name, low, high):
@@ -76,7 +77,7 @@ class TranscriptInput:
         return str(self.path)
 
 
-def captured_turns(path, session_id, provider, snapshot=None):
+def captured_turns(path, session_id, provider, snapshot=None, lines=None):
     with path.open('rb') as stream:
         raw = stream.read(native.MAX_SOURCE_BYTES + 1)
         if len(raw) > native.MAX_SOURCE_BYTES:
@@ -88,11 +89,13 @@ def captured_turns(path, session_id, provider, snapshot=None):
         if b'task_started' not in raw:
             return [], {}, {}
     source = TranscriptInput(path, raw, stat, session_id, provider)
+    if lines is not None:
+        lines.extend(io.BytesIO(raw))
     parse = parse_codex_session if provider == 'codex' else parse_claude_session
     return parse(source), source.warnings, source.finals
 
 
-def render_codex_context(snapshots, paths, *, detail, turns=0, closeout=False, require_readable=False):
+def render_codex_context(snapshots, paths, *, detail, turns=0, closeout=False, require_readable=False, selection=None):
     """Render the same selected evidence for local browsing and registered MCP reads."""
     native_sessions, transcripts = [], []
     for snapshot in snapshots:
@@ -115,6 +118,9 @@ def render_codex_context(snapshots, paths, *, detail, turns=0, closeout=False, r
             items = [i for i in items if i['turn_id'] in selected]
             legacy = [t for t in legacy if t.turn_id in selected]
         legacy = [t for t in legacy if t.prompt_text or t.assistant_text or t.tool_events]
+        if selection is not None:
+            selection.append({'session_id': sid, 'items': items, 'all_items': snapshot['items'],
+                              'legacy': legacy, 'legacy_all': parsed})
         if require_readable and not (items or legacy):
             raise ValueError(f"No readable content in the selected scope for {sid}.")
         if closeout:
@@ -139,17 +145,49 @@ def render_codex_context(snapshots, paths, *, detail, turns=0, closeout=False, r
     return '\n\n'.join(blocks), mode
 
 
-def selected_recording_text(path, provider, sid, label, detail, multiple):
+def claude_text(path, sid, detail, turns=0, inventories=None, thinking=False):
+    """Render a Claude Code file and count what the rendering leaves out."""
+    lines = []
+    parsed, warnings, finals = captured_turns(path, sid, 'claude', lines=lines)
+    selected = parsed[-turns:] if turns else parsed
+    if thinking:
+        # The parser is an exact copy of its source and drops thinking, so it is read here.
+        for turn in selected:
+            turn.thinking_events = [
+                AssistantEvent(text=text, source_record_index=index)
+                for index in turn.source_record_indices
+                for text in visibility.thinking_texts(lines[index] if index < len(lines) else b'')]
+    if inventories is not None and selected:
+        inventories.append(visibility.claude_inventory(lines, parsed, selected, detail=detail, thinking=thinking))
+    return render(selected, detail=detail, thinking=thinking), warnings, finals, selected
+
+
+def with_note(text, inventories, *, note=True, excluded=0, unavailable=0):
+    """Start a conversation copy with the counted statement of what it leaves out."""
+    inventory = visibility.combine(inventories, excluded=excluded, unavailable=unavailable)
+    opening = visibility.outgoing_note(inventory) if note else ''
+    return (f'{opening}\n\n{text}' if opening else text), inventory
+
+
+def visibility_fields(text, inventory, noted=True):
+    digest = hashlib.sha256(text.encode()).hexdigest()
+    return {'visibility': inventory, 'note_included': bool(inventory and noted),
+            'return_note': visibility.return_note(inventory, text_sha256=digest)}
+
+
+def selected_recording_text(path, provider, sid, label, detail, multiple, inventories=None, thinking=False):
     """Render one explicitly chosen file. Never resolve a sibling by its session ID."""
     issues = []
     if provider == 'codex':
         snapshot = native.load_rollout(path, session_id=sid)
-        text, _ = render_codex_context([snapshot], {sid: path}, detail=detail, require_readable=True)
+        selection = []
+        text, _ = render_codex_context([snapshot], {sid: path}, detail=detail, require_readable=True, selection=selection)
+        if inventories is not None:
+            inventories.extend(visibility.codex_inventory(part, detail=detail) for part in selection)
         issues = [f'{name}: {count}' for name, count in snapshot['diagnostics'].items()
                   if count and name in ('pending_records', 'malformed_records', 'oversized_records', 'identity_mismatches')]
     else:
-        turns, warnings, _ = captured_turns(path, sid, 'claude')
-        text = render(turns, detail=detail)
+        text, warnings, _, _ = claude_text(path, sid, detail, inventories=inventories, thinking=thinking)
         issues = [f'{name}: {count}' for name, count in warnings.items()]
     if not text:
         raise ValueError(f'No readable content in {label}.')
@@ -240,20 +278,21 @@ class AgentTools:
         if any(ref not in allowed or allowed[ref].get('source_available') is False for ref in recording_ids):
             raise ValueError('A selected recording is unregistered or unavailable.')
         rows = [allowed[ref] for ref in recording_ids]
-        pieces, warnings = [], []
+        pieces, warnings, inventories = [], [], []
         with fixed_selection([r['path'] for r in rows]) as versions:
             for r in rows:
                 sid = r.get('recorded_id', r['session_id'])
                 if recording_id(r['path'], r['provider'], sid) != r['recording_id']:
                     raise ValueError('Selected recording changed. Register the intended file again.')
                 piece, issues = selected_recording_text(r['path'], r['provider'], sid, r['session_id'],
-                                                       scope == 'full_thread', len(rows) > 1)
+                                                       scope == 'full_thread', len(rows) > 1, inventories)
                 pieces.append(piece)
                 warnings.extend(issues)
-        text = '\n\n'.join(pieces)
+        text, inventory = with_note('\n\n'.join(pieces), inventories)
         digest = hashlib.sha256(text.encode()).hexdigest()
         self.snapshots[digest] = text
         return {**self.read_trace_page(digest, 0, limit), 'recording_ids': recording_ids, 'warnings': warnings,
+                **visibility_fields(text, inventory),
                 'source_versions': [versions[r['path']] for r in rows], 'consistency': 'selected_versions_checked'}
 
     def _remember_bundle(self, bundle):
@@ -453,11 +492,14 @@ class AgentTools:
             raise ValueError('Choose compact or detailed full-thread scope.')
         if type(include_children) is not bool:
             raise ValueError('include_children must be a boolean.')
-        metadata = {}
+        metadata, inventories = {}, []
         if provider == 'codex':
             digest, bundle = self._capture(provider, session_id, include_children)
             paths = {r['session_id']: r['path'] for r in self.entries if r['provider'] == provider}
-            text, format_name = render_codex_context(bundle['sessions'], paths, detail=scope == 'full_thread')
+            selection = []
+            text, format_name = render_codex_context(bundle['sessions'], paths, detail=scope == 'full_thread',
+                                                     selection=selection)
+            inventories = [visibility.codex_inventory(part, detail=scope == 'full_thread') for part in selection]
             metadata = {'snapshot_kind': 'native_bundle' if format_name != 'legacy' else 'text',
                         'include_children': include_children, 'context_format': format_name,
                         'edges': copy.deepcopy(bundle['edges']), **self._availability(bundle)}
@@ -473,13 +515,16 @@ class AgentTools:
                     r.get('parent_session_id') == session_id), key=lambda r: r['session_id'])]
                 if all(r.get('recording_id') for r in group):
                     return self.read_selected_context([r['recording_id'] for r in group], scope, limit)
-            parsed, warnings, _ = captured_turns(row['path'], row.get('recorded_id', session_id), provider)
-            text = render(parsed, detail=scope == 'full_thread')
+            text, warnings, _, _ = claude_text(row['path'], row.get('recorded_id', session_id),
+                                               scope == 'full_thread', inventories=inventories)
             if warnings:
                 metadata['record_warnings'] = warnings
+        unavailable = sum(row['status'] != 'available' for row in metadata.get('availability', ()))
+        text, inventory = with_note(text, inventories, unavailable=unavailable)
         text_digest = hashlib.sha256(text.encode()).hexdigest()
         self.snapshots[text_digest] = text
         return {'provider': provider, 'session_id': session_id, 'scope': scope, **metadata,
+                **visibility_fields(text, inventory),
                 **self.read_trace_page(text_digest, 0, limit)}
 
     def read_trace_page(self, sha256, offset=0, limit=24000):

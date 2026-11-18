@@ -1,0 +1,45 @@
+{
+  "compactions": [],
+  "conversations": 1,
+  "final_only": false,
+  "left_out": {
+    "harness_context": {
+      "chars": 0,
+      "count": 16
+    },
+    "system_prompt": {
+      "chars": 0,
+      "count": 2
+    },
+    "thinking": {
+      "chars": 416,
+      "count": 2
+    },
+    "tool_inputs": {
+      "chars": 0,
+      "count": 1
+    },
+    "tool_results": {
+      "chars": 2266,
+      "count": 4
+    }
+  },
+  "not_found": [],
+  "program_user_lines": 1,
+  "provider": "claude",
+  "quoted_results": 0,
+  "related_not_selected": 0,
+  "related_unavailable": 0,
+  "thinking_included": 0,
+  "trimmed_tools": [
+    "SubagentHandback"
+  ],
+  "turns": {
+    "first": 1,
+    "included": 2,
+    "recorded": 2
+  },
+  "turns_before_last_compaction": 0,
+  "unreadable": {},
+  "view": "compact"
+}

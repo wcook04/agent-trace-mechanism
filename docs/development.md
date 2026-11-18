@@ -23,6 +23,7 @@ The rest of the repository supports those files or the older text-processing pat
 | [examples/](../examples/README.md) | Current recordings, generated outputs and earlier compatibility records |
 | [docs/](./) | Usage, implementation details, source provenance and [screenshots and diagram](images/) |
 | [parser.py](../src/trace_mechanism/parser.py), [views.py](../src/trace_mechanism/views.py) | Claude Code and older Codex transcript formats and their views |
+| [visibility.py](../src/trace_mechanism/visibility.py) | Count what a copy leaves out of the saved file and write [the two notes](reviewer-visibility.md) |
 | [structurer.mjs](../src/trace_mechanism/structurer.mjs) | A separate index builder for rendered trace text |
 
 ## Run checks
@@ -41,6 +42,7 @@ python3 -m venv .venv
 .venv/bin/python tools/demo_codex.py
 node --test tests/structurer.test.mjs
 .venv/bin/python tools/regenerate_examples.py --check
+.venv/bin/python tools/build_visibility_example.py --check
 .venv/bin/python tools/check_layout.py
 ```
 

@@ -111,7 +111,10 @@ class Handler(BaseHTTPRequestHandler):
                     capture = s.previews.get(body.get("preview_handle"))
                     if capture is None or capture["text_sha256"] != body.get("sha256"):
                         raise ValueError("This preview expired. Open the preview again.")
-                    result = {"verb": s.desktop["copy"](capture["text"])}
+                    wanted = "return_note" if body.get("what") == "return_note" else "text"
+                    if not capture.get(wanted):
+                        raise ValueError("This copy has no note for the coding chat.")
+                    result = {"verb": s.desktop["copy"](capture[wanted])}
                 elif path == "/preview-prompt":
                     raw = body.get("raw")
                     if not isinstance(raw, str) or len(raw.encode()) > shelf.LIMIT:

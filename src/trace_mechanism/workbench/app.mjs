@@ -11980,8 +11980,9 @@ const previewDialog = document.getElementById('trace-preview');
 const previewCopy = document.getElementById('preview-copy');
 const previewText = document.getElementById('preview-text');
 let previewCapture = null;
+let previewRun = 0; // A newer preview request, or closing the dialog, makes older replies stale.
 document.getElementById('preview-close').onclick = () => previewDialog.close();
-previewDialog.onclose = () => { previewCapture = null; previewText.textContent = ''; };
+previewDialog.onclose = () => { previewRun += 1; previewCapture = null; previewText.textContent = ''; };
 previewCopy.onclick = async () => {
   if (!previewCapture) return;
   const { result, summary } = previewCapture;
@@ -11994,9 +11995,35 @@ previewCopy.onclick = async () => {
     document.getElementById('preview-warnings').textContent = error.message;
   } finally { previewCopy.disabled = false; }
 };
+const previewNote = document.getElementById('preview-note');
+const previewThinking = document.getElementById('preview-thinking');
+const previewReturnNote = document.getElementById('preview-return-note');
+// Remembered per browser; a blocked store leaves the defaults (note on, thinking off).
+function copyOption(name, fallback) {
+  try { return (localStorage.getItem('agentTraceCopy.' + name) ?? fallback) === 'on'; } catch { return fallback === 'on'; }
+}
+function copyOptions() { return {note: copyOption('note', 'on'), thinking: copyOption('thinking', 'off')}; }
+for (const [box, name] of [[previewNote, 'note'], [previewThinking, 'thinking']]) {
+  box.onchange = () => {
+    try { localStorage.setItem('agentTraceCopy.' + name, box.checked ? 'on' : 'off'); } catch {}
+    if (previewCapture) portableTrace('preview', ...previewCapture.args, true);
+  };
+}
+previewReturnNote.onclick = async () => {
+  if (!previewCapture?.result.return_note) return;
+  const { result } = previewCapture;
+  previewReturnNote.disabled = true;
+  try {
+    const verb = desktop ? (await post('/copy-preview', {sha256:result.text_sha256, preview_handle:result.preview_handle, what:'return_note'})).verb : await deliver(result.return_note, 'copy');
+    document.getElementById('preview-warnings').textContent = verb + ' · note for the coding chat. It says what the reviewer was not given.';
+  } catch (error) {
+    document.getElementById('preview-warnings').textContent = error.message;
+  } finally { previewReturnNote.disabled = false; }
+};
 const previewButton = document.getElementById('preview-scope');
 previewButton.onclick = () => portableTrace('preview', selectedTraceSourceWindow(), false);
-async function portableTrace(action, sourceWindow, closeout, selection = null) {
+async function portableTrace(action, sourceWindow, closeout, selection = null, rerun = false) {
+  const run = action === 'preview' ? ++previewRun : 0;
   const row = selection?.row || findMissionByKey(selectedMissionKey);
   if (!row) return;
   const scope = sessionTraceScopeParams(sourceWindow || selectedTraceSourceWindow());
@@ -12007,7 +12034,7 @@ async function portableTrace(action, sourceWindow, closeout, selection = null) {
   if (button) button.disabled = true;
   receipt.textContent = 'Reading ' + title + '…';
   try {
-    const result = await post('/trace', {ref:row.ref, ...scope, ...(selection?.tail ? {activity_only:true} : selection ? {selected_refs:selection.refs} : {}), closeout, preview:action === 'preview', deliver:desktop ? action : null});
+    const result = await post('/trace', {ref:row.ref, ...scope, ...(selection?.tail ? {activity_only:true} : selection ? {selected_refs:selection.refs} : {}), closeout, preview:action === 'preview', deliver:desktop ? action : null, ...copyOptions()});
     const scopeLabel = selection?.tail ? 'Recent recorded activity' : selection ? 'Selected conversations · detailed' : closeout ? 'Closeout' : scope.turns ? `Last ${scope.turns} turn(s), selected conversation only` :
       scope.depth === 'summary' ? 'Full thread compact' : 'Full thread detailed';
     const coverage = result.coverage;
@@ -12016,7 +12043,13 @@ async function portableTrace(action, sourceWindow, closeout, selection = null) {
        coverage.relationships === 'unknown' && 'Discovery incomplete', Object.keys(result.unavailable).length > 0 && 'Known worker gaps'].filter(Boolean).join(' · ');
     const summary = [title, scopeLabel, coverageLabel, result.sessions + ' session(s)', _formatKB(result.bytes), ...result.warnings].join(' · ');
     if (action === 'preview') {
-      previewCapture = {result, summary};
+      if (run !== previewRun || (rerun && !previewDialog.open)) return;
+      previewCapture = {result, summary, args:[sourceWindow, closeout, selection]};
+      previewNote.checked = copyOption('note', 'on');
+      previewThinking.checked = copyOption('thinking', 'off');
+      previewNote.disabled = !result.visibility;
+      previewThinking.disabled = !String(result.visibility?.provider || '').includes('claude');
+      previewReturnNote.hidden = !result.return_note;
       document.getElementById('preview-scope-name').textContent = summary;
       document.getElementById('preview-sources').replaceChildren(...result.sources.map(source => {
         const item = document.createElement('li');
@@ -12026,7 +12059,7 @@ async function portableTrace(action, sourceWindow, closeout, selection = null) {
       document.getElementById('preview-warnings').textContent = 'Read sequentially at ' + new Date(result.captured_at).toLocaleTimeString() + '. Large native outputs use excerpts and field references.';
       previewText.textContent = result.text;
       receipt.textContent = 'Preview ready · ' + summary;
-      previewDialog.showModal();
+      if (!previewDialog.open) previewDialog.showModal();
       return;
     }
     const verb = result.verb || await deliver(result.text, action);
@@ -12038,7 +12071,19 @@ async function portableTrace(action, sourceWindow, closeout, selection = null) {
         setTimeout(() => { if (node.dataset.copy === 'just_copied') delete node.dataset.copy; }, 15000);
       }
     }
-  } catch (err) { receipt.textContent = err.message; }
+  } catch (err) {
+    receipt.textContent = err.message;
+    if (rerun && run === previewRun && previewDialog.open) {
+      // The text on screen is the earlier capture; put the boxes back to match it.
+      previewNote.checked = previewCapture?.result.note_included ?? previewNote.checked;
+      previewThinking.checked = Boolean(previewCapture?.result.visibility?.thinking_included);
+      try {
+        localStorage.setItem('agentTraceCopy.note', previewNote.checked ? 'on' : 'off');
+        localStorage.setItem('agentTraceCopy.thinking', previewThinking.checked ? 'on' : 'off');
+      } catch {}
+      document.getElementById('preview-warnings').textContent = err.message;
+    }
+  }
   finally { if (button) button.disabled = false; }
 }
 const sourceDialog = document.getElementById('source-dialog');
