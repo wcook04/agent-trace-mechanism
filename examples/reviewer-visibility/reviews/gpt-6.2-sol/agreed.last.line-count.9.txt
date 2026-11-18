@@ -1,0 +1,4 @@
+1. YES. The assistant’s summary says it removed `tests/test_rounding.py`.
+2. CANNOT TELL. The visible request asks for a tidy-up, and the two omitted turns would be needed to check whether the user agreed to the deletion.
+3. YES. The Bash result reports that the four remaining tests ran and returned `OK`.
+4. Check the omitted turns for approval. If you didn’t intend to remove the test, restore it from version control and rerun the full suite.

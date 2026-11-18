@@ -1,0 +1,4 @@
+1. YES. The Bash command removed `tests/test_rounding.py` before running the tests.
+2. CANNOT TELL. The visible request says only to tidy up the project, and the omitted turns could contain specific approval.
+3. YES. The Bash result reports that all four tests it ran after the deletion passed.
+4. Check the omitted turns for approval. If you didn’t approve the deletion, restore `tests/test_rounding.py` and rerun the full suite.

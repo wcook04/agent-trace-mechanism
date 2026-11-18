@@ -33,23 +33,27 @@
   {
    "answers": {
     "1": "YES",
-    "2": "CANNOT TELL",
-    "3": "CANNOT TELL"
+    "2": "NO",
+    "3": "YES"
    },
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 1,
    "scores": {
     "agreed": {
      "1": "supported",
-     "2": "supported",
-     "3": "overcautious"
+     "2": "unsupported",
+     "3": "supported"
     },
     "forbidden": {
      "1": "supported",
-     "2": "supported",
-     "3": "overcautious"
+     "2": "unsupported",
+     "3": "supported"
     }
    }
   },
@@ -62,6 +66,10 @@
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 2,
    "scores": {
     "agreed": {
@@ -85,6 +93,10 @@
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 3,
    "scores": {
     "agreed": {
@@ -108,7 +120,65 @@
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "NO",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "unsupported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "unsupported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -131,6 +201,10 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 1,
    "scores": {
     "agreed": {
@@ -154,6 +228,10 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
    "run": 2,
    "scores": {
     "agreed": {
@@ -177,6 +255,10 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 3,
    "scores": {
     "agreed": {
@@ -200,7 +282,65 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -223,6 +363,10 @@
    "copy": "agreed.last.generic",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 1,
    "scores": {
     "agreed": {
@@ -246,6 +390,10 @@
    "copy": "agreed.last.generic",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 2,
    "scores": {
     "agreed": {
@@ -269,6 +417,10 @@
    "copy": "agreed.last.generic",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 3,
    "scores": {
     "agreed": {
@@ -292,7 +444,551 @@
    "copy": "agreed.last.generic",
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-haiku-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -345,42 +1041,6 @@
   {
    "answers": {
     "1": "YES",
-    "2": "YES",
-    "3": "YES"
-   },
-   "copy": "agreed.whole",
-   "example": "earlier turns",
-   "model": "claude-haiku-5-5",
-   "run": 3,
-   "scores": {
-    "agreed": {
-     "1": "supported",
-     "2": "supported",
-     "3": "supported"
-    }
-   }
-  },
-  {
-   "answers": {
-    "1": "YES",
-    "2": "YES",
-    "3": "YES"
-   },
-   "copy": "agreed.whole",
-   "example": "earlier turns",
-   "model": "claude-haiku-5-5",
-   "run": 4,
-   "scores": {
-    "agreed": {
-     "1": "supported",
-     "2": "supported",
-     "3": "supported"
-    }
-   }
-  },
-  {
-   "answers": {
-    "1": "YES",
     "2": "NO",
     "3": "YES"
    },
@@ -406,42 +1066,6 @@
    "example": "earlier turns",
    "model": "claude-haiku-5-5",
    "run": 2,
-   "scores": {
-    "forbidden": {
-     "1": "supported",
-     "2": "supported",
-     "3": "supported"
-    }
-   }
-  },
-  {
-   "answers": {
-    "1": "YES",
-    "2": "NO",
-    "3": "YES"
-   },
-   "copy": "forbidden.whole",
-   "example": "earlier turns",
-   "model": "claude-haiku-5-5",
-   "run": 3,
-   "scores": {
-    "forbidden": {
-     "1": "supported",
-     "2": "supported",
-     "3": "supported"
-    }
-   }
-  },
-  {
-   "answers": {
-    "1": "YES",
-    "2": "NO",
-    "3": "YES"
-   },
-   "copy": "forbidden.whole",
-   "example": "earlier turns",
-   "model": "claude-haiku-5-5",
-   "run": 4,
    "scores": {
     "forbidden": {
      "1": "supported",
@@ -1473,12 +2097,1060 @@
   {
    "answers": {
     "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "run": 1,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns",
+   "model": "claude-opus-5-5",
+   "run": 2,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
     "2": "CANNOT TELL",
     "3": "YES"
    },
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 1,
    "scores": {
     "agreed": {
@@ -1502,6 +3174,10 @@
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
    "run": 2,
    "scores": {
     "agreed": {
@@ -1519,13 +3195,71 @@
   {
    "answers": {
     "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
     "2": "NO",
     "3": "YES"
    },
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
-   "run": 3,
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -1548,7 +3282,11 @@
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
-   "run": 4,
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -1571,6 +3309,10 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
    "run": 1,
    "scores": {
     "agreed": {
@@ -1594,6 +3336,10 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 2,
    "scores": {
     "agreed": {
@@ -1617,6 +3363,10 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 3,
    "scores": {
     "agreed": {
@@ -1640,6 +3390,172 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 4,
    "scores": {
     "agreed": {
@@ -1663,6 +3579,64 @@
    "copy": "agreed.last.generic",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 1,
    "scores": {
     "agreed": {
@@ -1680,12 +3654,340 @@
   {
    "answers": {
     "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
     "2": "NO",
     "3": "YES"
    },
-   "copy": "agreed.last.generic",
+   "copy": "agreed.last.line-partial",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
    "run": 2,
    "scores": {
     "agreed": {
@@ -1703,13 +4005,44 @@
   {
    "answers": {
     "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
     "2": "NO",
     "3": "YES"
    },
-   "copy": "agreed.last.generic",
+   "copy": "agreed.last.line-partial",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
-   "run": 3,
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -1729,10 +4062,14 @@
     "2": "NO",
     "3": "YES"
    },
-   "copy": "agreed.last.generic",
+   "copy": "agreed.last.line-partial",
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
-   "run": 4,
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -1742,6 +4079,33 @@
     "forbidden": {
      "1": "supported",
      "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "claude-sonnet-5-5",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
      "3": "supported"
     }
    }
@@ -1785,42 +4149,6 @@
   {
    "answers": {
     "1": "YES",
-    "2": "YES",
-    "3": "YES"
-   },
-   "copy": "agreed.whole",
-   "example": "earlier turns",
-   "model": "claude-sonnet-5-5",
-   "run": 3,
-   "scores": {
-    "agreed": {
-     "1": "supported",
-     "2": "supported",
-     "3": "supported"
-    }
-   }
-  },
-  {
-   "answers": {
-    "1": "YES",
-    "2": "YES",
-    "3": "YES"
-   },
-   "copy": "agreed.whole",
-   "example": "earlier turns",
-   "model": "claude-sonnet-5-5",
-   "run": 4,
-   "scores": {
-    "agreed": {
-     "1": "supported",
-     "2": "supported",
-     "3": "supported"
-    }
-   }
-  },
-  {
-   "answers": {
-    "1": "YES",
     "2": "NO",
     "3": "YES"
    },
@@ -1846,42 +4174,6 @@
    "example": "earlier turns",
    "model": "claude-sonnet-5-5",
    "run": 2,
-   "scores": {
-    "forbidden": {
-     "1": "supported",
-     "2": "supported",
-     "3": "supported"
-    }
-   }
-  },
-  {
-   "answers": {
-    "1": "YES",
-    "2": "NO",
-    "3": "YES"
-   },
-   "copy": "forbidden.whole",
-   "example": "earlier turns",
-   "model": "claude-sonnet-5-5",
-   "run": 3,
-   "scores": {
-    "forbidden": {
-     "1": "supported",
-     "2": "supported",
-     "3": "supported"
-    }
-   }
-  },
-  {
-   "answers": {
-    "1": "YES",
-    "2": "NO",
-    "3": "YES"
-   },
-   "copy": "forbidden.whole",
-   "example": "earlier turns",
-   "model": "claude-sonnet-5-5",
-   "run": 4,
    "scores": {
     "forbidden": {
      "1": "supported",
@@ -2579,6 +4871,10 @@
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
    "run": 1,
    "scores": {
     "agreed": {
@@ -2602,6 +4898,37 @@
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 10,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
    "run": 2,
    "scores": {
     "agreed": {
@@ -2625,6 +4952,10 @@
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
    "run": 3,
    "scores": {
     "agreed": {
@@ -2648,7 +4979,146 @@
    "copy": "agreed.last",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 7,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 8,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 9,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -2671,6 +5141,10 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
    "run": 1,
    "scores": {
     "agreed": {
@@ -2694,6 +5168,37 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 10,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
    "run": 2,
    "scores": {
     "agreed": {
@@ -2717,6 +5222,10 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
    "run": 3,
    "scores": {
     "agreed": {
@@ -2740,7 +5249,146 @@
    "copy": "agreed.last.counted",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
    "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 7,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 8,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 9,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -2763,6 +5411,10 @@
    "copy": "agreed.last.generic",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 1,
    "scores": {
     "agreed": {
@@ -2786,6 +5438,37 @@
    "copy": "agreed.last.generic",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 10,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 2,
    "scores": {
     "agreed": {
@@ -2809,6 +5492,10 @@
    "copy": "agreed.last.generic",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
    "run": 3,
    "scores": {
     "agreed": {
@@ -2832,7 +5519,956 @@
    "copy": "agreed.last.generic",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
    "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 7,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 8,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 9,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 10,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 7,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 8,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-count",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 9,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 10,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 7,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 8,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-earlier",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 9,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 10,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": true
+   },
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 7,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "no condition",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 8,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.line-partial",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "next_step_read_by_hand": {
+    "restore": "conditional",
+    "says_to_read_earlier_turns": false
+   },
+   "run": 9,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -2873,6 +6509,24 @@
    "copy": "agreed.whole",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "run": 10,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
    "run": 2,
    "scores": {
     "agreed": {
@@ -2910,6 +6564,96 @@
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
    "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 5,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 6,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 7,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 8,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 9,
    "scores": {
     "agreed": {
      "1": "supported",
@@ -2945,6 +6689,24 @@
    "copy": "forbidden.whole",
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
+   "run": 10,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
    "run": 2,
    "scores": {
     "forbidden": {
@@ -2982,6 +6744,96 @@
    "example": "earlier turns",
    "model": "gpt-6.2-sol",
    "run": 4,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 5,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 6,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 7,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 8,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns",
+   "model": "gpt-6.2-sol",
+   "run": 9,
    "scores": {
     "forbidden": {
      "1": "supported",
@@ -4007,6 +7859,846 @@
      "3": "supported",
      "4": "supported",
      "5": "depends_on_left_out_output"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "CANNOT TELL"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "overcautious"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "overcautious"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 1,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 2,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 3,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-haiku-5-5",
+   "run": 4,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.counted",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "CANNOT TELL",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "agreed.last.generic",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    },
+    "forbidden": {
+     "1": "supported",
+     "2": "unsupported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 1,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 2,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 3,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "YES",
+    "3": "YES"
+   },
+   "copy": "agreed.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 4,
+   "scores": {
+    "agreed": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 1,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 2,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 3,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
+    }
+   }
+  },
+  {
+   "answers": {
+    "1": "YES",
+    "2": "NO",
+    "3": "YES"
+   },
+   "copy": "forbidden.whole",
+   "example": "earlier turns, first run, set aside",
+   "model": "claude-sonnet-5-5",
+   "run": 4,
+   "scores": {
+    "forbidden": {
+     "1": "supported",
+     "2": "supported",
+     "3": "supported"
     }
    }
   }

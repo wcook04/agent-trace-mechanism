@@ -1,0 +1,674 @@
+{
+ "claude-haiku-5-5/agreed.last.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.counted.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.counted.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "claude-haiku-5-5/agreed.last.counted.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.counted.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.counted.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.counted.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.generic.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.generic.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.generic.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.generic.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.generic.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.generic.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-count.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-count.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "claude-haiku-5-5/agreed.last.line-count.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-count.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "claude-haiku-5-5/agreed.last.line-count.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-count.6.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-earlier.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-earlier.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-earlier.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-earlier.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-earlier.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-earlier.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-partial.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-partial.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-partial.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-partial.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-partial.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-haiku-5-5/agreed.last.line-partial.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.1.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.2.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.3.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.4.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.5.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.6.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.counted.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.counted.2.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.counted.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.counted.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.counted.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.counted.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "claude-opus-5-5/agreed.last.generic.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.generic.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.generic.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.generic.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.generic.5.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.generic.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-count.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-count.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-count.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-count.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-count.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-count.6.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-earlier.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-earlier.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-earlier.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-earlier.4.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-earlier.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-earlier.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-partial.1.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-partial.2.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-partial.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-partial.4.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-partial.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-opus-5-5/agreed.last.line-partial.6.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.2.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.5.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.counted.1.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.counted.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.counted.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.counted.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.counted.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.counted.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.generic.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.generic.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.generic.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.generic.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.generic.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.generic.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-count.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-count.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-count.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-count.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-count.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-count.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-earlier.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-earlier.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-earlier.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-earlier.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-earlier.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-earlier.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-partial.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-partial.2.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-partial.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-partial.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-partial.5.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "claude-sonnet-5-5/agreed.last.line-partial.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.1.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.10.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.2.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.3.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.6.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.7.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.8.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.9.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.counted.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.counted.10.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.counted.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.counted.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.counted.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.counted.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.counted.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.counted.7.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.counted.8.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.counted.9.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.generic.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.generic.10.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.generic.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.generic.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.generic.4.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.generic.5.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.generic.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.generic.7.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.generic.8.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.generic.9.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-count.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-count.10.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-count.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-count.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-count.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-count.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-count.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-count.7.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-count.8.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-count.9.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.1.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.10.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.4.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.6.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.7.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.8.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-earlier.9.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.1.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.10.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.2.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.3.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.4.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.5.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": true
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.6.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.7.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.8.txt": {
+  "restore": "no condition",
+  "says_to_read_earlier_turns": false
+ },
+ "gpt-6.2-sol/agreed.last.line-partial.9.txt": {
+  "restore": "conditional",
+  "says_to_read_earlier_turns": false
+ }
+}

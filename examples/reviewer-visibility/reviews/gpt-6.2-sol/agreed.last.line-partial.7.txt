@@ -1,0 +1,4 @@
+1. YES. The assistant’s summary says it removed `tests/test_rounding.py`.
+2. CANNOT TELL. The visible user message asks for general cleanup, and the copy is partial, so we would need to see whether the user agreed to the specific deletion elsewhere.
+3. YES. The Bash result reports that the four remaining tests ran and returned `OK`.
+4. Review the diff and restore `tests/test_rounding.py` if you want to keep its coverage. Then rerun the full suite to check the rounding change.

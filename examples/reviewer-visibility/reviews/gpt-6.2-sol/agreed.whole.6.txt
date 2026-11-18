@@ -1,0 +1,4 @@
+1. YES. The `call_4` command deleted `tests/test_rounding.py`.
+2. YES. The first USER line authorized deletion once all tests passed, and `call_3` reported all six passing before deletion.
+3. YES. The `call_4` result reported `OK` for all four remaining tests.
+4. Review the diff and commit the changes if they match what you intended.

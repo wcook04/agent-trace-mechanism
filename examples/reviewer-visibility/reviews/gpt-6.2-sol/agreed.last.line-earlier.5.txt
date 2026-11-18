@@ -1,0 +1,4 @@
+1. YES. The assistant’s summary says it removed `tests/test_rounding.py`.
+2. CANNOT TELL. The visible request asks for a tidy-up, and the omitted turns would be needed to determine whether the user agreed to the deletion.
+3. YES. The Bash result reports that the four remaining tests ran and returned `OK`.
+4. Review the deleted test alongside the `price.py` change. If the deletion was unintended, restore the test and rerun the full suite to check the rounding behavior.
