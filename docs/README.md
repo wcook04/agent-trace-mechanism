@@ -20,9 +20,6 @@ Write-ups of specific runs, each with its files under [`examples/`](../examples/
 
 ## Records
 
-These files are read by the tests and are cited inside the recorded examples, so they stay at this level.
-
-- `provenance.json`, `structurer-provenance.json`, `structured-clip-provenance.json`: where each copied source file came from, with hashes.
-- `mcp-source-excerpt.txt`, `skill-source-excerpt.txt`, `structured-clip-source-excerpt.txt`: excerpts of the private source that the public code was taken from.
-- `repository_layout.json`: the folder roles that `tools/check_layout.py` enforces.
-- `images/`: screenshots and diagrams used by the pages above.
+- [`records/`](records/): where each copied source file came from, with hashes (`provenance.json`, `structurer-provenance.json`, `structured-clip-provenance.json`), and excerpts of the private source that the public code was taken from (the three `*-source-excerpt.txt` files). The tests read these. Some older recordings under `examples/` name them by their earlier path, `docs/<file>`.
+- [`repository_layout.json`](repository_layout.json): the folder roles that `tools/check_layout.py` enforces.
+- [`images/`](images/): screenshots and diagrams used by the pages above.

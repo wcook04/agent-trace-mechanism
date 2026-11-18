@@ -1,6 +1,6 @@
 # Checking a worker's validation history
 
-[README](../../README.md) · [Selected native records](../../examples/validation-history.jsonl) · [Provenance](../../examples/validation-history-provenance.json)
+[README](../../README.md) · [Selected native records](../../examples/validation-history/validation-history.jsonl) · [Provenance](../../examples/validation-history/validation-history-provenance.json)
 
 During Agent Trace development on 2 November 2026, a reviewing agent used the public MCP server to investigate test failures across an existing chat and its 16 descendants. The records showed why an isolated successful command was insufficient evidence.
 
@@ -47,7 +47,7 @@ A separate measurement used a frozen copy of that worker's full 5.57 MB history,
 
 Plain search was faster than a fresh MCP capture and could find the same assertion text. It returned 21 whole JSONL lines; MCP returned three failed-command descriptors. The smaller response reflects selection and formatting, not proof of better search quality. MCP byte counts include both serialized result representations; these are not token measurements. Snapshot memory growth was not measured.
 
-[All measurements](../../examples/retrieval-costs.json) include individual timings and the source hash. To measure a local native history containing a failed command:
+[All measurements](../../examples/validation-history/retrieval-costs.json) include individual timings and the source hash. To measure a local native history containing a failed command:
 
 ```sh
 .venv/bin/python tools/measure_retrieval.py /path/to/rollout.jsonl --query AssertionError

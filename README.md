@@ -62,7 +62,7 @@ Follow the [registration and host connection guide](skills/agent-trace/reference
 
 - [Example recordings](examples/README.md) include a failed test investigation, a coordinator with two workers, and a cross-provider review.
 - [All documentation](docs/README.md) lists the guides and the write-ups of specific runs, including [what a second model is told about a copy that leaves things out](docs/studies/reviewer-visibility.md).
-- [How the reader works](docs/mechanism.md) and [reader provenance](docs/provenance.json) describe the supported formats and their origins.
+- [How the reader works](docs/mechanism.md) and [reader provenance](docs/records/provenance.json) describe the supported formats and their origins.
 - [Development and source map](docs/development.md) and [contributing](CONTRIBUTING.md) cover local checks, packaging and reporting bugs.
 
 [Apache 2.0 licence](LICENSE) · [Attribution](NOTICE) · [Cite Agent Trace](CITATION.cff)

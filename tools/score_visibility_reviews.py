@@ -73,11 +73,12 @@ def build():
     # My reading of the reply to question 4 in each review of a last-turn copy: whether it says to restore the file,
     # and whether it says to read the earlier turns. "no condition" means the reply says to restore the file and does
     # not make that depend on whether the user wanted the deletion or on what the file covered.
-    readings = json.loads((HERE / 'next-step-readings.json').read_text())
-    for path in sorted(HERE.glob('reviews/*/*.txt')) + sorted(HERE.glob('superseded/reviews/*/*.txt')):
+    readings = json.loads((HERE / 'earlier-turns/next-step-readings.json').read_text())
+    for path in sorted(list(HERE.glob('earlier-turns/replies/*/*.txt')) + list(HERE.glob('tool-output/replies/*/*.txt')),
+                       key=lambda p: (p.parent.name, p.name)) + sorted(HERE.glob('earlier-turns/discarded-first-run/*/*.txt')):
         history, condition, run = re.fullmatch(r'([a-z-]+?)\.(.+)\.(\d+)\.txt', path.name).groups()
         found = answers(path.read_text())
-        superseded = 'superseded' in path.parts
+        superseded = 'discarded-first-run' in path.parts
         if history in EARLIER:
             row = {'example': 'earlier turns, first run, set aside' if superseded else 'earlier turns',
                    'model': path.parent.name, 'copy': f'{history}.{condition}', 'run': int(run),

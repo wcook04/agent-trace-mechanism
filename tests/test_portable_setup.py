@@ -13,7 +13,7 @@ def test_discovery_uses_the_configured_home(tmp_path, monkeypatch, capsys, provi
     folder = tmp_path / 'nonstandard profile with spaces'
     histories = folder / child
     histories.mkdir(parents=True)
-    fixture = ROOT / ('examples/native-command.jsonl' if provider == 'codex' else 'tests/fixtures/claude.jsonl')
+    fixture = ROOT / ('examples/native-command/native-command.jsonl' if provider == 'codex' else 'tests/fixtures/claude.jsonl')
     source = histories / 'selected.jsonl'
     source.write_bytes(fixture.read_bytes())
     monkeypatch.setenv(variable, str(folder))
@@ -27,7 +27,7 @@ def test_connection_keeps_venv_executable_and_absolute_manifest(tmp_path, monkey
     folder = tmp_path / 'another project'
     folder.mkdir()
     manifest = folder / 'chosen chats.json'
-    register([ROOT / 'examples/native-command.jsonl'], manifest)
+    register([ROOT / 'examples/native-command/native-command.jsonl'], manifest)
     executable = folder / 'venv python'
     executable.symlink_to(Path(__import__('sys').executable))
     monkeypatch.setattr('sys.executable', str(executable))
@@ -43,7 +43,7 @@ def test_verify_mixed_histories_from_unrelated_directory(tmp_path, monkeypatch):
     folder = tmp_path / 'records with spaces'
     folder.mkdir()
     sources = []
-    for provider, fixture in [('codex', 'examples/native-command.jsonl'), ('claude', 'tests/fixtures/claude.jsonl')]:
+    for provider, fixture in [('codex', 'examples/native-command/native-command.jsonl'), ('claude', 'tests/fixtures/claude.jsonl')]:
         source = folder / (provider + '.jsonl')
         source.write_bytes((ROOT / fixture).read_bytes())
         sources.append(source)

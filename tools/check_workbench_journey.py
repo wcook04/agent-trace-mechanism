@@ -276,7 +276,7 @@ def run(args, home):
             )
             # Two physical files claim one recorded ID. Pick each by location,
             # including the archive through its filter, and compare the actual preview.
-            fixture = (ROOT / "examples/codex.jsonl").read_text()
+            fixture = (ROOT / "examples/synthetic-codex/codex.jsonl").read_text()
             archive = folder.parent / "archived_sessions"
             archive.mkdir()
             title_index = folder.parent / "session_index.jsonl"

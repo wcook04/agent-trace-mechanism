@@ -1,20 +1,33 @@
 # Reviewer visibility example
 
-Five histories of one small coding task, the copies of each that reviewers were given, 352 reviews of those copies, and a review pasted back into a forked coding session. [The write-up](../../docs/studies/reviewer-visibility.md) explains it.
+The files behind [the write-up](../../docs/studies/reviewer-visibility.md). There is one folder for each test.
+
+| Folder | The test |
+|---|---|
+| [earlier-turns/](earlier-turns/) | Two scripted conversations with the same last turn. Models were given only the last turn and asked whether the user had agreed to a deletion. This is the test with the table in the write-up |
+| [tool-output/](tool-output/) | One recorded conversation and two edited versions of it. Models were given copies with the tool output left out |
+| [pasting-back/](pasting-back/) | One Codex session forked six times. A scripted review was pasted into each fork, three times with the lines from Agent Trace and three times without |
+| [first-pass/](first-pass/) | The first version of the tool-output test, kept as it was. Its copies had a defect that the write-up describes |
+
+`earlier-turns/` and `tool-output/` have the same layout:
 
 | File | Contents |
 |---|---|
-| [histories/](histories) | `told.jsonl` is a recording with private records removed. `not-told.jsonl` and `wrongly-refused.jsonl` are that recording with two edits made by the build script. `agreed.jsonl` and `forbidden.jsonl` are constructed three-turn conversations written in the build script |
-| [copies/](copies) | The texts the reviewers were given, named `<history>.<copy>.txt` |
-| [reviewer-prompt.txt](reviewer-prompt.txt), [reviewer-prompt-earlier-turns.txt](reviewer-prompt-earlier-turns.txt) | The prompt each reviewer was given, with a copy in place of `{copy}`. The second is for the copies of `agreed` and `forbidden` |
-| [reviews/](reviews) | Each review as the reviewer wrote it, in a folder for each model, named `<history>.<copy>.<run>.txt` |
-| [results.json](results.json) | Each answer, its score, and the key the scores use |
-| [next-step-readings.json](next-step-readings.json) | For each review of a last-turn copy, a reading of what it told the user to do next |
-| [superseded/](superseded) | 40 reviews from the first run of the earlier-turns example, set aside because the reviewers' context held a chat message of mine. The write-up explains |
-| [return-note.txt](return-note.txt) | The note to paste beside a review of `told` in the coding conversation |
-| [inventory.json](inventory.json) | The counts the notes for `told` are written from |
-| [return/](return) | The return leg: a Codex session's compact copy and first report, a scripted review, the two pasted texts, six reports and the commands each fork ran |
-| [first-pass/](first-pass) | The copies, reviews and return leg of the first version, kept as they were |
-| [provenance.json](provenance.json) | How each file was made, and what is not regenerated |
+| `conversations/` | The saved conversations. In `earlier-turns/` both were written by a script and are not recordings. In `tool-output/`, `told.jsonl` is a recording with private records removed, and the other two are that recording with two edits |
+| `copies/` | The exact text each model was given, named `<conversation>.<copy>.txt` |
+| `prompt.txt` | The prompt, with a copy in place of `{copy}` |
+| `replies/` | Each reply as the model wrote it, in a folder for each model, named `<conversation>.<copy>.<run>.txt` |
+| `return-note.txt` | The lines Agent Trace writes to send to the coding agent with a reply |
 
-The compact copies of `told` and `not-told` have the same text, so each of those texts was reviewed once and the review is filed under `told`. The last-turn copies of `agreed` and `forbidden` have the same text too, and those reviews are filed under `agreed`.
+Three files belong to one test only. [earlier-turns/next-step-readings.json](earlier-turns/next-step-readings.json) is a reading of what each reply told the user to do next. [earlier-turns/discarded-first-run/](earlier-turns/discarded-first-run/) holds 40 replies that were thrown away because a chat message of mine had been passed to the models. [tool-output/inventory.json](tool-output/inventory.json) holds the counts that the lines for `told` are written from.
+
+[results.json](results.json) has every answer from every reply, with its score and the key the scores use. [provenance.json](provenance.json) says how each file was made and which files are not regenerated.
+
+Where two copies have the same text, that text was given to the models once. In `tool-output/` those replies are filed under `told`, and in `earlier-turns/` under `agreed`.
+
+To check that the copies and the scores match the code:
+
+```sh
+python tools/build_visibility_example.py --check
+python tools/score_visibility_reviews.py --check
+```

@@ -29,7 +29,7 @@ def generate():
         save(stem + '.expected.json', json.dumps(structured(turns), ensure_ascii=False, indent=2) + '\n')
 
     for provider, parser in [('codex', parse_codex_session), ('claude', parse_claude_session)]:
-        base = 'examples' if provider == 'codex' else 'tests/fixtures'
+        base = 'examples/synthetic-codex' if provider == 'codex' else 'tests/fixtures'
         view(f'{base}/{provider}.jsonl', f'{base}/{provider}', parser)
     for phase in ('before', 'after'):
         view(f'examples/codex-retrieval/source-{phase}.jsonl',
@@ -51,21 +51,21 @@ def generate():
                 raw = clip['raw_sidecar']['filename']
                 save(str(Path(output_name).parent / raw), (temp / raw).read_bytes())
 
-    index('examples/codex.detailed.txt', 'examples/production-structured-clip.json', single=True)
+    index('examples/synthetic-codex/codex.detailed.txt', 'examples/structured-clip/production-structured-clip.json', single=True)
     index('examples/codex-retrieval/after.detailed.txt', 'examples/codex-retrieval/after.index.json', single=True)
     index('examples/controlled-run/assembled.detailed.txt', 'examples/controlled-run/structured-attachment.json')
 
     clip_provenance = {
         'source_file': 'src/trace_mechanism/structurer.mjs',
         'source_sha256': hashlib.sha256((ROOT / 'src/trace_mechanism/structurer.mjs').read_bytes()).hexdigest(),
-        'fixture': 'examples/codex.detailed.txt',
-        'fixture_sha256': hashlib.sha256(outputs['examples/codex.detailed.txt']).hexdigest(),
-        'output': 'examples/production-structured-clip.json',
-        'output_sha256': hashlib.sha256(outputs['examples/production-structured-clip.json']).hexdigest(),
-        'invocation': 'node tools/build_index.mjs examples/codex.detailed.txt examples/production-structured-clip.json --single',
+        'fixture': 'examples/synthetic-codex/codex.detailed.txt',
+        'fixture_sha256': hashlib.sha256(outputs['examples/synthetic-codex/codex.detailed.txt']).hexdigest(),
+        'output': 'examples/structured-clip/production-structured-clip.json',
+        'output_sha256': hashlib.sha256(outputs['examples/structured-clip/production-structured-clip.json']).hexdigest(),
+        'invocation': 'node tools/build_index.mjs examples/synthetic-codex/codex.detailed.txt examples/structured-clip/production-structured-clip.json --single',
         'validation': 'Reproduction, exact source reconstruction and semantic action regressions are separate checks.',
     }
-    save('docs/structured-clip-provenance.json', json.dumps(clip_provenance, indent=2) + '\n')
+    save('docs/records/structured-clip-provenance.json', json.dumps(clip_provenance, indent=2) + '\n')
     historical = json.loads((ROOT / 'examples/controlled-run/provenance.json').read_text())
     historical['structured_index_rebuilt'] = {
         'builder': 'src/trace_mechanism/structurer.mjs', 'source_sha256': clip_provenance['source_sha256'],

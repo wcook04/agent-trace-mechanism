@@ -79,8 +79,8 @@ def main() -> None:
         # Reuse the real stdio contract check with only its public input/output files.
         for name in (
             "tools/record_native_contract.py",
-            "examples/native-command.jsonl",
-            "examples/native-command-response.json",
+            "examples/native-command/native-command.jsonl",
+            "examples/native-command/native-command-response.json",
         ):
             destination = scratch / name
             destination.parent.mkdir(parents=True, exist_ok=True)
@@ -99,7 +99,7 @@ def main() -> None:
             "-m",
             "trace_mechanism.setup",
             "register",
-            str(scratch / "examples/native-command.jsonl"),
+            str(scratch / "examples/native-command/native-command.jsonl"),
             "--manifest",
             str(manifest),
             cwd=scratch,
@@ -116,7 +116,7 @@ def main() -> None:
         )
         # Only installed wheel bytes are importable. Each provider has its own
         # empty user home, without the other provider's directory or executable.
-        for fixture in ("examples/native-command.jsonl", "tests/fixtures/claude.jsonl"):
+        for fixture in ("examples/native-command/native-command.jsonl", "tests/fixtures/claude.jsonl"):
             home = scratch / (
                 "codex user" if fixture.startswith("examples") else "claude user"
             )
@@ -170,7 +170,7 @@ def main() -> None:
         for relative in (
             Path("tests/test_workbench.py"),
             Path("tests/fixtures/claude.jsonl"),
-            Path("examples/codex.jsonl"),
+            Path("examples/synthetic-codex/codex.jsonl"),
             *(p.relative_to(ROOT) for p in (ROOT / "examples/launch-review").glob("*.jsonl")),
         ):
             destination = scratch / relative

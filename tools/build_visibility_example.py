@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rebuild the histories and copies in examples/reviewer-visibility.
 
-``histories/told.jsonl`` is a recording. The other two histories are that
+``tool-output/conversations/told.jsonl`` is a recording. The other two histories are that
 recording with the edits listed in EDITS, so the three differ only where the
 edits say. Each history is then copied the ways a reviewer was given it.
 ``--check`` fails if a file differs from what this script builds.
@@ -125,9 +125,9 @@ def derive(told, name):
 
 
 def build():
-    told = (HERE / 'histories/told.jsonl').read_text()
-    files = {f'histories/{name}.jsonl': derive(told, name) for name in EDITS}
-    histories = {'told': told, **{name: files[f'histories/{name}.jsonl'] for name in EDITS}}
+    told = (HERE / 'tool-output/conversations/told.jsonl').read_text()
+    files = {f'tool-output/conversations/{name}.jsonl': derive(told, name) for name in EDITS}
+    histories = {'told': told, **{name: files[f'tool-output/conversations/{name}.jsonl'] for name in EDITS}}
     scratch = HERE / '.build'
     scratch.mkdir(exist_ok=True)
     try:
@@ -140,20 +140,20 @@ def build():
                 noted, inventory = with_note(text, found, note=opening == 'counted')
                 if opening == 'generic':
                     noted = f'{GENERIC}\n\n{text}'
-                files[f'copies/{history}.{name}.txt'] = noted + '\n'
+                files[f'tool-output/copies/{history}.{name}.txt'] = noted + '\n'
                 if (history, name) == ('told', 'counted'):
-                    files['return-note.txt'] = visibility_fields(noted, inventory)['return_note'] + '\n'
-                    files['inventory.json'] = json.dumps(inventory, indent=2, sort_keys=True) + '\n'
+                    files['tool-output/return-note.txt'] = visibility_fields(noted, inventory)['return_note'] + '\n'
+                    files['tool-output/inventory.json'] = json.dumps(inventory, indent=2, sort_keys=True) + '\n'
             path.unlink()
     finally:
         scratch.rmdir()
     for name in SAME_TEXT:
-        assert files[f'copies/told.{name}.txt'] == files[f'copies/not-told.{name}.txt'], name
+        assert files[f'tool-output/copies/told.{name}.txt'] == files[f'tool-output/copies/not-told.{name}.txt'], name
     scratch.mkdir(exist_ok=True)
     try:
         for history in FIRST_TURN:
             body = earlier_turns_history(history)
-            files[f'histories/{history}.jsonl'] = body
+            files[f'earlier-turns/conversations/{history}.jsonl'] = body
             path = scratch / f'{history}.jsonl'
             path.write_text(body)
             for name, (turns, opening) in LAST_TURN_COPIES.items():
@@ -164,14 +164,14 @@ def build():
                     noted = f'{GENERIC}\n\n{text}'
                 if opening in LINES:
                     noted = f'{LINES[opening]}\n\n{text}'
-                files[f'copies/{history}.{name}.txt'] = noted + '\n'
+                files[f'earlier-turns/copies/{history}.{name}.txt'] = noted + '\n'
                 if (history, name) == ('agreed', 'last.counted'):
-                    files['return/earlier-turns-return-note.txt'] = visibility_fields(noted, inventory)['return_note'] + '\n'
+                    files['earlier-turns/return-note.txt'] = visibility_fields(noted, inventory)['return_note'] + '\n'
             path.unlink()
     finally:
         scratch.rmdir()
     for name in (n for n in LAST_TURN_COPIES if n != 'whole'):
-        assert files[f'copies/agreed.{name}.txt'] == files[f'copies/forbidden.{name}.txt'], name
+        assert files[f'earlier-turns/copies/agreed.{name}.txt'] == files[f'earlier-turns/copies/forbidden.{name}.txt'], name
     return files
 
 
@@ -189,8 +189,8 @@ def main():
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text)
             print(f'{name}  {hashlib.sha256(text.encode()).hexdigest()[:12]}  {len(text):,} chars')
-    if (HERE / 'copies/told.before.txt').read_text() != (HERE / 'copies/not-told.before.txt').read_text():
-        stale.append('copies/not-told.before.txt differs from copies/told.before.txt')
+    if (HERE / 'tool-output/copies/told.before.txt').read_text() != (HERE / 'tool-output/copies/not-told.before.txt').read_text():
+        stale.append('tool-output/copies/not-told.before.txt differs from tool-output/copies/told.before.txt')
     if stale:
         sys.exit('Stale: ' + ', '.join(stale) + '. Run tools/build_visibility_example.py')
     if args.check:

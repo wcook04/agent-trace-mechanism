@@ -24,7 +24,7 @@ def main():
         original.SUPPORT = Path(folder)
         reader = original.build_activity_reader()
         for provider, file in (
-            ("codex", "examples/codex.jsonl"),
+            ("codex", "examples/synthetic-codex/codex.jsonl"),
             ("claude_code", "tests/fixtures/claude.jsonl"),
         ):
             path = ROOT / file

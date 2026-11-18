@@ -32,7 +32,7 @@ class RecordedExamplesTests(unittest.TestCase):
         self.assertEqual(clip['coverage_scope']['original_session_coverage'], 'unknown_from_supplied_text')
 
     def test_small_edit_fixture_interpretation(self):
-        clip = json.loads((ROOT / 'examples/production-structured-clip.json').read_text())
+        clip = json.loads((ROOT / 'examples/structured-clip/production-structured-clip.json').read_text())
         rows = clip['artifact_delta_index']['rows']
         self.assertEqual([r['delta_state'] for r in rows], ['discovered', 'edited'])
         self.assertEqual({r['path'] for r in rows}, {'example.txt'})
@@ -51,7 +51,7 @@ class RecordedExamplesTests(unittest.TestCase):
         self.assertIn('sibling raw sidecar', clip['local_capture']['note'])
 
     def test_copied_builder_matches_pinned_source(self):
-        provenance = json.loads((ROOT / 'docs/structurer-provenance.json').read_text())
+        provenance = json.loads((ROOT / 'docs/records/structurer-provenance.json').read_text())
         self.assertEqual(hashlib.sha256((ROOT / provenance['copy']).read_bytes()).hexdigest(), provenance['sha256'])
 
 

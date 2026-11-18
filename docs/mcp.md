@@ -111,9 +111,9 @@ References remain usable after source files change, but only while this server p
 
 ## A recorded command through the current server
 
-[Selected native records](../examples/native-command.jsonl) contain a test command run during Agent Trace development on 2 November 2026. The workspace path was replaced with `<public-repo>` and session metadata reduced. The command, combined output, item IDs and timestamps were retained.
+[Selected native records](../examples/native-command/native-command.jsonl) contain a test command run during Agent Trace development on 2 November 2026. The workspace path was replaced with `<public-repo>` and session metadata reduced. The command, combined output, item IDs and timestamps were retained.
 
-[The complete captured requests and MCP responses](../examples/native-command-response.json) show two operations: search for `Ran 2 tests`, then retrieve `/aggregated_output` using the returned item and snapshot. They are regenerated from the current server, rather than copied from an earlier plugin version.
+[The complete captured requests and MCP responses](../examples/native-command/native-command-response.json) show two operations: search for `Ran 2 tests`, then retrieve `/aggregated_output` using the returned item and snapshot. They are regenerated from the current server, rather than copied from an earlier plugin version.
 
 ```sh
 .venv/bin/python tools/record_native_contract.py --check

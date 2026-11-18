@@ -92,8 +92,8 @@ Outside readers have corrected this work four times, including one run that I ha
 ## Files
 
 - [Full record](reviewer-visibility-full-record.md): every test, including the ones that showed nothing, the corrections, the limits and how to rerun the checks.
-- [The prompt](../../examples/reviewer-visibility/reviewer-prompt-earlier-turns.txt) given to every model.
-- [The copies](../../examples/reviewer-visibility/copies/): the exact text each model was given. The six rows of the table are the files named `agreed.last*.txt`.
-- [The replies](../../examples/reviewer-visibility/reviews/): one file per answer, in a folder per model.
-- [The counts](../../examples/reviewer-visibility/results.json) and [the reading of each recommendation](../../examples/reviewer-visibility/next-step-readings.json).
+- [The prompt](../../examples/reviewer-visibility/earlier-turns/prompt.txt) given to every model.
+- [The copies](../../examples/reviewer-visibility/earlier-turns/copies/): the exact text each model was given. The six rows of the table are the files named `agreed.last*.txt`.
+- [The replies](../../examples/reviewer-visibility/earlier-turns/replies/): one file per answer, in a folder per model.
+- [The counts](../../examples/reviewer-visibility/results.json) and [the reading of each recommendation](../../examples/reviewer-visibility/earlier-turns/next-step-readings.json).
 - [The code that counts what a copy leaves out](../../src/trace_mechanism/visibility.py).
