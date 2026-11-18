@@ -11,7 +11,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / 'examples/validation-history.jsonl'
+SOURCE = ROOT / 'examples/validation-history/validation-history.jsonl'
 
 
 async def inspect():

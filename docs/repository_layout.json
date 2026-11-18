@@ -19,14 +19,15 @@
       "purpose": "Regression and provenance tests"
     },
     "examples": {
-      "purpose": "Selected native records, current MCP responses, retrieval measurements and retained legacy parser regressions",
+      "purpose": "One folder per example: selected native records, current MCP responses, retrieval measurements, reviewer-visibility tests and retained legacy parser regressions. No loose files except README.md",
       "guide": "examples/README.md"
     },
     "tools": {
       "purpose": "Native MCP checks, retrieval measurements, compatibility replay, example regeneration and layout checks"
     },
     "docs": {
-      "purpose": "Mechanism, production excerpts, provenance, layout policy, app screenshots and explanatory diagrams"
+      "purpose": "Usage guides, write-ups of specific runs under studies/, production excerpts and provenance under records/, layout policy, app screenshots and explanatory diagrams",
+      "guide": "docs/README.md"
     },
     ".github": {
       "purpose": "Public CI verification"
@@ -40,18 +41,20 @@
     "README.md",
     "LICENSE",
     "pyproject.toml",
-    "docs/provenance.json",
+    "docs/records/provenance.json",
     "docs/repository_layout.json",
     "src/trace_mechanism/parser.py",
     "tools/check_layout.py",
     "src/trace_mechanism/mcp_server.py",
     "src/trace_mechanism/structurer.mjs",
     "tools/regenerate_examples.py",
-    "docs/codex-retrieval.md",
+    "docs/studies/codex-retrieval.md",
+    "docs/README.md",
+    "docs/studies/reviewer-visibility.md",
     "src/trace_mechanism/codex_native.py",
     "docs/mcp.md",
-    "examples/native-command.jsonl",
-    "examples/native-command-response.json",
+    "examples/native-command/native-command.jsonl",
+    "examples/native-command/native-command-response.json",
     "tools/record_native_contract.py",
     "CONTRIBUTING.md",
     "examples/README.md",
@@ -69,7 +72,7 @@
   "content_routes": {
     "README.md": [
       "docs/development.md",
-      "docs/provenance.json",
+      "docs/records/provenance.json",
       "CONTRIBUTING.md",
       "examples/README.md",
       "skills/agent-trace/SKILL.md",

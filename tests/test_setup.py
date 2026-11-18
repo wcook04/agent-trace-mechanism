@@ -21,9 +21,9 @@ def test_cli_rejects_conflicting_operations(monkeypatch, options):
 
 
 def test_native_and_unsupported_are_distinct(tmp_path):
-    native = inspect(ROOT / 'examples/native-command.jsonl')
+    native = inspect(ROOT / 'examples/native-command/native-command.jsonl')
     assert native['coverage'] == 'native' and native['native_items'] == 1
-    assert inspect(ROOT / 'examples/codex.jsonl')['coverage'] == 'legacy_conversation'
+    assert inspect(ROOT / 'examples/synthetic-codex/codex.jsonl')['coverage'] == 'legacy_conversation'
     empty = tmp_path / 'empty.jsonl'
     empty.write_text('{}\n')
     assert inspect(empty)['coverage'] == 'unsupported'
@@ -33,12 +33,12 @@ def test_native_and_unsupported_are_distinct(tmp_path):
 
 def test_registration_preserves_existing_file_and_uses_absolute_source(tmp_path):
     manifest = tmp_path / 'manifest.json'
-    register([ROOT / 'examples/native-command.jsonl'], manifest)
+    register([ROOT / 'examples/native-command/native-command.jsonl'], manifest)
     original = manifest.read_bytes()
     assert Path(load_manifest(manifest)[0]['path']).is_absolute()
     assert manifest.stat().st_mode & 0o077 == 0
     with pytest.raises(FileExistsError):
-        register([ROOT / 'examples/native-command.jsonl'], manifest)
+        register([ROOT / 'examples/native-command/native-command.jsonl'], manifest)
     assert manifest.read_bytes() == original
 
 
@@ -49,7 +49,7 @@ def test_registers_actual_provider_and_rejects_claude_identity_mismatch(tmp_path
     assert report['provider'] == 'claude' and report['coverage'] == 'conversation'
     assert report['tool_calls'] > 0
     manifest = tmp_path / 'mixed.json'
-    register([ROOT / 'examples/native-command.jsonl', source], manifest)
+    register([ROOT / 'examples/native-command/native-command.jsonl', source], manifest)
     entries = load_manifest(manifest)
     assert [r['provider'] for r in entries] == ['codex', 'claude']
     api = AgentTools(entries)
@@ -60,7 +60,7 @@ def test_registers_actual_provider_and_rejects_claude_identity_mismatch(tmp_path
 
 
 def test_string_subagent_metadata_is_valid_without_a_parent_edge(tmp_path):
-    rows = [json.loads(line) for line in (ROOT / 'examples/native-command.jsonl').read_text().splitlines()]
+    rows = [json.loads(line) for line in (ROOT / 'examples/native-command/native-command.jsonl').read_text().splitlines()]
     rows[0]['payload']['source'] = {'subagent': 'review'}
     source = tmp_path / 'review.jsonl'
     source.write_text('\n'.join(json.dumps(row) for row in rows) + '\n')
@@ -72,7 +72,7 @@ def test_string_subagent_metadata_is_valid_without_a_parent_edge(tmp_path):
 def test_listing_tolerates_a_broken_link(tmp_path, monkeypatch, capsys):
     from trace_mechanism.setup import main
     (tmp_path / 'broken.jsonl').symlink_to(tmp_path / 'missing')
-    (tmp_path / 'valid.jsonl').write_bytes((ROOT / 'examples/native-command.jsonl').read_bytes())
+    (tmp_path / 'valid.jsonl').write_bytes((ROOT / 'examples/native-command/native-command.jsonl').read_bytes())
     monkeypatch.setattr('sys.argv', ['setup', 'list', '--root', str(tmp_path)])
     main()
     assert len(json.loads(capsys.readouterr().out)) == 1
@@ -82,7 +82,7 @@ def test_only_selected_parent_links_are_registered(tmp_path):
     sources = []
     for sid, parent in [('root', None), ('child', 'root'), ('unselected-parent-child', 'elsewhere')]:
         source = tmp_path / (sid + '.jsonl')
-        rows = [json.loads(line) for line in (ROOT / 'examples/native-command.jsonl').read_text().splitlines()]
+        rows = [json.loads(line) for line in (ROOT / 'examples/native-command/native-command.jsonl').read_text().splitlines()]
         rows[0]['payload']['id'] = sid
         rows[0]['payload']['parent_thread_id'] = parent
         rows[1]['payload']['thread_id'] = sid

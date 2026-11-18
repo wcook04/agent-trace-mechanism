@@ -90,7 +90,7 @@ A **snapshot** here is a fixed assembled capture of the selected records. It is 
 | `sha256` from a text read | Compatibility alias for `text_sha256`, not a native change baseline |
 | Snapshot hash in an item/field reference | Select the retained session snapshot for that exact read |
 
-The text from `read_chat_context` and `read_selected_context` starts with a note counting what the rendering leaves out of the saved files, so `text_sha256` covers the note. Both also return `visibility`, the counts behind the note, and `return_note`, the text to give the coding conversation with a review ([reviewer visibility](reviewer-visibility.md)).
+The text from `read_chat_context` and `read_selected_context` starts with a note counting what the rendering leaves out of the saved files, so `text_sha256` covers the note. Both also return `visibility`, the counts behind the note, and `return_note`, the text to give the coding conversation with a review ([reviewer visibility](studies/reviewer-visibility.md)).
 
 `read_chat_context` returns both text and native handles when supported native items are present. Its native handle can be used directly for `read_trace_changes`. A legacy-only text read has no native-item baseline. A mixed selection retains legacy conversation text and lists native coverage by session; its change queries track only native items.
 
@@ -111,9 +111,9 @@ References remain usable after source files change, but only while this server p
 
 ## A recorded command through the current server
 
-[Selected native records](../examples/native-command.jsonl) contain a test command run during Agent Trace development on 2 November 2026. The workspace path was replaced with `<public-repo>` and session metadata reduced. The command, combined output, item IDs and timestamps were retained.
+[Selected native records](../examples/native-command/native-command.jsonl) contain a test command run during Agent Trace development on 2 November 2026. The workspace path was replaced with `<public-repo>` and session metadata reduced. The command, combined output, item IDs and timestamps were retained.
 
-[The complete captured requests and MCP responses](../examples/native-command-response.json) show two operations: search for `Ran 2 tests`, then retrieve `/aggregated_output` using the returned item and snapshot. They are regenerated from the current server, rather than copied from an earlier plugin version.
+[The complete captured requests and MCP responses](../examples/native-command/native-command-response.json) show two operations: search for `Ran 2 tests`, then retrieve `/aggregated_output` using the returned item and snapshot. They are regenerated from the current server, rather than copied from an earlier plugin version.
 
 ```sh
 .venv/bin/python tools/record_native_contract.py --check

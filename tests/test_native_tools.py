@@ -92,5 +92,5 @@ def test_detail_field_handle_survives_source_changes(tmp_path):
 def test_copied_native_core_matches_provenance():
     import hashlib
     root = Path(__file__).resolve().parents[1]
-    record = json.loads((root / "docs/provenance.json").read_text())["native_core"]
+    record = json.loads((root / "docs/records/provenance.json").read_text())["native_core"]
     assert hashlib.sha256((root / record["copy"]).read_bytes()).hexdigest() == record["sha256"]

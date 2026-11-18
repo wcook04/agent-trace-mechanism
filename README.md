@@ -43,7 +43,7 @@ The current release is a technical preview. The native window is available from 
 
 Open **History folders**, set **Codex home** to the absolute path of [examples/checkout-review](examples/checkout-review) in your clone, and save. Select **Investigate a checkout total**, choose **Test runner**, then **Open thread**. Clicking a command shows its recorded outcome, an output excerpt when available, and its location in the source file. Clear the folder setting to return to your own histories.
 
-**Preview copy** lists the sources and shows the exact text. **Copy this text** copies that snapshot even if another event arrives. **Refresh + Copy** reads the recordings again. Each copy of a conversation starts with a counted note of what it leaves out, such as thinking, tool results and earlier turns, and **Copy note for the coding chat** gives the matching note to paste beside a reviewer's answer ([why, and one small test](docs/reviewer-visibility.md)). Compact views leave out tool bodies and mark each one at its call with its length. Detailed views can excerpt large native outputs. You can also select unrelated recordings together or save a personal Markdown prompt on the prompt shelf.
+**Preview copy** lists the sources and shows the exact text. **Copy this text** copies that snapshot even if another event arrives. **Refresh + Copy** reads the recordings again. Each copy of a conversation starts with a counted note of what it leaves out, such as thinking, tool results and earlier turns, and **Copy note for the coding chat** gives the matching note to paste beside a reviewer's answer ([why, and one small test](docs/studies/reviewer-visibility.md)). Compact views leave out tool bodies and mark each one at its call with its length. Detailed views can excerpt large native outputs. You can also select unrelated recordings together or save a personal Markdown prompt on the prompt shelf.
 
 ## Let an agent read selected files
 
@@ -61,7 +61,8 @@ Follow the [registration and host connection guide](skills/agent-trace/reference
 ## Explore and contribute
 
 - [Example recordings](examples/README.md) include a failed test investigation, a coordinator with two workers, and a cross-provider review.
-- [How the reader works](docs/mechanism.md) and [reader provenance](docs/provenance.json) describe the supported formats and their origins.
+- [All documentation](docs/README.md) lists the guides and the write-ups of specific runs, including [what a second model is told about a copy that leaves things out](docs/studies/reviewer-visibility.md).
+- [How the reader works](docs/mechanism.md) and [reader provenance](docs/records/provenance.json) describe the supported formats and their origins.
 - [Development and source map](docs/development.md) and [contributing](CONTRIBUTING.md) cover local checks, packaging and reporting bugs.
 
 [Apache 2.0 licence](LICENSE) · [Attribution](NOTICE) · [Cite Agent Trace](CITATION.cff)

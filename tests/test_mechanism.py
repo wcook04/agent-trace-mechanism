@@ -19,7 +19,7 @@ class MechanismTests(unittest.TestCase):
         source = (ROOT / 'src/trace_mechanism/parser.py').read_text()
         lines = source.splitlines(keepends=True)
         nodes = {n.name: n for n in ast.parse(source).body if isinstance(n, (ast.FunctionDef, ast.ClassDef))}
-        recorded = json.loads((ROOT / 'docs/provenance.json').read_text())['symbol_sha256']
+        recorded = json.loads((ROOT / 'docs/records/provenance.json').read_text())['symbol_sha256']
         for name, expected in recorded.items():
             node = nodes[name]
             start = min([node.lineno] + [d.lineno for d in node.decorator_list])
@@ -28,12 +28,12 @@ class MechanismTests(unittest.TestCase):
     def test_synthetic_examples_match_expected_output(self):
         for provider in ('codex', 'claude'):
             actual = subprocess.check_output([sys.executable, '-m', 'trace_mechanism', provider,
-                                              str(ROOT / ('examples' if provider == 'codex' else 'tests/fixtures') / f'{provider}.jsonl')], text=True)
-            self.assertEqual(json.loads(actual), json.loads((ROOT / ('examples' if provider == 'codex' else 'tests/fixtures') / f'{provider}.expected.json').read_text()))
+                                              str(ROOT / ('examples/synthetic-codex' if provider == 'codex' else 'tests/fixtures') / f'{provider}.jsonl')], text=True)
+            self.assertEqual(json.loads(actual), json.loads((ROOT / ('examples/synthetic-codex' if provider == 'codex' else 'tests/fixtures') / f'{provider}.expected.json').read_text()))
 
     def test_actual_missing_result_and_view_selection(self):
         for provider, parse in [('codex', parse_codex_session), ('claude', parse_claude_session)]:
-            turns = parse(ROOT / ('examples' if provider == 'codex' else 'tests/fixtures') / f'{provider}.jsonl')
+            turns = parse(ROOT / ('examples/synthetic-codex' if provider == 'codex' else 'tests/fixtures') / f'{provider}.jsonl')
             compact, detailed, data = render(turns), render(turns, True), structured(turns)
             self.assertIn('old line', detailed)
             self.assertIn('new line', detailed)
@@ -41,7 +41,7 @@ class MechanismTests(unittest.TestCase):
             self.assertNotIn('new line', compact)
             self.assertIn('the compact view', compact)
             self.assertTrue(any(e['output'].startswith('old line') for e in data[0]['tools']))
-        pending = parse_codex_session(ROOT / 'examples/codex.jsonl')[0]
+        pending = parse_codex_session(ROOT / 'examples/synthetic-codex/codex.jsonl')[0]
         self.assertFalse(pending.is_complete)
         self.assertEqual(pending.tool_events[-1].output_text, '[no output recorded]')
         self.assertIn('without function_call_output', pending.partial_reason)
@@ -102,14 +102,14 @@ class MechanismTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(data).hexdigest(), recorded['sha256'], name)
 
     def test_production_clip_preserves_synthetic_source(self):
-        clip = json.loads((ROOT / 'examples/production-structured-clip.json').read_text())
-        source = (ROOT / 'examples/codex.detailed.txt').read_bytes()
+        clip = json.loads((ROOT / 'examples/structured-clip/production-structured-clip.json').read_text())
+        source = (ROOT / 'examples/synthetic-codex/codex.detailed.txt').read_bytes()
         segments = sorted(clip['source_segments'], key=lambda item: item['ordinal'])
         self.assertEqual(''.join(item['text'] for item in segments).encode(), source)
         for item in segments:
             bounds = item['byte_range_utf8']
             self.assertEqual(source[bounds['start']:bounds['end']], item['text'].encode())
-        provenance = json.loads((ROOT / 'docs/structured-clip-provenance.json').read_text())
+        provenance = json.loads((ROOT / 'docs/records/structured-clip-provenance.json').read_text())
         self.assertEqual(hashlib.sha256(source).hexdigest(), provenance['fixture_sha256'])
 
     def test_explicit_replay_matches_call_and_result(self):

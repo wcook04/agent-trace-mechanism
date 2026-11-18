@@ -63,7 +63,7 @@ def test_cold_provider_matrix(isolated, hosts):
         )
         folder.mkdir(parents=True)
         fixture = (
-            "examples/native-command.jsonl"
+            "examples/native-command/native-command.jsonl"
             if host == "codex"
             else "tests/fixtures/claude.jsonl"
         )
@@ -88,7 +88,7 @@ def test_cold_provider_matrix(isolated, hosts):
 
 
 def test_copy_older_codex_session_from_another_project(isolated):
-    fixture = (ROOT / "examples/codex.jsonl").read_text()
+    fixture = (ROOT / "examples/synthetic-codex/codex.jsonl").read_text()
     _, _, events = fixture.partition("\n")
     home = isolated / ".codex/sessions"
     other_project = isolated / "other-project"
@@ -145,7 +145,7 @@ def test_new_user_history_locations_and_restart(isolated, monkeypatch, capsys, l
         assert api("/mission-index")["index"]["active_rows"] == []
 
     sources = {}
-    fixture = (ROOT / "examples/codex.jsonl").read_text(encoding="utf-8")
+    fixture = (ROOT / "examples/synthetic-codex/codex.jsonl").read_text(encoding="utf-8")
     for sid, folder, answer in (
         ("active-chat", "sessions/2026/01/01", "Active answer."),
         ("archived-chat", "archived_sessions", "Archived answer."),
@@ -155,7 +155,7 @@ def test_new_user_history_locations_and_restart(isolated, monkeypatch, capsys, l
         path.write_text(fixture.replace("synthetic-codex", sid).replace("Update prepared.", answer), encoding="utf-8")
         sources[sid] = path
     native = homes["codex"] / "sessions/native.jsonl"
-    shutil.copyfile(ROOT / "examples/native-command.jsonl", native)
+    shutil.copyfile(ROOT / "examples/native-command/native-command.jsonl", native)
     claude = homes["claude"] / "projects/another-project/chat.jsonl"
     claude.parent.mkdir(parents=True)
     shutil.copyfile(ROOT / "tests/fixtures/claude.jsonl", claude)
@@ -250,7 +250,7 @@ def test_installed_console_launch_from_unrelated_directory(isolated):
                     assert json.load(response)["index"]["active_rows"] == []
                 folder = isolated / ".codex/archived_sessions"
                 folder.mkdir(parents=True)
-                shutil.copyfile(ROOT / "examples/codex.jsonl", folder / "saved-chat.jsonl")
+                shutil.copyfile(ROOT / "examples/synthetic-codex/codex.jsonl", folder / "saved-chat.jsonl")
                 with urlopen(request, timeout=10) as response:
                     (row,) = json.load(response)["index"]["active_rows"]
                 assert row["provider_archived"]
@@ -322,7 +322,7 @@ def test_app_key_file_boundary_and_prompt_restart(isolated):
             with pytest.raises(HTTPError):
                 api("/save-prompt", invalid)
         with pytest.raises(HTTPError):
-            api("/trace", {"ref": str(ROOT / "examples/native-command.jsonl")})
+            api("/trace", {"ref": str(ROOT / "examples/native-command/native-command.jsonl")})
     with app() as api:
         assert api("/prompt-shelf/continue")["body"] == update["raw"]
         (isolated / ".agent-trace/prompts/continue.md").unlink()
@@ -335,7 +335,7 @@ def test_mixed_turn_scope_and_mcp_agree(isolated):
     folder = isolated / ".codex/sessions"
     folder.mkdir(parents=True)
     path = folder / "mixed.jsonl"
-    lines = (ROOT / "examples/native-command.jsonl").read_text().splitlines()
+    lines = (ROOT / "examples/native-command/native-command.jsonl").read_text().splitlines()
     sid = json.loads(lines[0])["payload"]["id"]
     legacy = [
         json.dumps({"type": "event_msg", "payload": payload})
@@ -447,7 +447,7 @@ def test_symlink_writes_and_replaced_history(isolated):
         raise
     folder = isolated / ".codex/sessions"
     folder.mkdir(parents=True)
-    shutil.copyfile(ROOT / "examples/native-command.jsonl", folder / "coordinator.jsonl")
+    shutil.copyfile(ROOT / "examples/native-command/native-command.jsonl", folder / "coordinator.jsonl")
     with app() as api:
         (parent,) = api("/mission-index")["index"]["active_rows"]
         for url, body in (
@@ -513,7 +513,7 @@ def test_large_tool_output_preserves_exact_terminal_message(isolated):
 def test_damaged_preferences_preserved_without_hiding_sessions(isolated, damaged):
     folder = isolated / ".codex/sessions"
     folder.mkdir(parents=True)
-    shutil.copyfile(ROOT / "examples/codex.jsonl", folder / "source.jsonl")
+    shutil.copyfile(ROOT / "examples/synthetic-codex/codex.jsonl", folder / "source.jsonl")
     marker = isolated / ".agent-trace/mission-markers.json"
     marker.parent.mkdir()
     marker.write_bytes(damaged)
@@ -536,7 +536,7 @@ def test_choose_nested_workers_or_parent_from_oversize_tree(isolated):
 
     folder = isolated / ".codex/sessions"
     folder.mkdir(parents=True)
-    fixture = (ROOT / "examples/codex.jsonl").read_text().splitlines()
+    fixture = (ROOT / "examples/synthetic-codex/codex.jsonl").read_text().splitlines()
     for i in range(67):
         parent = None if not i else "worker1" if i == 2 else "worker0"
         meta = {"id": f"worker{i}", "agent_nickname": f"Name {i}"}
@@ -596,7 +596,7 @@ def test_archive_move_duplicate_and_exact_file_capture(isolated):
     active = isolated / ".codex/sessions/a.jsonl"
     archived = isolated / ".codex/archived_sessions/a.jsonl"
     archived.parent.mkdir(parents=True)
-    shutil.copyfile(ROOT / "examples/codex.jsonl", archived)
+    shutil.copyfile(ROOT / "examples/synthetic-codex/codex.jsonl", archived)
     lib = Library()
     (first,) = lib.discover()
     assert first["provider_archived"]
@@ -661,7 +661,7 @@ def test_bounded_turn_evidence_with_and_without_a_boundary(isolated):
 
     path = isolated / ".codex/sessions/large.jsonl"
     path.parent.mkdir(parents=True)
-    fixture = (ROOT / "examples/codex.jsonl").read_text()
+    fixture = (ROOT / "examples/synthetic-codex/codex.jsonl").read_text()
     path.write_text(fixture + json.dumps({"padding": "x" * 200000}) + "\n")
     lib = Library()
     (row,) = lib.discover()
@@ -714,7 +714,7 @@ def test_exact_mcp_selection_of_claude_worker_and_disconnected_codex(isolated):
         path.write_text(fixture.replace('Update complete.', label))
     codex = isolated / '.codex/archived_sessions/other.jsonl'
     codex.parent.mkdir(parents=True)
-    shutil.copyfile(ROOT / 'examples/codex.jsonl', codex)
+    shutil.copyfile(ROOT / 'examples/synthetic-codex/codex.jsonl', codex)
     (codex.parent / 'unidentified.jsonl').write_text('{}\n')
     lib = Library()
     by_path = {Path(r['source_file']).name: r for r in lib.discover()}
@@ -738,7 +738,7 @@ def test_exact_mcp_selection_of_claude_worker_and_disconnected_codex(isolated):
 def test_overlapping_native_previews_and_folder_persistence(isolated):
     src = isolated / 'custom/sessions'
     src.mkdir(parents=True)
-    shutil.copyfile(ROOT / 'examples/codex.jsonl', src / 'a.jsonl')
+    shutil.copyfile(ROOT / 'examples/synthetic-codex/codex.jsonl', src / 'a.jsonl')
     text = (src / 'a.jsonl').read_text().replace('synthetic-codex', 'second').replace('Update prepared.', 'Second answer.')
     (src / 'b.jsonl').write_text(text)
     with app() as api:

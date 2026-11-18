@@ -11,8 +11,8 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / 'examples/native-command.jsonl'
-TARGET = ROOT / 'examples/native-command-response.json'
+SOURCE = ROOT / 'examples/native-command/native-command.jsonl'
+TARGET = ROOT / 'examples/native-command/native-command-response.json'
 
 
 async def capture():
@@ -75,7 +75,7 @@ def main():
         print('Native search and field retrieval match the recorded MCP contract.')
     else:
         TARGET.write_text(encoded)
-        print('Updated examples/native-command-response.json')
+        print('Updated examples/native-command/native-command-response.json')
     if args.show:
         search, read = captured['calls']
         print(f"\nSearch: {search['arguments']['query']!r}")

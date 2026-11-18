@@ -95,7 +95,7 @@ def check_download(archive, receipt, screenshots, denied, interactions):
                     folder = folder.with_name("archived_sessions")
                 folder.mkdir(parents=True)
                 source = root / (
-                    "examples/codex.jsonl" if codex else "tests/fixtures/claude.jsonl"
+                    "examples/synthetic-codex/codex.jsonl" if codex else "tests/fixtures/claude.jsonl"
                 )
                 shutil.copyfile(source, folder / "source.jsonl")
                 if codex:

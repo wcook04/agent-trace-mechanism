@@ -372,7 +372,7 @@ def test_codex_note_is_counted_from_the_turns_and_markers_the_copy_prints():
     assert last['left_out']['earlier_turns']['count'] == 1
     assert 'It holds turn 2 of 2' in visibility.outgoing_note(visibility.combine([last]))
 
-    text, whole = copy(root / 'codex.jsonl', 0)
+    text, whole = copy(root / 'synthetic-codex' / 'codex.jsonl', 0)
     markers = [int(size) for size in re.findall(r'left out of the compact view: (\d+) character', text)]
     assert markers == [9, 51, 14]
     assert whole['left_out']['tool_results'] == {'count': 2, 'chars': 23}

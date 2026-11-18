@@ -1,10 +1,10 @@
 {
   "source_file": "src/trace_mechanism/structurer.mjs",
   "source_sha256": "82755807df2374f4f9e948cfee0ef54ce3fa35a5531d5954d492c4bf83bf0139",
-  "fixture": "examples/codex.detailed.txt",
+  "fixture": "examples/synthetic-codex/codex.detailed.txt",
   "fixture_sha256": "8bc08b869090092d59ff993162228e0d9476d22bbbd3db6a40674fa6fd3604f6",
-  "output": "examples/production-structured-clip.json",
+  "output": "examples/structured-clip/production-structured-clip.json",
   "output_sha256": "66dc49470f2c28d32c54c41442c164b6284a517e2dc361a090580dae81ec8a5f",
-  "invocation": "node tools/build_index.mjs examples/codex.detailed.txt examples/production-structured-clip.json --single",
+  "invocation": "node tools/build_index.mjs examples/synthetic-codex/codex.detailed.txt examples/structured-clip/production-structured-clip.json --single",
   "validation": "Reproduction, exact source reconstruction and semantic action regressions are separate checks."
 }

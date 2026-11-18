@@ -60,7 +60,7 @@ for the chosen scope. **Copy this text** transfers that capture even if a new
 event arrives. **Refresh + Copy** instead reads the files again. A copy of a
 conversation starts with a note counting what it leaves out of the saved file.
 The preview can switch that note off, add Claude Code's saved thinking to the
-copy, and copy [the note for the coding conversation](reviewer-visibility.md). Full-thread
+copy, and copy [the note for the coding conversation](studies/reviewer-visibility.md). Full-thread
 scopes traverse the currently discovered tree. Latest and last-N cover only
 the selected conversation. Large native tool outputs use excerpts and exact
 field handles. Mixed Codex recordings also include the transcript projection,
