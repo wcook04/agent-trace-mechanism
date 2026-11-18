@@ -26,7 +26,8 @@
       "purpose": "Native MCP checks, retrieval measurements, compatibility replay, example regeneration and layout checks"
     },
     "docs": {
-      "purpose": "Mechanism, production excerpts, provenance, layout policy, app screenshots and explanatory diagrams"
+      "purpose": "Usage guides, write-ups of specific runs under studies/, production excerpts, provenance, layout policy, app screenshots and explanatory diagrams",
+      "guide": "docs/README.md"
     },
     ".github": {
       "purpose": "Public CI verification"
@@ -47,7 +48,9 @@
     "src/trace_mechanism/mcp_server.py",
     "src/trace_mechanism/structurer.mjs",
     "tools/regenerate_examples.py",
-    "docs/codex-retrieval.md",
+    "docs/studies/codex-retrieval.md",
+    "docs/README.md",
+    "docs/studies/reviewer-visibility.md",
     "src/trace_mechanism/codex_native.py",
     "docs/mcp.md",
     "examples/native-command.jsonl",

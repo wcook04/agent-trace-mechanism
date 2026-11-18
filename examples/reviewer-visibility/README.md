@@ -1,6 +1,6 @@
 # Reviewer visibility example
 
-Five histories of one small coding task, the copies of each that reviewers were given, 352 reviews of those copies, and a review pasted back into a forked coding session. [The write-up](../../docs/reviewer-visibility.md) explains it.
+Five histories of one small coding task, the copies of each that reviewers were given, 352 reviews of those copies, and a review pasted back into a forked coding session. [The write-up](../../docs/studies/reviewer-visibility.md) explains it.
 
 | File | Contents |
 |---|---|

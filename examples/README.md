@@ -24,8 +24,8 @@ The remaining files preserve earlier parser and export behaviour:
   `.detailed.txt` and `.expected.json` siblings are generated expectations.
 - [controlled-run/](controlled-run/) and [codex-retrieval/](codex-retrieval/)
   retain earlier recordings and derived views. Their guides describe the
-  [controlled run](../docs/controlled-run.md) and
-  [retrieval recording](../docs/codex-retrieval.md).
+  [controlled run](../docs/studies/controlled-run.md) and
+  [retrieval recording](../docs/studies/codex-retrieval.md).
 - `production-structured-clip.json` preserves a desktop export; its
   [provenance](../docs/structured-clip-provenance.json) describes the selection.
 - `retrieval-costs.json` holds recorded measurements, not performance guarantees.

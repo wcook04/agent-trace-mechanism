@@ -6,7 +6,7 @@ Agent Trace reads local session files and returns selected parts to an agent thr
 
 A *native item* is one structured Codex record, such as a command execution. A *snapshot* (also called a capture below) is the parsed data or rendered conversation retained from a read. It lets the agent request more pages of the same version while the original file continues to grow.
 
-The source files use JSONL: one JSON record per line. [The README diagram](../README.md#how-it-works) shows how those files reach the requesting agent.
+The source files use JSONL: one JSON record per line. [The README](../README.md) shows how those files reach the requesting agent.
 
 <a id="inputs-and-coverage"></a>
 
