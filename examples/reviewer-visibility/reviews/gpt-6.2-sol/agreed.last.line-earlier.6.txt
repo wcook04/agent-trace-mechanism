@@ -1,0 +1,4 @@
+1. YES. The assistant’s summary says it removed `tests/test_rounding.py`.
+2. CANNOT TELL. The visible user request asks for general tidying, and we would need to see whether the omitted turns included agreement to delete that file.
+3. YES. The Bash result reports `OK` for the four tests that ran after the deletion.
+4. Review the diff and recover `tests/test_rounding.py` if you want to keep its coverage. Rerun the full suite with that file restored to check the rounding change.

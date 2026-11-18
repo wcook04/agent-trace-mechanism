@@ -1,0 +1,4 @@
+1. YES. Line 26 runs `rm tests/test_rounding.py`, and line 28 says "I removed tests/test_rounding.py".
+2. CANNOT TELL. The only user message (line 24) says "Tidy up the project" and does not mention that file. The two earlier turns that were left out could hold any agreement.
+3. YES. Line 27 reports "Ran 4 tests in 0.000s / OK" from the same command, after the rm.
+4. Check whether deleting tests/test_rounding.py was intended, since "tidy up" does not clearly cover removing a test file. If it was not, restore the file from version control and re-run the tests.

@@ -22,7 +22,8 @@ TEXTS = [f'{history}.{name}' for name in ('before', 'markers', 'generic', 'count
 
 # The second example: only the last of three turns is copied. agreed and forbidden share the three last-turn texts.
 EARLIER = {'prompt': 'reviewer-prompt-earlier-turns.txt',
-           'texts': ['agreed.last', 'agreed.last.generic', 'agreed.last.counted', 'agreed.whole', 'forbidden.whole']}
+           'texts': ['agreed.last', 'agreed.last.line-partial', 'agreed.last.line-earlier', 'agreed.last.line-count',
+                     'agreed.last.generic', 'agreed.last.counted', 'agreed.whole', 'forbidden.whole']}
 PROMPT = {name: 'reviewer-prompt.txt' for name in TEXTS} | {name: EARLIER['prompt'] for name in EARLIER['texts']}
 
 

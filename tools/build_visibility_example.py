@@ -61,7 +61,16 @@ LAST_TURN_COPIES = {  # name: (turns copied, opening)
     'last': (1, ''),
     'last.generic': (1, 'generic'),
     'last.counted': (1, 'counted'),
+    'last.line-partial': (1, 'line-partial'),
+    'last.line-earlier': (1, 'line-earlier'),
+    'last.line-count': (1, 'line-count'),
     'whole': (0, ''),
+}
+# One-line notes, to separate what a note says from how long it is. They differ only after the colon.
+LINES = {
+    'line-partial': 'Note from the program that made this copy: this copy is partial.',
+    'line-earlier': 'Note from the program that made this copy: earlier turns of the conversation were left out of this copy.',
+    'line-count': 'Note from the program that made this copy: 2 earlier turns of the conversation were left out of this copy.',
 }
 
 
@@ -150,14 +159,18 @@ def build():
             for name, (turns, opening) in LAST_TURN_COPIES.items():
                 found = []
                 text, _, _, _ = claude_text(path, SESSION, True, turns=turns, inventories=found)
-                noted, _ = with_note(text, found, note=opening == 'counted')
+                noted, inventory = with_note(text, found, note=opening == 'counted')
                 if opening == 'generic':
                     noted = f'{GENERIC}\n\n{text}'
+                if opening in LINES:
+                    noted = f'{LINES[opening]}\n\n{text}'
                 files[f'copies/{history}.{name}.txt'] = noted + '\n'
+                if (history, name) == ('agreed', 'last.counted'):
+                    files['return/earlier-turns-return-note.txt'] = visibility_fields(noted, inventory)['return_note'] + '\n'
             path.unlink()
     finally:
         scratch.rmdir()
-    for name in ('last', 'last.generic', 'last.counted'):
+    for name in (n for n in LAST_TURN_COPIES if n != 'whole'):
         assert files[f'copies/agreed.{name}.txt'] == files[f'copies/forbidden.{name}.txt'], name
     return files
 
