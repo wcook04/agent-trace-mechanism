@@ -4,7 +4,7 @@ Five histories of one small coding task, the copies of each that reviewers were 
 
 | File | Contents |
 |---|---|
-| [histories/](histories) | `told.jsonl` is a recording with private records removed. `not-told.jsonl` and `wrongly-refused.jsonl` are that recording with two edits made by the build script. `agreed.jsonl` and `forbidden.jsonl` are three-turn conversations written by hand in the build script |
+| [histories/](histories) | `told.jsonl` is a recording with private records removed. `not-told.jsonl` and `wrongly-refused.jsonl` are that recording with two edits made by the build script. `agreed.jsonl` and `forbidden.jsonl` are constructed three-turn conversations written in the build script |
 | [copies/](copies) | The texts the reviewers were given, named `<history>.<copy>.txt` |
 | [reviewer-prompt.txt](reviewer-prompt.txt), [reviewer-prompt-earlier-turns.txt](reviewer-prompt-earlier-turns.txt) | The prompt each reviewer was given, with a copy in place of `{copy}`. The second is for the copies of `agreed` and `forbidden` |
 | [reviews/](reviews) | Each review as the reviewer wrote it, in a folder for each model, named `<history>.<copy>.<run>.txt` |
