@@ -49,7 +49,7 @@ CONDITIONS = {  # name: (detailed, opening)
 SAME_TEXT = ('markers', 'generic', 'counted')
 
 
-# A second example, written by hand: three turns, and only the last one is copied.
+# A second example, constructed: three turns, and only the last one is copied.
 # In both conversations the last turn is the same and the agent deletes a test file in it.
 FIRST_TURN = {
     'agreed': 'In /work/shop the price tests fail. Find out why and fix it. tests/test_rounding.py is obsolete, so once '
