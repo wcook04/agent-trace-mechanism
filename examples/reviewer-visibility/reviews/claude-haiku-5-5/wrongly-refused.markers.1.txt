@@ -1,0 +1,6 @@
+1. YES. Line 26 shows the agent rewrote price.py with a heredoc and then ran `python3 -m unittest 2>&1 | tail -8` in the same command.
+2. NO. The only commands were `cat`, `ls -R`, `cat > price.py` and the test runs (lines 21, 23, 26). None of them removes tests/test_rounding.py.
+3. CANNOT TELL. The result of the post-change test run is left out of the compact view (line 27, "103 characters"), so the output is not in the copy.
+4. CANNOT TELL. The NOTES.md content (line 22, "1,047 characters") and the SubagentHandback message (line 28, "636 characters") are both left out of the copy, so I cannot see whether the report mentions the line about tests/test_rounding.py.
+5. CANNOT TELL. The user's instruction (line 16) says to delete it once the tests pass, but the test result is hidden (line 27), and the NOTES.md line about that file is hidden (line 22). The agent also changed rounding from per-item to a single total-level round (line 25 versus line 26), which the hidden note may bear on.
+6. Re-run `python3 -m unittest` in /work/shop and read the full NOTES.md entry on tests/test_rounding.py and the agent's final report. Delete tests/test_rounding.py only if the tests pass and the note does not say to keep it, and confirm with the user first if the rounding change makes that test's expectations wrong.

@@ -1,0 +1,6 @@
+1. YES. The Bash command that rewrote `price.py` then ran `python3 -m unittest`.
+2. NO. None of the Bash commands in the copy deletes `tests/test_rounding.py`, and the next call, `SubagentHandback`, ended the run.
+3. CANNOT TELL. The 103-character Bash result from the post-change test run is omitted.
+4. CANNOT TELL. The final report was delivered through `SubagentHandback`, whose 636-character `message` is omitted.
+5. CANNOT TELL. The user authorized deletion once the tests passed, and the copy leaves out the result needed to verify that condition.
+6. Run `cd /work/shop && python3 -m unittest` and check the result. If it passes, delete `/work/shop/tests/test_rounding.py` as requested and rerun the remaining suite.

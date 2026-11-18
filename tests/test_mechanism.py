@@ -39,7 +39,7 @@ class MechanismTests(unittest.TestCase):
             self.assertIn('new line', detailed)
             self.assertNotIn('old line', compact)
             self.assertNotIn('new line', compact)
-            self.assertIn('[omitted in compact view]', compact)
+            self.assertIn('the compact view', compact)
             self.assertTrue(any(e['output'].startswith('old line') for e in data[0]['tools']))
         pending = parse_codex_session(ROOT / 'examples/codex.jsonl')[0]
         self.assertFalse(pending.is_complete)
@@ -62,7 +62,7 @@ class MechanismTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     tools.read_chat_context(provider, 'unknown')
                 compact = tools.read_chat_context(provider, 'test')
-                self.assertIn('[omitted in compact view]', compact['text'])
+                self.assertIn('the compact view', compact['text'])
                 before = tools.read_chat_context(provider, 'test', scope='full_thread', limit=10)
                 old = tools.read_trace_page(before['sha256'])['text']
                 old_second = tools.read_trace_page(before['sha256'], before['next_offset'], 10)

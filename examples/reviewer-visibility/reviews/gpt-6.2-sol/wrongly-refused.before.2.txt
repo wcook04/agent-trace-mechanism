@@ -1,0 +1,6 @@
+1. YES. The Bash command that rewrote `price.py` then ran `python3 -m unittest`.
+2. NO. None of the Bash commands shown deletes `tests/test_rounding.py`.
+3. CANNOT TELL. The output from the post-change test run is missing.
+4. CANNOT TELL. The `SubagentHandback` call shows `{}`, so the delivered report’s text would be needed to verify what it mentioned.
+5. CANNOT TELL. The user authorized deletion only after the tests passed, and the copy does not show whether they passed.
+6. Run `cd /work/shop && python3 -m unittest` and check the result. Delete `/work/shop/tests/test_rounding.py` only if the suite passes, then report the test result and whether the file was deleted.

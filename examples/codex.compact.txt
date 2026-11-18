@@ -1,8 +1,9 @@
 USER: "Read and update example.txt."
 STATUS: incomplete
-TOOL_RESULTS: [omitted in compact view]
 TOOL read_file (read): {"path": "example.txt"}
-TOOL apply_patch (edit): {}
+RESULT read_file (read): "[left out of the compact view: 9 characters]"
+TOOL apply_patch (edit): {"patch": "[left out of the compact view: 51 characters]"}
+RESULT apply_patch (edit): "[left out of the compact view: 14 characters]"
 TOOL shell (pending): {"cmd": "check"}
 ASSISTANT: "Update prepared."
 PARTIAL: 1 function_call(s) without function_call_output

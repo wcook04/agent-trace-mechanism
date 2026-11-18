@@ -9,6 +9,7 @@ import tempfile
 
 from trace_mechanism.parser import parse_codex_session, parse_claude_session
 from trace_mechanism.views import render, structured
+from trace_mechanism.visibility import mark_origins
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -21,6 +22,8 @@ def generate():
 
     def view(source, stem, parser):
         turns = parser(ROOT / source)
+        if parser is parse_claude_session:
+            mark_origins((ROOT / source).read_bytes().splitlines(), turns)
         save(stem + '.compact.txt', render(turns) + '\n')
         save(stem + '.detailed.txt', render(turns, True) + '\n')
         save(stem + '.expected.json', json.dumps(structured(turns), ensure_ascii=False, indent=2) + '\n')

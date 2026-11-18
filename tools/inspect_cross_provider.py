@@ -35,7 +35,8 @@ async def main():
             text = compact.structuredContent['text']
             assert text == compact.content[0].text
             assert 'Agent Trace text now comes through in full.' in text
-            assert 'RESULT mcp__agent-trace__read_trace_item' not in text
+            # The compact view names each result and gives its length without its text.
+            assert 'RESULT mcp__agent-trace__read_trace_item (' in text and 'left out of the compact view' in text
             print('Read Claude\'s final review from its compact conversation.')
 
             detail = await call('read_chat_context', {**selection, 'scope': 'full_thread', 'limit': 3000})

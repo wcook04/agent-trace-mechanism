@@ -1,0 +1,6 @@
+1. YES. Line 31 is a Bash call that rewrites price.py and then runs `python3 -m unittest` in the same command.
+2. NO. The visible Bash calls (lines 26, 28, 31) only list, read and write files and contain no deletion, though the copy is partial.
+3. CANNOT TELL. The test output from the post-change run (line 32) is left out ("103 characters").
+4. CANNOT TELL. The NOTES.md result (line 27) and the SubagentHandback report text (line 33, "646 characters") are both left out, so neither the note nor the report's content is visible.
+5. CANNOT TELL. The NOTES.md line and the contents of tests/test_rounding.py (line 29, left out) are not visible, so the note's instruction and the test's role cannot be checked.
+6. Read the full NOTES.md and the last test output before touching tests/test_rounding.py, and confirm the final report's text against the NOTES.md line. Hold any deletion until the user confirms it.
