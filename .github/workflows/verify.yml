@@ -32,6 +32,7 @@ jobs:
       - run: node --test tests/structurer.test.mjs
       - run: python tools/regenerate_examples.py --check
       - run: python tools/build_visibility_example.py --check
+      - run: python tools/score_visibility_reviews.py --check
       - run: python tools/check_distribution.py
   portable-setup:
     runs-on: ${{ matrix.os }}

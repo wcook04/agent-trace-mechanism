@@ -43,6 +43,7 @@ python3 -m venv .venv
 node --test tests/structurer.test.mjs
 .venv/bin/python tools/regenerate_examples.py --check
 .venv/bin/python tools/build_visibility_example.py --check
+.venv/bin/python tools/score_visibility_reviews.py --check
 .venv/bin/python tools/check_layout.py
 ```
 

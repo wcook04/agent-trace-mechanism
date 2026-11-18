@@ -63,7 +63,7 @@ class MCPTransportTests(unittest.IsolatedAsyncioTestCase):
                         self.assertEqual(found['items'][0]['provider'], provider)
                         selection = {'provider': provider, 'session_id': 'test-' + provider}
                         compact = await call('read_chat_context', selection)
-                        self.assertIn('[omitted in compact view]', compact['text'])
+                        self.assertIn('the compact view', compact['text'])
                         detail = await call('read_chat_context', {**selection, 'scope': 'full_thread', 'limit': 10})
                         self.assertIsNotNone(detail['next_offset'])
                         old = await call('read_trace_page', {'sha256': detail['sha256'], 'offset': detail['next_offset']})

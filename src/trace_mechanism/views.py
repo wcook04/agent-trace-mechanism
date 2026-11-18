@@ -30,26 +30,68 @@ def chronological_events(turn, thinking=False):
     return sorted(events, key=lambda item: item[0])
 
 
+COMPACT_INPUT_KEYS = {'path', 'file_path', 'filename', 'command', 'cmd'}
+REPORT_TOOL = 'SubagentHandback'
+
+
+def _left_out(size, error=False):
+    return (f"[left out of the compact view: {size:,} character{'' if size == 1 else 's'}"
+            f"{', marked as an error' if error else ''}]")
+
+
+def _size(value):
+    return len(value) if isinstance(value, str) else len(json.dumps(value, ensure_ascii=False))
+
+
+def compact_input(value):
+    """Keep paths and commands; name every other input and give its length."""
+    if not isinstance(value, dict):
+        return _left_out(_size(value))
+    return {key: item if key in COMPACT_INPUT_KEYS else _left_out(_size(item)) for key, item in value.items()}
+
+
+def delivered_report(turn):
+    """The call id of a subagent's final report, when that report ended the turn.
+
+    Claude Code ends a subagent's run at a successful SubagentHandback call, so
+    no assistant message follows it and the parser reports the turn as partial.
+    """
+    events = chronological_events(turn)
+    if not events:
+        return None
+    _, kind, event = events[-1]
+    if kind == 'result' and event.name == REPORT_TOOL and not event.is_error \
+            and all(e.call_observed and e.result_observed for e in turn.tool_events):
+        return event.tool_call_id or 'unidentified'
+    return None
+
+
 def render(turns, detail=False, thinking=False):
     lines = []
     for turn in turns:
+        report = delivered_report(turn)
         lines.extend([f'USER: {json.dumps(turn.prompt_text, ensure_ascii=False)}',
-                      f'STATUS: {"complete" if turn.is_complete else "incomplete"}'])
-        if not detail:
-            lines.append('TOOL_RESULTS: [omitted in compact view]')
+                      f'STATUS: {"complete" if turn.is_complete or report else "incomplete"}'])
+        origin = getattr(turn, 'user_origin', '')
+        if origin:
+            lines.append(f'WRITTEN_BY: Claude Code, not the user ({origin})')
         for _, kind, event in chronological_events(turn, thinking):
+            call = f'{event.name} ({event.tool_call_id or "unidentified"})' if kind in ('call', 'result') else ''
             if kind == 'thinking':
                 lines.append(f'THINKING: {json.dumps(event.text, ensure_ascii=False)}')
             elif kind == 'assistant':
                 lines.append(f'ASSISTANT: {json.dumps(event.text, ensure_ascii=False)}')
             elif kind == 'call':
-                allowed = {'path', 'file_path', 'filename', 'command', 'cmd'}
-                displayed = event.input if detail else {k: v for k, v in event.input.items() if k in allowed}
-                lines.append(f'TOOL {event.name} ({event.tool_call_id or "unidentified"}): {json.dumps(displayed, ensure_ascii=False, sort_keys=True)}')
+                displayed = event.input if detail else compact_input(event.input)
+                lines.append(f'TOOL {call}: {json.dumps(displayed, ensure_ascii=False, sort_keys=True)}')
             elif detail:
-                lines.append(f'RESULT {event.name} ({event.tool_call_id or "unidentified"}): {json.dumps(event.output_text, ensure_ascii=False)}')
+                lines.append(f'RESULT {call}: {json.dumps(event.output_text, ensure_ascii=False)}')
+            else:
+                lines.append(f'RESULT {call}: {json.dumps(_left_out(_size(event.output_text or ""), event.is_error))}')
         if not turn.assistant_events and turn.assistant_text:
             lines.append(f'ASSISTANT: {json.dumps(turn.assistant_text, ensure_ascii=False)}')
-        if turn.partial_reason:
+        if report:
+            lines.append(f'FINAL_REPORT: delivered to the caller by the {REPORT_TOOL} call {report}, which ended the run')
+        elif turn.partial_reason:
             lines.append(f'PARTIAL: {turn.partial_reason}')
     return '\n'.join(lines)

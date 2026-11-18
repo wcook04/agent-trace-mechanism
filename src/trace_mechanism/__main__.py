@@ -49,6 +49,9 @@ def main():
     if args.view == 'json':
         print(json.dumps(structured(turns), indent=2, ensure_ascii=False))
     else:
+        if args.provider != 'codex':
+            from .visibility import mark_origins
+            mark_origins(Path(args.file).read_bytes().splitlines(), turns)
         print(render(turns, detail=args.view == 'detailed'))
 
 

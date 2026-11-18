@@ -1,6 +1,7 @@
 USER: "Read and update example.txt."
 STATUS: complete
-TOOL_RESULTS: [omitted in compact view]
 TOOL Read (read): {"file_path": "example.txt"}
-TOOL Edit (edit): {"file_path": "example.txt"}
+RESULT Read (read): "[left out of the compact view: 9 characters]"
+TOOL Edit (edit): {"file_path": "example.txt", "new_string": "[left out of the compact view: 8 characters]", "old_string": "[left out of the compact view: 8 characters]"}
+RESULT Edit (edit): "[left out of the compact view: 20 characters]"
 ASSISTANT: "Update complete."

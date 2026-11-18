@@ -157,6 +157,8 @@ def claude_text(path, sid, detail, turns=0, inventories=None, thinking=False):
                 AssistantEvent(text=text, source_record_index=index)
                 for index in turn.source_record_indices
                 for text in visibility.thinking_texts(lines[index] if index < len(lines) else b'')]
+    # Shown under the USER line, whether or not the opening note is on.
+    visibility.mark_origins(lines, selected)
     if inventories is not None and selected:
         inventories.append(visibility.claude_inventory(lines, parsed, selected, detail=detail, thinking=thinking))
     return render(selected, detail=detail, thinking=thinking), warnings, finals, selected

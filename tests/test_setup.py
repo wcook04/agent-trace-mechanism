@@ -53,7 +53,7 @@ def test_registers_actual_provider_and_rejects_claude_identity_mismatch(tmp_path
     entries = load_manifest(manifest)
     assert [r['provider'] for r in entries] == ['codex', 'claude']
     api = AgentTools(entries)
-    assert 'TOOL_RESULTS: [omitted' in api.read_chat_context('claude', report['session_id'])['text']
+    assert 'left out of the compact view' in api.read_chat_context('claude', report['session_id'])['text']
     entries[1]['session_id'] = 'wrong-id'
     with pytest.raises(ValueError, match='identity'):
         AgentTools(entries).read_chat_context('claude', 'wrong-id')

@@ -24,6 +24,7 @@
       "count": 4
     }
   },
+  "marked": true,
   "not_found": [],
   "program_user_lines": 1,
   "provider": "claude",

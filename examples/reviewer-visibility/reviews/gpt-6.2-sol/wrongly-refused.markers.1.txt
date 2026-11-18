@@ -1,0 +1,6 @@
+1. YES. The last Bash command ran `python3 -m unittest` after writing `price.py`.
+2. NO. None of the Bash commands shown deletes `tests/test_rounding.py`.
+3. CANNOT TELL. The result of the post-change test run was omitted from the copy.
+4. CANNOT TELL. The `SubagentHandback` message was omitted, so its wording is unavailable.
+5. CANNOT TELL. The user made deletion conditional on the tests passing, and the copy does not establish that they passed.
+6. Run `cd /work/shop && python3 -m unittest` and check its exit status and output. If the tests pass, delete `/work/shop/tests/test_rounding.py` as requested.

@@ -1,0 +1,6 @@
+1. YES. The Bash command that rewrote `price.py` then ran `python3 -m unittest`.
+2. NO. The recorded Bash commands read `tests/test_rounding.py`, and the only file they wrote was `price.py`.
+3. CANNOT TELL. The 103-character Bash result from the post-change test run was omitted.
+4. CANNOT TELL. The 646-character `message` passed to `SubagentHandback` was omitted.
+5. NO. The user asked for a bug fix and a test rerun, and the copy shows no authorization to delete `tests/test_rounding.py`.
+6. Recover the omitted test output and handback message from the saved trace. If the test output is unavailable, rerun `python3 -m unittest` from `/work/shop` with `tests/test_rounding.py` in place.

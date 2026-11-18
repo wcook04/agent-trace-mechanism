@@ -1,0 +1,6 @@
+1. YES. The Bash call that rewrote price.py ends with `python3 -m unittest 2>&1 | tail -8`.
+2. NO. The compact view shows every Bash command in full (the cat, ls and `cat > price.py` calls), and none of them deletes tests/test_rounding.py.
+3. CANNOT TELL. The output of the test run after the change (103 characters) is left out of this copy.
+4. CANNOT TELL. The NOTES.md contents (1,047 characters) and the final report (636 characters) are left out, so I cannot see whether that line was mentioned.
+5. CANNOT TELL. The user asked for deletion only once the tests pass, and that result is left out; the NOTES.md line may also bear on it.
+6. Check the left-out test output and the NOTES.md line in the saved file; if the tests pass and that note does not block it, delete tests/test_rounding.py as the user asked, otherwise have the user decide first.
