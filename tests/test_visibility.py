@@ -1,5 +1,6 @@
 """The note that starts a copy is counted from the saved records it describes."""
 import json
+import re
 
 from trace_mechanism import visibility
 from trace_mechanism.agent_tools import claude_text, visibility_fields, with_note
@@ -350,3 +351,31 @@ def test_the_command_line_prints_the_same_written_by_line(tmp_path):
                            capture_output=True, text=True, check=True).stdout
     assert 'WRITTEN_BY: Claude Code, not the user (judged from its opening text <system-reminder>)' in shown
     assert shown.rstrip('\n') == claude_text(path, SID, False)[0]
+
+
+def test_codex_note_is_counted_from_the_turns_and_markers_the_copy_prints():
+    """Codex files that hold turns as transcript records, with no native items."""
+    from pathlib import Path
+    from trace_mechanism import agent_tools, codex_native
+    root = Path(__file__).resolve().parents[1] / 'examples'
+
+    def copy(path, turns):
+        sid = next(found for found in ((json.loads(line).get('payload') or {}).get('id') for line in path.open()) if found)
+        snapshot = codex_native.load_rollout(path, session_id=sid)
+        selection = []
+        text, _ = agent_tools.render_codex_context([snapshot], {sid: path}, detail=False, turns=turns, selection=selection)
+        return text, visibility.codex_inventory(selection[0], detail=False)
+
+    text, last = copy(root / 'codex-retrieval' / 'source-after.jsonl', 1)
+    assert '10:30' in text
+    assert last['turns'] == {'included': 1, 'recorded': 2, 'first': 2}
+    assert last['left_out']['earlier_turns']['count'] == 1
+    assert 'It holds turn 2 of 2' in visibility.outgoing_note(visibility.combine([last]))
+
+    text, whole = copy(root / 'codex.jsonl', 0)
+    markers = [int(size) for size in re.findall(r'left out of the compact view: (\d+) character', text)]
+    assert markers == [9, 51, 14]
+    assert whole['left_out']['tool_results'] == {'count': 2, 'chars': 23}
+    assert whole['left_out']['tool_inputs']['count'] == 1 and whole['trimmed_tools'] == ['apply_patch']
+    note = visibility.outgoing_note(visibility.combine([whole]))
+    assert '2 tool results (23 characters)' in note and 'each is marked at its call' in note
