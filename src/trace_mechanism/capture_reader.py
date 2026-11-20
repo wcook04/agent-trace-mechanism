@@ -227,7 +227,8 @@ def parse_cite(cite: str) -> dict:
         raise CaptureError('Citation fragments are not supported.')
     item_id = urllib.parse.unquote(parsed.path.lstrip('/'))
     try:
-        pairs = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True, strict_parsing=True)
+        # Some Python patch releases raise on an empty query under strict parsing; no query means no parameters.
+        pairs = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True, strict_parsing=True) if parsed.query else []
     except ValueError as exc:
         raise CaptureError(f'Bad citation query: {exc}') from None
     query = {}
