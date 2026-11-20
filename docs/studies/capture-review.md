@@ -1,58 +1,88 @@
 # Reading a worker's saved run in another chat
 
-On 17 November 2026, a Codex worker finished a task on a small web service and reported:
+Codex and Claude Code save each session as a file on your computer. Agent Trace reads those files. This page is about one new thing Agent Trace can do: export one saved session as a single ZIP file, so that a model in a different chat (ChatGPT, for example) can read the session even though it can't open anything on the machine where the session was recorded. The ZIP file is called a capture here.
+
+The case below is a real one. A Codex worker (a sub-agent that a Codex chat starts to do one task) reported that its tests passed. Its saved session was exported as a capture, and two models, Claude and GPT, were each given the capture and asked whether the session showed what the worker claimed.
+
+## What a capture contains
+
+A capture is one ZIP file with three things in it:
+
+- the saved session, as it was at the moment of export: every command the worker ran, each command's output and exit code, every file edit and every message;
+- a manifest listing what was included, what was left out, and a SHA-256 hash of each file in the ZIP;
+- `capture_reader.py`, a short Python script that needs nothing but Python 3.9 or later. The script verifies the hashes, lists the saved items, searches their text and prints any item or any range of characters from it.
+
+The exported session gets an ID, the SHA-256 hash of its contents, called the snapshot ID. Each saved command, output, edit or message has its own item ID, taken from the session file.
+
+Every time the script prints text, it also prints a reference to that text, for example:
+
+```text
+agent-trace://99b68b39…/exec-31ac40f6-…?field=/aggregated_output&chars=11598-11606
+```
+
+The reference names the snapshot ID, the item ID, the field inside that item (here `aggregated_output`, the command's output) and the character range. A reviewer who quotes saved text in an answer gives the reference beside the quote. Later, on the machine where the session was recorded, Agent Trace can import the capture and open each reference at the same characters. The session file may have grown since the export, but the reference still opens the text as it was when exported.
+
+## The worker and its report
+
+On 17 November 2026, a Codex worker finished a task on a small Python web service and ended with this message:
 
 > All 42 tests passed. Live responses match OpenAPI, and older standalone inputs still load without the reading-path receipts.
 
-On 20 November that worker's saved session was exported as one ZIP file, a capture, containing its 196 recorded items and a small standard-library reader. A Claude model (Opus) and a fresh GPT reviewer in ChatGPT each received the capture, the worker's report and the same question. Each chose which recorded commands and results to read and returned references to the evidence it used.
+On 20 November the worker's session was exported as a capture with 196 saved items. The capture is not published, because the worker read files from a private repository and their contents are in its saved outputs. The quoted outputs on this page are short ranges from it.
 
-The reviewers were instructed to use only the capture. Claude ran on the originating machine; its recorded tool calls were checked afterwards for compliance with that instruction. GPT received the uploaded capture without the original project. The fresh GPT reviewer wrote its answer before seeing Claude's verdict. The later comparison and implementation audit were separate activities.
+## What the saved session shows
 
-The capture was then imported into Agent Trace on the originating machine. All 12 of Claude's references and all 9 of GPT's reopened at the saved text. The installed MCP tool also reopened the live-HTTP reference and supplied a follow-up read pinned to the same snapshot.
+Each of the three claims in the message has a command in the session that exited with code 0. This table lists them in the order they finished.
 
-## The worker's report against its own records
-
-Each sentence of the report has a recorded command that exited 0. The two schema checks finished before the worker's last edit, and the 42-test run finished after it. That last edit, at 20:09:51 UTC, changed one test in `test_service.py` by adding `len(fields) == 5` to a condition. The quoted outputs below come from the private capture.
-
-| Sentence of the report | Recorded command | Finished (UTC) | Text at the citation |
+| Claim in the message | Command the worker ran | Finished (UTC) | Output at the reference |
 |---|---|---|---|
-| "older standalone inputs still load" | A script run with `uv run --with jsonschema` over the bundled and the older data folders | 20:09:09 | `Draft 2020-12 validates bundled and legacy study and sources payloads.` |
-| "Live responses match OpenAPI" | An inline script that started the service on a local port, fetched the study routes over HTTP and validated each response against `/openapi.json` | 20:09:40 | `Live JSON study aliases and sources match OpenAPI schemas.` |
+| "older standalone inputs still load" | A script, run with `uv run --with jsonschema`, that loaded the service's bundled data folder and its older data folder and validated both against the JSON schema | 20:09:09 | `Draft 2020-12 validates bundled and legacy study and sources payloads.` |
+| "Live responses match OpenAPI" | A script that started the web service on a local port, requested its study endpoints over HTTP and validated each response against the service's `/openapi.json` | 20:09:40 | `Live JSON study aliases and sources match OpenAPI schemas.` |
 | "All 42 tests passed." | `python3 -B -m unittest discover && python3 -B verification/check_bundle.py && git diff --check` | 20:09:55 | `Ran 42 tests in 0.943s` · `OK` · `Verified 34 pinned files and 30 case records.` |
 
-A reader of the record can open that edit and judge whether it changes what the two earlier checks show.
+The worker's last file edit finished at 20:09:51, between the second and third commands. That edit changed one test in `test_service.py`, adding `len(fields) == 5` to a condition. So the 42-test run came after the last edit, and the two schema scripts came before it. Anyone reading the capture can open that edit and decide whether it affects what the two schema scripts showed.
 
-Earlier in the same session, a `unittest discover` run failed with `Ran 37 tests in 0.864s` and `FAILED (errors=10`. The worker made further edits after it, and the 42-test run came after the last of them.
+Earlier in the same session, `python3 -B -m unittest discover` had failed with `Ran 37 tests in 0.864s` and `FAILED (errors=10`. The worker made several edits after that failure, and the 42-test run was after the last of them.
 
-The records do not show which 42 tests ran, because the output shows only dots. They do not show the environment the command inherited. The test code reads `cls.data_dir = Path(os.environ.get("MEDAGENT_TEST_DATA_DIR", ROOT / "data"`, and the final command does not set that variable. The capture contains only this worker, so it cannot show whether the parent chat or another worker changed shared files afterwards.
+There are three things the saved session cannot show:
 
-## What each reviewer did
+- **Which 42 tests ran.** The test output prints one dot per test and no test names.
+- **The environment variables the test command started with.** The tests choose their data folder with `cls.data_dir = Path(os.environ.get("MEDAGENT_TEST_DATA_DIR", ROOT / "data"`, so they use the bundled `data` folder unless `MEDAGENT_TEST_DATA_DIR` is set. The command line does not set it. Whether it was already set in the shell is not recorded.
+- **Changes made by other agents.** The capture holds only this worker's session. If the Codex chat that started the worker, or another worker, changed shared files later, that is not in this capture.
 
-Both reviewers were asked whether "All 42 tests passed" established that the complete relevant suite passed against the worker's final code. Both answered "supported only in narrower form". That question asked about more than the worker had said.
+## What the two reviewers did
 
-Claude found the final 42-test run, the earlier failing run and the data-folder default. It said the 42 tests used only the bundled data. It also discussed a separate schema-validation script without citing the successful live HTTP check.
+Two models reviewed the capture:
 
-The independent GPT reviewer found the same final run and earlier failure. It also found and cited the successful live HTTP check.
+- **Claude (Opus)**, on the machine where the session was recorded, was told to use only the capture and the script inside it. Its tool calls were read afterwards. All 13 were shell commands in the capture's folder, and it opened no other file.
+- **GPT**, in a new ChatGPT session, got the capture as an upload, with no access to the machine. It wrote its answer before seeing Claude's.
 
-When the two reviews were compared afterwards, Claude's statement about the data folder turned out to go further than the record. The final command does not set `MEDAGENT_TEST_DATA_DIR`, but the record does not show the environment the command inherited, so it cannot show that the variable was unset. Neither reviewer could inspect that environment.
+Both got the worker's message and the same question: does the saved session show that "All 42 tests passed" means the complete relevant test suite passed on the worker's final code? That question asked about more than the worker had claimed. Both answered "supported only in a narrower form".
 
-Because the references reopen, the reviews can be checked as well as the worker. One of Claude's references opens at only `MEDAGENT_TEST_DATA_DIR`, which is too short to show the claim written beside it. A reference can resolve correctly while its text does not support the sentence next to it.
+Claude cited the 42-test run, the earlier failing run, and the line in the tests that falls back to the bundled data folder. Claude wrote that the 42 tests used only the bundled data. Claude did not cite the second command in the table, the one that requested the live endpoints over HTTP.
 
-## What changed in the reader
+GPT cited the same 42-test run and the same earlier failure. GPT also found and cited the command that requested the live endpoints over HTTP and validated the responses.
 
-A separate implementation audit in the same research round found defects in the reader and exporter. The following fixes were then applied and checked in the desktop environment.
+The capture was then imported into Agent Trace on the machine where the session was recorded. All 12 of Claude's references and all 9 of GPT's opened at the text each model had quoted.
 
-In the desktop app's MCP server, opening a citation already read the saved snapshot. But the follow-up read that the result suggested left out the snapshot ID, and the server reads the live session when that ID is missing. So a reviewer following the suggestion could move to newer text without being told. The suggested read now carries the snapshot ID.
+When the two answers were read against the text their references opened, two problems were found in Claude's answer:
 
-A short page of a whole item used to be cited as the whole item. It is now cited with its character range. Search results also give a second citation for the passage shown, beside the citation for the matched text.
+- Claude's statement that the tests used only the bundled data goes further than the session shows. The command line does not set `MEDAGENT_TEST_DATA_DIR`, but the session does not record whether the shell already had it set.
+- One of Claude's references opens at only the 22 characters `MEDAGENT_TEST_DATA_DIR`. That text is what Claude quoted, but those 22 characters cannot support the sentence Claude wrote next to them. A reference can open at exactly the right text while the text is still not enough to support what the reviewer says about it.
 
-A later review of the published reader found that a damaged citation could still resolve to different text. The parser ignored unknown query parameters and kept the last of two repeated ones. So `&amp;chars=0-4`, left over from copying through HTML, or a typo such as `&char=0-4`, returned the whole field, and `&chars=0-4&chars=11-15` returned the second range. The reader now refuses unknown, repeated or HTML-escaped parameters, reports the bad citation, and goes on with the rest of a batch. [`tests/test_citation_queries.py`](../../tests/test_citation_queries.py) has the cases.
+## Faults found in Agent Trace and fixed
 
-## Try the reader on a different published capture
+Two later reviews of Agent Trace's code, done in ChatGPT, found three faults in how references were handled. All three are fixed.
 
-The worker's capture and complete review records are not published here, because the capture contains outputs from a private repository. The download below lets a reader reproduce the search, read and citation mechanics on different evidence; it does not reproduce the private Bernoulli comparison. [`examples/portable-capture/validation-history.trace.zip`](../../examples/portable-capture/validation-history.trace.zip) is a capture of the five published records from [Checking a worker's validation history](investigation.md): a failing test run, a fixture correction and a passing retry. A test in [`tests/test_portable_capture.py`](../../tests/test_portable_capture.py) checks that its snapshot is exactly what the native reader produces from [`examples/validation-history/validation-history.jsonl`](../../examples/validation-history/validation-history.jsonl).
+1. **A follow-up read could leave the saved snapshot.** When Agent Trace's MCP server opened a reference, it read the saved snapshot correctly. It also suggested the next read for the reviewer to make, but the suggested read left out the snapshot ID. Without a snapshot ID, the server reads the session file as it is now. So a reviewer following the suggestion would have read newer text without being told. The suggested read now includes the snapshot ID.
+2. **A short read was cited as the whole item.** When the script printed a short range of a long item, the reference it gave pointed at the whole item. The reference now includes the character range. Search results now give two references: one for the matched words and one for the passage printed around them.
+3. **A damaged reference could open different text.** The script ignored parts of a reference it did not recognise, and when a part appeared twice it used the second one. So a reference copied through HTML (with `&amp;chars=0-4` in place of `&chars=0-4`) or one with a typo (`&char=0-4`) opened the whole output instead of the four characters. A reference with `&chars=0-4&chars=11-15` opened the second range. The script now refuses a reference with an unknown, repeated or HTML-escaped part, says which reference it refused, and carries on with any others it was given. [`tests/test_citation_queries.py`](../../tests/test_citation_queries.py) has these cases.
 
-Unzip it anywhere and run the bundled reader. It needs Python 3.9 or later and nothing else.
+## Try the script on a published capture
+
+[`examples/portable-capture/validation-history.trace.zip`](../../examples/portable-capture/validation-history.trace.zip) is a different, smaller capture that you can download. It holds the five saved commands published in [Checking a worker's validation history](investigation.md): a test run that passed, a larger test run that failed, a dry run and then a real run of a correction to a test fixture, and a retry of the larger test run that passed. It shows how the script works. It is not the worker's capture described above. A test in [`tests/test_portable_capture.py`](../../tests/test_portable_capture.py) confirms that its saved session matches exactly what Agent Trace reads from [`examples/validation-history/validation-history.jsonl`](../../examples/validation-history/validation-history.jsonl).
+
+Unzip it anywhere and run the script inside it with Python 3.9 or later:
 
 ```sh
 unzip validation-history.trace.zip -d capture && cd capture
@@ -62,15 +92,19 @@ python3 capture_reader.py search_contents --query "pass 124"
 python3 capture_reader.py cite "agent-trace://99b68b3932508387b45581f54c62cdbe78fb19cbfb98d1b6a32f045f70212164/exec-31ac40f6-d9e0-4099-ae13-4096e65285ac?field=/aggregated_output&chars=11598-11606"
 ```
 
-The last command prints `pass 123` from the combined run that exited 1. The search finds `pass 124` in the retry, at `…/exec-09178280-9355-47f4-a6ce-b1d912cc9dab?field=/aggregated_output&chars=225-233`. The retry's command ends in `| tail -10`. Unless the shell set `pipefail`, its exit code of 0 is the exit code of `tail`, so the test counts have to come from its output.
+- `verify` recomputes every hash and prints `"verified": true` if the files are unchanged.
+- `list_items --kind CommandExecution` lists the five commands, each with its exit code.
+- `search_contents --query "pass 124"` finds the line `pass 124` in the output of the test run that passed. It prints the reference `…/exec-09178280-9355-47f4-a6ce-b1d912cc9dab?field=/aggregated_output&chars=225-233`.
+- `cite` opens the reference you give it. This one prints `pass 123`, from the earlier test run, which exited with code 1.
 
-A citation names the snapshot ID, the item ID, a JSON Pointer to the field and a character range. If the snapshot ID is not in the capture, the reader refuses it rather than reading another version. The command names follow Codex's history tools (`list_items`, `read_item` with `offset_chars` and `limit_chars`, `search_contents`). Here a `window_id` is a frozen snapshot of one conversation, not a model context window. The reader's source is [`src/trace_mechanism/capture_reader.py`](../../src/trace_mechanism/capture_reader.py).
+The passing test run's command ends in `| tail -10`. Unless the shell had `pipefail` set, the exit code of 0 belongs to `tail`, not to the tests, so the number of passing tests has to be read from the output.
+
+The script's command names follow the history tools Codex gives its models: `list_items`, `read_item` (which takes `offset_chars` and `limit_chars`) and `search_contents`. In the script, the option `window_id` takes a snapshot ID. In Codex, a window is a model's context window, which is a different thing. If you give the script a snapshot ID that is not in the capture, it refuses and does not read any other version. The script's source is [`src/trace_mechanism/capture_reader.py`](../../src/trace_mechanism/capture_reader.py).
 
 ## Limits
 
-- This is one worker and two reviews, so it says nothing about how often reviews like these are right.
-- The shared artifact was the same capture. Claude's restriction was procedural; GPT's copy did not include the original project. The blind capture review, subsequent comparison and implementation audit were distinct steps.
-- Nothing in the capture was rerun. The records describe the code as it was on 17 November.
-- The export tool that made these captures is in the private desktop build of Agent Trace. This repository has the reader and the published capture, and does not yet have the exporter.
-- A capture contains whatever the session saved, including paths and command output. Read one before sharing it.
-
+- This is one worker and two reviews. It says nothing about how often reviews like these are right.
+- Claude ran on the machine where the session was recorded and was told to use only the capture, so its access was limited by instruction, not by the machine. GPT had only the uploaded capture.
+- Nothing in the capture was run again. The saved session describes the web service's code as it was on 17 November.
+- The export tool that makes captures is in the desktop version of Agent Trace, which is not public. This repository has the script and the published capture, and does not yet have the export tool.
+- A capture contains whatever the session saved, including file paths and command output. Read a capture before sharing it.
