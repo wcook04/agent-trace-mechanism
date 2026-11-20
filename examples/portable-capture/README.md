@@ -8,4 +8,4 @@ python3 capture_reader.py verify
 python3 capture_reader.py search_contents --query "pass 124"
 ```
 
-[`provenance.json`](provenance.json) gives the hashes of the capture and its source file. The study [Two models reviewing a Codex worker from a saved copy of its run](../../docs/studies/capture-review.md) explains how captures were used on a real worker.
+[`provenance.json`](provenance.json) gives the hashes of the capture and its source file. The study [Reading a worker's saved run in another chat](../../docs/studies/capture-review.md) explains how captures were used on a real worker.
