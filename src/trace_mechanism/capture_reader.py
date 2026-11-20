@@ -217,17 +217,40 @@ def make_cite(window_id: str, item_id: str, field: str = '', start: int | None =
 
 
 def parse_cite(cite: str) -> dict:
-    parsed = urllib.parse.urlsplit(cite.strip().strip('<>`'))
+    try:
+        parsed = urllib.parse.urlsplit(cite.strip().strip('<>`'))
+    except ValueError as exc:
+        raise CaptureError(f'Bad citation URL: {exc}') from None
     if parsed.scheme != 'agent-trace' or not parsed.netloc:
         raise CaptureError(f'Not an agent-trace citation: {cite!r}')
+    if parsed.fragment:
+        raise CaptureError('Citation fragments are not supported.')
     item_id = urllib.parse.unquote(parsed.path.lstrip('/'))
-    query = dict(urllib.parse.parse_qsl(parsed.query))
+    try:
+        pairs = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True, strict_parsing=True)
+    except ValueError as exc:
+        raise CaptureError(f'Bad citation query: {exc}') from None
+    query = {}
+    for key, value in pairs:
+        if key.startswith('amp;'):
+            raise CaptureError('HTML-escaped citation query; use the exact URI with & between parameters, not &amp;.')
+        if key not in ('field', 'chars'):
+            raise CaptureError(f'Unknown citation parameter: {key!r}')
+        if key in query:
+            raise CaptureError(f'Duplicate citation parameter: {key!r}')
+        query[key] = value
     out = {'window_id': parsed.netloc, 'item_id': item_id, 'field': query.get('field', '')}
     if 'chars' in query:
         a, _, b = query['chars'].partition('-')
-        if not (a.isdigit() and b.isdigit()) or int(b) < int(a):
+        if not (a.isascii() and a.isdigit() and b.isascii() and b.isdigit()):
             raise CaptureError(f'Bad chars range in {cite!r}')
-        out['start'], out['end'] = int(a), int(b)
+        try:
+            start, end = int(a), int(b)
+        except ValueError:
+            raise CaptureError(f'Bad chars range in {cite!r}') from None
+        if end < start:
+            raise CaptureError(f'Bad chars range in {cite!r}')
+        out['start'], out['end'] = start, end
     return out
 
 
