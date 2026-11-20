@@ -1,0 +1,10 @@
+{
+ "schema": "portable_capture_provenance@1",
+ "capture": "validation-history.trace.zip",
+ "capture_sha256": "7cf50d070b949bda591db1248557c828af22c9b2da28b3fc79ea0fcadef08346",
+ "source": "examples/validation-history/validation-history.jsonl",
+ "source_sha256": "762bf1140b84ad8b49b36c069e143b5d5ba0432cec7d0bbcd43fc01bce05b09d",
+ "window_id": "99b68b3932508387b45581f54c62cdbe78fb19cbfb98d1b6a32f045f70212164",
+ "exported": "2026-11-20 by the desktop build's exporter, with only this file selected and no descendants requested",
+ "check": "tests/test_portable_capture.py compares the capture's snapshot with trace_mechanism.codex_native.load_rollout on the source file"
+}

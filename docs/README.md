@@ -11,6 +11,7 @@
 
 Write-ups of specific runs, each with its files under [`examples/`](../examples/README.md).
 
+- [Two models reviewing a Codex worker from a saved copy of its run](studies/capture-review.md), with a [capture you can read yourself](../examples/portable-capture/README.md).
 - [Telling a second model what a copied conversation leaves out](studies/reviewer-visibility.md), with its [full record](studies/reviewer-visibility-full-record.md).
 - [Codex and Claude reading each other's work](studies/cross-provider.md)
 - [A real review with two subagents](studies/agent-tree.md)
